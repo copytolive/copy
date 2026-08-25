@@ -1,0 +1,35 @@
+name: Inspect CopyToLive Auth Storage
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-auth-storage.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect auth API and browser storage contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          for fn in ['assets/js/dashboard-WZpp2Gui.js','assets/js/index-DNfwXZJH.js']:
+              p=Path(fn)
+              s=p.read_text(errors='replace')
+              print('===',fn,'bytes',len(s),'===')
+              for needle in ['/auth/login','/auth/register','/auth/me','accessToken','Authorization','Bearer','localStorage.setItem','localStorage.getItem','isPremium','isPro']:
+                  print('\n--',needle,'count',s.count(needle),'--')
+                  start=0
+                  for _ in range(min(s.count(needle),20)):
+                      i=s.find(needle,start)
+                      if i<0: break
+                      print(s[max(0,i-500):min(len(s),i+900)].replace('\n',' '))
+                      start=i+len(needle)
+              keys=sorted(set(re.findall(r'localStorage\.(?:getItem|setItem|removeItem)\(["\']([^"\']+)',s)))
+              print('\nLOCAL_STORAGE_KEYS',keys)
+          PY

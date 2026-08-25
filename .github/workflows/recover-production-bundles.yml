@@ -1,0 +1,97 @@
+name: Recover exact CopyToLive production bundles
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/recover-production-bundles.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download exact production static bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            assets/js/index-DNfwXZJH.js
+            assets/js/dashboard-WZpp2Gui.js
+            assets/js/vendor-rXCDSp0G.js
+            assets/js/market-DD_HSfzQ.js
+            assets/js/charting-C4jAt7iT.js
+            assets/js/trading-BeRNyRbU.js
+            assets/css/index-Dam86hTI.css
+            favicon.ico
+            favicon-32x32.png
+            favicon-16x16.png
+            apple-touch-icon.png
+            manifest.json
+          )
+
+          for f in "${files[@]}"; do
+            mkdir -p "$(dirname "$f")"
+            echo "FETCH https://copytolive.com/$f"
+            curl -LfsS --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 180 \
+              "https://copytolive.com/$f" -o "$f.production"
+            test -s "$f.production"
+            mv "$f.production" "$f"
+            printf '%-52s %12s bytes  ' "$f" "$(wc -c < "$f")"
+            sha256sum "$f" | cut -d' ' -f1
+          done
+
+      - name: Syntax and integrity validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in \
+            assets/js/index-DNfwXZJH.js \
+            assets/js/dashboard-WZpp2Gui.js \
+            assets/js/vendor-rXCDSp0G.js \
+            assets/js/market-DD_HSfzQ.js \
+            assets/js/charting-C4jAt7iT.js \
+            assets/js/trading-BeRNyRbU.js; do
+            echo "NODE_CHECK $f"
+            node --check "$f"
+          done
+
+          grep -q 'index-DNfwXZJH.js' index.html
+          grep -q '/copy/assets/js/index-DNfwXZJH.js' index.html
+          test -s data/backtest_farm_1.json
+          test -s data/backtest_farm_2.json
+          python3 - <<'PY'
+          import json
+          a=json.load(open('data/backtest_farm_1.json'))
+          b=json.load(open('data/backtest_farm_2.json'))
+          assert len(a)+len(b)==118
+          print('BACKTEST_DATA_OK',len(a),len(b))
+          PY
+
+      - name: Commit recovered production bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'copytolive-recovery-bot'
+          git config user.email 'copytolive-recovery-bot@users.noreply.github.com'
+          git add \
+            assets/js/index-DNfwXZJH.js \
+            assets/js/dashboard-WZpp2Gui.js \
+            assets/js/vendor-rXCDSp0G.js \
+            assets/js/market-DD_HSfzQ.js \
+            assets/js/charting-C4jAt7iT.js \
+            assets/js/trading-BeRNyRbU.js \
+            assets/css/index-Dam86hTI.css \
+            favicon.ico favicon-32x32.png favicon-16x16.png apple-touch-icon.png manifest.json
+
+          if git diff --cached --quiet; then
+            echo 'Production bundles already exact; no commit needed.'
+          else
+            git commit -m 'fix(pages): restore exact production static bundles'
+            git push origin HEAD:main
+          fi

@@ -1,0 +1,83 @@
+name: Recover CopyToLive production Backtest data
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/recover-copy-production-data.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Probe public production dataset paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p recovered/probes
+
+          probe() {
+            local name="$1"
+            local url="$2"
+            local tmp="recovered/probes/${name}.tmp"
+            local hdr="recovered/probes/${name}.headers.txt"
+            echo "PROBE $url"
+            if curl -L --fail --silent --show-error \
+              --connect-timeout 15 --max-time 90 \
+              -D "$hdr" -o "$tmp" "$url"; then
+              if python3 - "$tmp" <<'PY'
+import json, os, sys
+p=sys.argv[1]
+if os.path.getsize(p) < 100:
+    raise SystemExit(2)
+with open(p, 'rb') as f:
+    raw=f.read()
+try:
+    json.loads(raw)
+except Exception:
+    raise SystemExit(3)
+print('VALID_JSON', os.path.getsize(p))
+PY
+              then
+                mv "$tmp" "recovered/${name}.json"
+                echo "FOUND ${name} $url"
+              else
+                rm -f "$tmp"
+                echo "REJECT non-JSON/too-small: $url"
+              fi
+            else
+              rm -f "$tmp"
+              echo "MISS $url"
+            fi
+          }
+
+          probe backtest_farm_1 https://copytolive.com/data/backtest_farm_1.json
+          probe backtest_farm_2 https://copytolive.com/data/backtest_farm_2.json
+          probe backtest_farm_monolith https://copytolive.com/data/backtest_farm.json
+          probe root_backtest_farm_1 https://copytolive.com/backtest_farm_1.json
+          probe root_backtest_farm_2 https://copytolive.com/backtest_farm_2.json
+          probe root_backtest_farm https://copytolive.com/backtest_farm.json
+          probe locked_backtest_farm https://copytolive.com/production_locked/650_locked/backtest_farm.json
+          probe backtest_summary https://copytolive.com/data/backtest_summary.json
+          probe backtest_local https://copytolive.com/data/backtest_local.json
+
+          echo '=== RECOVERED ==='
+          find recovered -maxdepth 1 -type f -name '*.json' -printf '%f %s bytes\n' | sort
+          test -n "$(find recovered -maxdepth 1 -type f -name '*.json' -print -quit)" || {
+            echo 'No valid JSON dataset recovered from public production paths.' >&2
+            exit 20
+          }
+
+      - name: Upload recovered production data
+        uses: actions/upload-artifact@v4
+        with:
+          name: copy-production-backtest-recovery
+          path: recovered/
+          if-no-files-found: error
+          retention-days: 3

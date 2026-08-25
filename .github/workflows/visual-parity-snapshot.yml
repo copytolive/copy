@@ -20,16 +20,10 @@ jobs:
           set -euo pipefail
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
           test -n "$CHROME"
-          echo "Using $CHROME"
 
-          "$CHROME" \
-            --headless=new \
-            --no-sandbox \
-            --disable-dev-shm-usage \
-            --disable-gpu \
-            --remote-debugging-address=127.0.0.1 \
-            --remote-debugging-port=9222 \
-            about:blank >/tmp/chrome.out 2>/tmp/chrome.err &
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu \
+            --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 about:blank \
+            >/tmp/chrome.out 2>/tmp/chrome.err &
           CHROME_PID=$!
           trap 'kill $CHROME_PID 2>/dev/null || true' EXIT
 
@@ -40,69 +34,28 @@ jobs:
 
           cat > /tmp/cdp.mjs <<'NODE'
           import fs from 'node:fs';
-          const pages = JSON.parse(fs.readFileSync('/tmp/pages.json', 'utf8'));
+          const pages = JSON.parse(fs.readFileSync('/tmp/pages.json','utf8'));
           const target = pages.find(x => x.type === 'page');
           if (!target?.webSocketDebuggerUrl) throw new Error('No CDP page target');
           const ws = new WebSocket(target.webSocketDebuggerUrl);
-          let seq = 0;
-          const pending = new Map();
-          const events = [];
-          const networkFailures = [];
-          const send = (method, params={}) => new Promise((resolve,reject) => {
-            const id = ++seq;
-            pending.set(id,{resolve,reject,method});
-            ws.send(JSON.stringify({id,method,params}));
-          });
-          ws.onmessage = ev => {
-            const msg = JSON.parse(ev.data);
-            if (msg.id && pending.has(msg.id)) {
-              const p = pending.get(msg.id); pending.delete(msg.id);
-              msg.error ? p.reject(new Error(`${p.method}: ${JSON.stringify(msg.error)}`)) : p.resolve(msg.result);
-              return;
-            }
-            if (msg.method === 'Runtime.exceptionThrown') events.push({type:'exception', data:msg.params.exceptionDetails});
-            if (msg.method === 'Runtime.consoleAPICalled') events.push({type:'console', data:msg.params});
-            if (msg.method === 'Log.entryAdded') events.push({type:'log', data:msg.params.entry});
-            if (msg.method === 'Network.loadingFailed') networkFailures.push(msg.params);
-          };
-          await new Promise((resolve,reject)=>{ws.onopen=resolve; ws.onerror=reject;});
-          await send('Runtime.enable');
-          await send('Log.enable');
-          await send('Page.enable');
-          await send('Network.enable');
-          await send('Page.navigate',{url:'https://copytolive.github.io/copy/?visual=parity-cdp'});
+          let seq=0; const pending=new Map(); const events=[]; const networkFailures=[];
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject,method});ws.send(JSON.stringify({id,method,params}));});
+          ws.onmessage=ev=>{const msg=JSON.parse(ev.data);if(msg.id&&pending.has(msg.id)){const p=pending.get(msg.id);pending.delete(msg.id);msg.error?p.reject(new Error(`${p.method}: ${JSON.stringify(msg.error)}`)):p.resolve(msg.result);return;}if(msg.method==='Runtime.exceptionThrown')events.push({type:'exception',data:msg.params.exceptionDetails});if(msg.method==='Runtime.consoleAPICalled')events.push({type:'console',data:msg.params});if(msg.method==='Log.entryAdded')events.push({type:'log',data:msg.params.entry});if(msg.method==='Network.loadingFailed')networkFailures.push(msg.params);};
+          await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject;});
+          await send('Runtime.enable'); await send('Log.enable'); await send('Page.enable'); await send('Network.enable');
+          await send('Page.navigate',{url:'https://copytolive.github.io/copy/?verify=production-bundle'});
           await new Promise(r=>setTimeout(r,15000));
-          const evalResult = await send('Runtime.evaluate',{expression:`JSON.stringify({
-            href: location.href,
-            title: document.title,
-            readyState: document.readyState,
-            rootExists: !!document.getElementById('root'),
-            rootLength: document.getElementById('root')?.innerHTML.length || 0,
-            rootText: (document.getElementById('root')?.innerText || '').slice(0,1000),
-            bodyText: document.body.innerText.slice(0,1500),
-            scripts: Array.from(document.scripts).map(s=>s.src||'[inline]').slice(-20)
-          })`, returnByValue:true});
-          const state = JSON.parse(evalResult.result.value);
-          const report = {state, events, networkFailures};
-          fs.writeFileSync('browser-diagnostics.json', JSON.stringify(report,null,2));
-          console.log('=== PAGE STATE ===');
-          console.log(JSON.stringify(state,null,2));
-          console.log('=== RUNTIME EVENTS ===');
-          for (const e of events) {
-            if (e.type === 'exception') {
-              console.log('EXCEPTION', e.data.text, e.data.exception?.description || '', e.data.url || '', e.data.lineNumber, e.data.columnNumber);
-            } else if (e.type === 'log') {
-              console.log('LOG', e.data.level, e.data.text, e.data.url || '');
-            } else {
-              const vals=(e.data.args||[]).map(a=>a.value ?? a.description ?? a.type);
-              console.log('CONSOLE', e.data.type, ...vals);
-            }
-          }
-          console.log('=== NETWORK FAILURES ===');
-          for (const f of networkFailures) console.log('NETFAIL', f.errorText, f.type, f.blockedReason||'', f.canceled||false);
+          const res=await send('Runtime.evaluate',{expression:`JSON.stringify({href:location.href,title:document.title,readyState:document.readyState,rootExists:!!document.getElementById('root'),rootLength:document.getElementById('root')?.innerHTML.length||0,rootText:(document.getElementById('root')?.innerText||'').slice(0,1500),bodyText:document.body.innerText.slice(0,2000),scripts:Array.from(document.scripts).map(s=>s.src||'[inline]').slice(-20)})`,returnByValue:true});
+          const state=JSON.parse(res.result.value); const exceptions=events.filter(e=>e.type==='exception');
+          fs.writeFileSync('browser-diagnostics.json',JSON.stringify({state,events,networkFailures},null,2));
+          console.log('PAGE_STATE',JSON.stringify(state,null,2));
+          for(const e of exceptions) console.log('EXCEPTION',e.data.text,e.data.exception?.description||'',e.data.url||'');
+          for(const f of networkFailures) console.log('NETFAIL',f.errorText,f.type,f.blockedReason||'');
+          if(!state.rootExists || state.rootLength < 100) throw new Error(`React root did not render: ${state.rootLength}`);
+          if(exceptions.length) throw new Error(`Browser exceptions present: ${exceptions.length}`);
+          console.log('VISUAL_RUNTIME_ACCEPTANCE=PASS');
           ws.close();
           NODE
-
           node /tmp/cdp.mjs | tee browser-diagnostics.txt
 
       - name: Capture live GitHub Pages viewport
@@ -110,16 +63,9 @@ jobs:
         run: |
           set -euo pipefail
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
-          "$CHROME" \
-            --headless=new \
-            --no-sandbox \
-            --disable-dev-shm-usage \
-            --disable-gpu \
-            --hide-scrollbars \
-            --window-size=2048,1180 \
-            --virtual-time-budget=15000 \
-            --screenshot=copy-pages-live.png \
-            'https://copytolive.github.io/copy/?visual=parity-screenshot'
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --hide-scrollbars \
+            --window-size=2048,1180 --virtual-time-budget=15000 \
+            --screenshot=copy-pages-live.png 'https://copytolive.github.io/copy/?visual=final'
           test -s copy-pages-live.png
           file copy-pages-live.png
 

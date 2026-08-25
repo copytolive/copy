@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard — CopyToLive</title>
+<style>
+  :root { --bg:#0a0e17; --bg2:#0f1421; --card:#151a26; --border:#2a3142; --gold:#FFD700; --green:#10b981; --red:#ef4444; --text:#fff; --muted:#8895a8; --blue:#60a5fa; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,"Segoe UI",Inter,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  header { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+  .logo { color:var(--gold); font-weight:900; font-size:18px; }
+  .logo span { color:var(--text); }
+  .auth-bar { display:flex; gap:8px; align-items:center; }
+  .auth-bar input { padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg2); color:var(--text); font-size:13px; min-width:240px; }
+  .btn { padding:8px 16px; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:13px; background:var(--gold); color:#4d4000; }
+  .btn:hover { background:#ffe255; }
+  .btn-ghost { background:transparent; color:var(--text); border:1px solid var(--border); }
+  main { padding:24px; max-width:1400px; margin:0 auto; }
+  .grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); margin-bottom:20px; }
+  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .stat-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-bottom:6px; }
+  .stat-value { font-size:24px; font-weight:800; font-family:'JetBrains Mono',monospace; }
+  .stat-value.green { color:var(--green); }
+  .stat-value.gold { color:var(--gold); }
+  .stat-value.red { color:var(--red); }
+  .stat-sub { font-size:11px; color:var(--muted); margin-top:4px; }
+  .panel { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:14px; }
+  .panel h2 { font-size:14px; font-weight:700; color:var(--gold); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; }
+  .row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .row:last-child { border:none; }
+  .row .k { color:var(--muted); }
+  .row .v { font-family:'JetBrains Mono',monospace; font-weight:600; }
+  .v.healthy { color:var(--green); }
+  .v.degraded { color:var(--gold); }
+  .v.unhealthy { color:var(--red); }
+  .table { width:100%; border-collapse:collapse; font-size:12px; }
+  .table th, .table td { text-align:left; padding:8px; border-bottom:1px solid var(--border); }
+  .table th { color:var(--gold); font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:1px; }
+  .table td.mono { font-family:'JetBrains Mono',monospace; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:700; text-transform:uppercase; }
+  .badge.ok { background:rgba(16,185,129,0.15); color:var(--green); }
+  .badge.warn { background:rgba(255,215,0,0.15); color:var(--gold); }
+  .badge.err { background:rgba(239,68,68,0.15); color:var(--red); }
+  .login-screen { display:flex; align-items:center; justify-content:center; min-height:80vh; }
+  .login-card { max-width:360px; width:100%; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:32px; text-align:center; }
+  .login-card h1 { font-size:18px; margin-bottom:8px; color:var(--gold); }
+  .login-card .small { font-size:12px; color:var(--muted); margin-bottom:20px; }
+  .login-card input { width:100%; margin-bottom:10px; padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg2); color:var(--text); font-size:14px; }
+  .login-card .err { color:var(--red); font-size:12px; margin-top:8px; }
+  .refresh-info { color:var(--muted); font-size:11px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Copy<span>To</span>Live <span style="color:var(--muted); font-weight:400;">· Admin</span></div>
+  <div class="auth-bar" id="auth-bar" style="display:none;">
+    <span class="refresh-info" id="last-refresh">—</span>
+    <button class="btn-ghost btn" onclick="refresh()">Refresh</button>
+    <button class="btn-ghost btn" onclick="logout()">Logout</button>
+  </div>
+</header>
+<main>
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <h1>Admin Login</h1>
+      <p class="small">Akses dashboard ini perlu account dengan role <strong>admin</strong>.</p>
+      <input type="email" id="login-email" placeholder="admin@email" autofocus>
+      <input type="password" id="login-password" placeholder="Password">
+      <button class="btn" style="width:100%;" onclick="login()">Login</button>
+      <div id="login-err" class="err"></div>
+    </div>
+  </div>
+  <div id="dashboard" style="display:none;">
+    <h2 style="font-size:18px; margin-bottom:14px; color:var(--gold);">📊 Live Metrics</h2>
+    <div class="grid" id="stats"></div>
+
+    <div class="panel">
+      <h2>System Health</h2>
+      <div id="health"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Event Funnel — Last 24 Hours</h2>
+      <div id="funnel"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Onboarding Stats</h2>
+      <div id="onboarding"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Recent Events (last 50)</h2>
+      <div style="max-height:380px; overflow:auto;">
+        <table class="table" id="events-table">
+          <thead><tr><th>Time</th><th>Category</th><th>Action</th><th>User</th><th>Variant</th><th>Props</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+let TOKEN = sessionStorage.getItem('admin_token') || '';
+
+function authHeaders() { return TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {}; }
+
+async function login() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  try {
+    const r = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error || 'Login failed'; return; }
+    if (d.user?.role !== 'admin' && !d.user?.isAdmin) {
+      errEl.textContent = 'Account ini bukan admin.';
+      return;
+    }
+    TOKEN = d.accessToken;
+    sessionStorage.setItem('admin_token', TOKEN);
+    showDashboard();
+    refresh();
+  } catch (e) {
+    errEl.textContent = 'Connection error: ' + e.message;
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('admin_token');
+  TOKEN = '';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('auth-bar').style.display = 'none';
+}
+
+function showDashboard() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('auth-bar').style.display = 'flex';
+}
+
+async function refresh() {
+  document.getElementById('last-refresh').textContent = '⏳ refreshing…';
+  await Promise.all([loadStats(), loadHealth(), loadEvents(), loadOnboarding()]);
+  document.getElementById('last-refresh').textContent = `✓ ${new Date().toLocaleTimeString()}`;
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch('/api/events/stats?since_ms=86400000', { headers: authHeaders() });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const subSuccess = d.byAction['subscribe.success'] || 0;
+    const liveSwitch = d.byAction['paper_live_switch.to_live'] || 0;
+    const riskAccept = d.byAction['risk_disclosure.accept'] || 0;
+    document.getElementById('stats').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Events 24h</div><div class="stat-value gold">${d.total}</div><div class="stat-sub">${d.uniqueSessions} unique sessions</div></div>
+      <div class="stat-card"><div class="stat-label">Unique Users</div><div class="stat-value">${d.uniqueUsers}</div></div>
+      <div class="stat-card"><div class="stat-label">Subscribes</div><div class="stat-value green">${subSuccess}</div></div>
+      <div class="stat-card"><div class="stat-label">Paper → Live</div><div class="stat-value gold">${liveSwitch}</div></div>
+      <div class="stat-card"><div class="stat-label">Risk Disclosure Accepted</div><div class="stat-value ${riskAccept > 0 ? 'green' : ''}">${riskAccept}</div></div>
+    `;
+    // Funnel
+    const fHtml = Object.entries(d.byAction).sort((a,b)=>b[1]-a[1]).map(([k,v]) =>
+      `<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`
+    ).join('') || '<div class="row"><span class="k">No events yet</span></div>';
+    document.getElementById('funnel').innerHTML = fHtml;
+  } catch (e) {
+    document.getElementById('stats').innerHTML = `<div class="stat-card" style="grid-column:1/-1;color:var(--red);">⚠ ${e.message}</div>`;
+  }
+}
+
+async function loadHealth() {
+  try {
+    const r = await fetch('/api/health');
+    const d = await r.json();
+    let html = `<div class="row"><span class="k">Overall</span><span class="v ${d.overallStatus}">${(d.overallStatus||'').toUpperCase()}</span></div>`;
+    html += `<div class="row"><span class="k">Uptime</span><span class="v">${d.uptime}</span></div>`;
+    for (const [name, c] of Object.entries(d.checks || {})) {
+      html += `<div class="row"><span class="k">${name} ${c.critical ? '⚠' : ''}</span><span class="v ${c.status}">${(c.status||'').toUpperCase()} <span style="color:var(--muted); font-weight:400;">${c.duration||''}</span></span></div>`;
+    }
+    document.getElementById('health').innerHTML = html;
+  } catch (e) {
+    document.getElementById('health').innerHTML = `<div style="color:var(--red);">⚠ ${e.message}</div>`;
+  }
+}
+
+async function loadEvents() {
+  try {
+    const r = await fetch('/api/events/recent?limit=50', { headers: authHeaders() });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const rows = (d.events || []).map(e => {
+      const propsStr = Object.keys(e.props || {}).length ? JSON.stringify(e.props).substring(0, 60) : '';
+      const time = new Date(e.ts).toLocaleString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit', month:'short', day:'numeric' });
+      return `<tr>
+        <td class="mono">${time}</td>
+        <td><span class="badge ${e.action.includes('fail')||e.action.includes('reject') ? 'err' : (e.category==='risk_disclosure' ? 'warn':'ok')}">${e.category}</span></td>
+        <td class="mono">${e.action}</td>
+        <td class="mono">${e.userId || '-'}</td>
+        <td class="mono">${e.variant || '-'}</td>
+        <td class="mono" style="color:var(--muted); font-size:10px;">${propsStr}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">No events yet</td></tr>`;
+    document.querySelector('#events-table tbody').innerHTML = rows;
+  } catch (e) {
+    document.querySelector('#events-table tbody').innerHTML = `<tr><td colspan="6" style="color:var(--red);">⚠ ${e.message}</td></tr>`;
+  }
+}
+
+async function loadOnboarding() {
+  try {
+    const r = await fetch('/api/onboarding/stats', { headers: authHeaders() });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    let html = `
+      <div class="row"><span class="k">Total Sessions</span><span class="v">${d.totalSessions}</span></div>
+      <div class="row"><span class="k">Completed</span><span class="v healthy">${d.completed}</span></div>
+      <div class="row"><span class="k">Skipped</span><span class="v degraded">${d.skipped}</span></div>
+      <div class="row"><span class="k">Completion Rate</span><span class="v gold">${d.completionRate}</span></div>
+      <div class="row"><span class="k">Total Events</span><span class="v">${d.totalEvents}</span></div>
+    `;
+    if (d.funnel) {
+      html += '<div style="margin-top:14px; font-size:11px; color:var(--muted); text-transform:uppercase;">Funnel:</div>';
+      for (const f of d.funnel) {
+        html += `<div class="row"><span class="k">${f.step}</span><span class="v">${f.completions}/${f.views} (${f.dropoff} drop)</span></div>`;
+      }
+    }
+    document.getElementById('onboarding').innerHTML = html;
+  } catch (e) {
+    document.getElementById('onboarding').innerHTML = `<div style="color:var(--red);">⚠ ${e.message}</div>`;
+  }
+}
+
+// ─── Bootstrap ───
+if (TOKEN) {
+  showDashboard();
+  refresh();
+  setInterval(refresh, 30000); // auto-refresh every 30s
+} else {
+  document.getElementById('login-email').focus();
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') login();
+});
+</script>
+</body>
+</html>

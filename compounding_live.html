@@ -1335,7 +1335,7 @@
         setLoginBusy(true);
         
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'https://copytolive.com/api/auth/login', true);
+        xhr.open('POST', '/api/auth/login', true);
         xhr.withCredentials = true;
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.setRequestHeader('Accept', 'application/json');
@@ -1526,7 +1526,7 @@
     };
     window._syncHlPerpMeta = async function(){
         try {
-            var resp = await fetch('https://copytolive.com/proxy/hyperliquid/info', {
+            var resp = await fetch('/proxy/hyperliquid/info', {
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({type:'meta'})
@@ -2080,7 +2080,7 @@
         // Register wallet + API key to bot-trading API (key is encrypted server-side)
         try {
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'https://copytolive.com/api/bot-trading/register', true);
+            xhr.open('POST', '/api/bot-trading/register', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.onload = function() {
                 try {
@@ -2435,7 +2435,7 @@
                 <div class="renko-frame-wrap" style="flex:1;min-height:620px;height:min(860px,82vh);background:#060d18;">
                     <iframe
                         id="renkoMainFrame"
-                        src="/copy/renko/?embed=1&symbol=SOL&smaPeriod=10&sma=10&v=sma10_live_20260823"
+                        src="/renko?embed=1&symbol=SOL&smaPeriod=10&sma=10&v=sma10_live_20260823"
                         title="CopyToLive Renko"
                         loading="eager"
                         sandbox="allow-scripts allow-same-origin allow-downloads"
@@ -3015,7 +3015,7 @@
 
     <script>
     // Auto-detect: relative URL works with both Caddy (production) and Vite proxy (dev)
-    const API_BASE = 'https://copytolive.com/trading/compounding';
+    const API_BASE = '/trading/compounding';
     const WA_CS = '6281599997561';  // CS WhatsApp
     let prevPrices = {};
     
@@ -3106,7 +3106,7 @@
 
     async function fetchBackendHyperliquidAccount() {
         try {
-            const r = await fetchT('https://copytolive.com/api/broker/hyperliquid/account', {}, 6000);
+            const r = await fetchT('/api/broker/hyperliquid/account', {}, 6000);
             if (!r || !r.ok) return null;
             const d = await r.json();
             if (!d || d.walletConnected === false) return null;
@@ -3122,7 +3122,7 @@
     async function fetchBackendHyperliquidPositions(wallet) {
         try {
             if (!/^0x[a-fA-F0-9]{40}$/.test(String(wallet || ''))) return null;
-            const r = await fetchT('https://copytolive.com/api/bot-trading/positions/' + encodeURIComponent(wallet) + '?t=' + Date.now(), {}, 8000);
+            const r = await fetchT('/api/bot-trading/positions/' + encodeURIComponent(wallet) + '?t=' + Date.now(), {}, 8000);
             if (!r || !r.ok) return null;
             return await r.json();
         } catch(e) {
@@ -4470,12 +4470,12 @@
             var sym = s.symbol || '';
             var code = (s.name||id||'').toString().slice(0,32);
             if (loved){
-                fetch('https://copytolive.com/api/bot-trading/favorites/add', {
+                fetch('/api/bot-trading/favorites/add', {
                     method:'POST', headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({ wallet:w, strategy_id:id, strategy_code:code, symbol:sym, lot_size_usd:12, leverage:1, is_paper:true })
                 }).catch(function(){});
             } else {
-                fetch('https://copytolive.com/api/bot-trading/favorites/remove', {
+                fetch('/api/bot-trading/favorites/remove', {
                     method:'POST', headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({ wallet:w, strategy_id:id })
                 }).catch(function(){});
@@ -4573,7 +4573,7 @@
             var w = activeHyperliquidWallet();
             if (!w) return; // no wallet → keep local set
             // iter168: di Mode Manual, muat HANYA love manual (source=manual).
-            var _url = 'https://copytolive.com/api/bot-trading/favorites/list?enabled_only=true&wallet=' + encodeURIComponent(w);
+            var _url = '/api/bot-trading/favorites/list?enabled_only=true&wallet=' + encodeURIComponent(w);
             if (window._enrollMode === 'manual') _url += '&source=manual';
             fetch(_url)
               .then(function(r){ return r.ok ? r.json() : null; })
@@ -5015,7 +5015,7 @@
         if ((window._renkoSmaApiPollLocks[key] || 0) > now) return _getRenkoSmaLiveSignal(key);
         window._renkoSmaApiPollLocks[key] = now + 2500;
         try {
-            var resp = await fetchT('https://copytolive.com/api/charting/hyperliquid/renko/' + encodeURIComponent(key) + '?limit=120&live=1&smaPeriod=' + RENKO_SMA_PERIOD + '&sma=' + RENKO_SMA_PERIOD + '&t=' + now, {
+            var resp = await fetchT('/api/charting/hyperliquid/renko/' + encodeURIComponent(key) + '?limit=120&live=1&smaPeriod=' + RENKO_SMA_PERIOD + '&sma=' + RENKO_SMA_PERIOD + '&t=' + now, {
                 method: 'GET',
                 cache: 'no-store'
             }, 20000);
@@ -5063,7 +5063,7 @@
         var engineSymbol = _renkoEngineSymbol(coin);
         var rawLot = String(lot == null ? '' : lot).trim().replace(',', '.');
         var size = parseFloat(rawLot);
-        var resp = await fetchT('https://copytolive.com/api/bot-trading/direct-open', {
+        var resp = await fetchT('/api/bot-trading/direct-open', {
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body: JSON.stringify({
@@ -5093,7 +5093,7 @@
             }
             try {
                 var wallet = (window.activeHyperliquidWallet && window.activeHyperliquidWallet()) || window._userWallet;
-                var resp = await fetchT('https://copytolive.com/api/bot-trading/positions/close', {
+                var resp = await fetchT('/api/bot-trading/positions/close', {
                     method:'POST',
                     headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({ wallet: wallet, symbol: _renkoEngineSymbol(coin) })
@@ -5954,7 +5954,7 @@
         var orig = btn ? btn.textContent : '';
         if (btn){ btn.disabled = true; btn.textContent = '...'; btn.style.opacity = '0.6'; }
         try {
-            var r = await fetchT('https://copytolive.com/api/bot-trading/positions/close', {
+            var r = await fetchT('/api/bot-trading/positions/close', {
                 method:'POST', headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({ wallet: w, symbol: symbol, hlCoin: hlCoin || '' })
             }, 20000);
@@ -7401,7 +7401,7 @@
         try {
             var w = window._userWallet;
             if (w) {
-                fetch('https://copytolive.com/api/bot-trading/auto-enroll', {
+                fetch('/api/bot-trading/auto-enroll', {
                     method:'POST', headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({ wallet: w, enabled: (mode === 'auto') ? 1 : 0 })
                 }).then(function(){
@@ -7415,7 +7415,7 @@
     window._loadLovedManual = function(){
         try {
             var w = activeHyperliquidWallet(); if (!w) return;
-            fetch('https://copytolive.com/api/bot-trading/favorites/list?enabled_only=true&source=manual&wallet=' + encodeURIComponent(w))
+            fetch('/api/bot-trading/favorites/list?enabled_only=true&source=manual&wallet=' + encodeURIComponent(w))
               .then(function(r){ return r.ok ? r.json() : null; })
               .then(function(d){
                   if (!d) return;
@@ -7433,7 +7433,7 @@
         try {
             var w = activeHyperliquidWallet();
             if (!w) { window._renderEnrollBtns(); return; }
-            fetch('https://copytolive.com/api/bot-trading/auto-enroll?wallet=' + encodeURIComponent(w))
+            fetch('/api/bot-trading/auto-enroll?wallet=' + encodeURIComponent(w))
               .then(function(r){ return r.ok ? r.json() : null; })
               .then(function(d){
                   if (d && typeof d.auto_enroll_all !== 'undefined') {
@@ -7630,7 +7630,7 @@
         } catch(e){}
         try {
             if (frame) {
-                var current = new URL(frame.getAttribute('src') || '/copy/renko/?embed=1', window.location.origin);
+                var current = new URL(frame.getAttribute('src') || '/renko?embed=1', window.location.origin);
                 current.searchParams.set('embed', '1');
                 current.searchParams.set('symbol', coin);
                 current.searchParams.set('smaPeriod', String(RENKO_SMA_PERIOD));
@@ -7639,7 +7639,7 @@
                 frame.src = current.pathname + current.search;
             }
         } catch(e) {
-            if (frame) frame.src = '/copy/renko/?embed=1&symbol=' + encodeURIComponent(coin) + '&smaPeriod=' + RENKO_SMA_PERIOD + '&sma=' + RENKO_SMA_PERIOD + '&focus=' + Date.now();
+            if (frame) frame.src = '/renko?embed=1&symbol=' + encodeURIComponent(coin) + '&smaPeriod=' + RENKO_SMA_PERIOD + '&sma=' + RENKO_SMA_PERIOD + '&focus=' + Date.now();
         }
     };
     function _renkoSleep(ms){
@@ -8068,7 +8068,7 @@
         window._lastPendingHash = null;
         // Sync lot multiplier to backend
         const lotVal = parseFloat(document.getElementById('lotMultInput').value) || 1;
-        fetchT('https://copytolive.com/trading/compounding/config/lot-multiplier', {
+        fetchT('/trading/compounding/config/lot-multiplier', {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({lot_multiplier: lotVal})
         }).catch(e => console.warn('Lot sync failed:', e));
@@ -8083,7 +8083,7 @@
         if (val > 100) { e.target.value = 100; return; }
         localStorage.setItem('ctrl_lot', val);
         // Sync lot multiplier to backend
-        fetchT('https://copytolive.com/trading/compounding/config/lot-multiplier', {
+        fetchT('/trading/compounding/config/lot-multiplier', {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({lot_multiplier: val})
         }).catch(e => console.warn('Lot sync failed:', e));
@@ -8103,7 +8103,7 @@
         if (val >= 1 && val <= 100) {
             const card = document.getElementById('slControlCard');
             try {
-                const resp = await fetchT('https://copytolive.com/trading/compounding/config/max-sl', {
+                const resp = await fetchT('/trading/compounding/config/max-sl', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({max_sl_pct: val})
@@ -8818,7 +8818,7 @@
         const msPerCandle = interval === '1h' ? 3600000 : interval === '4h' ? 14400000 : 86400000;
         const startTime = Date.now() - msPerCandle * 100;
         try {
-            const resp = await fetch('https://copytolive.com/proxy/hyperliquid/info', {
+            const resp = await fetch('/proxy/hyperliquid/info', {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({type:'candleSnapshot', req:{coin:hlCoin, interval:interval, startTime:startTime, endTime:Date.now()}})
             });
@@ -9398,6 +9398,5 @@
             © 2026 OpenTrue AI Trading · Powered by 269 Validated Strategies · Hyperliquid DEX
         </p>
     </div>
-    <script src="/copy/pages_compounding_mirror.js?v=migration-81cdd20"></script>
 </body>
 </html>

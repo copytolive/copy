@@ -1,1 +1,22 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CopyToLive Renko</title><style>html,body,iframe{margin:0;width:100%;height:100%;border:0;background:#050b14}</style></head><body><iframe src="https://copytolive.github.io/rwa/?view=renko&embed=1" title="CopyToLive Renko"></iframe></body></html>
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>CopyToLive Renko</title>
+  <script>
+    (function () {
+      try {
+        localStorage.setItem('ot_backtest_view_mode', 'charting');
+      } catch (e) {}
+      var params = new URLSearchParams(location.search);
+      params.set('view', 'renko');
+      location.replace('/copy/?' + params.toString());
+    })();
+  </script>
+</head>
+<body style="margin:0;background:#050b14;color:#eaecef;font-family:system-ui,sans-serif">
+  <p style="padding:24px">Membuka dashboard Renko… <a href="/copy/?view=renko" style="color:#d4af37">Buka manual</a></p>
+</body>
+</html>

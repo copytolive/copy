@@ -1,0 +1,30 @@
+{
+  "site": {
+    "name": "CopyToLive",
+    "tagline": "Copy-trading on Hyperliquid"
+  },
+  "nav": {
+    "home": "Home",
+    "track_record": "Track Record",
+    "methodology": "Methodology",
+    "faq": "FAQ",
+    "status": "Status",
+    "pricing": "Pricing",
+    "login": "Log in",
+    "signup": "Get started"
+  },
+  "hero": {
+    "title": "Profitable algorithms. On your account.",
+    "sub": "Subscribe to vetted strategies. Trade automatically on YOUR Hyperliquid account. Keep your funds safe.",
+    "cta_primary": "Start free 14-day paper trial",
+    "cta_secondary": "View track record"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "risk": "Risk Disclosure",
+    "refund": "Refund",
+    "sla": "SLA"
+  }
+}

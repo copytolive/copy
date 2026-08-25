@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sequential Compounding Plan</title>
+    <script>
+        (function () {
+            const originalWarn = console.warn.bind(console);
+            console.warn = function (...args) {
+                const msg = String(args[0] || '');
+                if (msg.includes('cdn.tailwindcss.com should not be used in production')) return;
+                originalWarn(...args);
+            };
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: #f8fafc; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.05); box-shadow: 0 4px 30px rgba(0,0,0,.1); }
+        .glass-card { background: linear-gradient(145deg, rgba(30,41,59,.8) 0%, rgba(15,23,42,.9) 100%); border: 1px solid rgba(255,255,255,.05); box-shadow: inset 0 1px 0 rgba(255,255,255,.1); }
+        .text-gradient { background: linear-gradient(135deg, #4ade80 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15,23,42,.5); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(71,85,105,.8); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,1); }
+        .sticky-col { position: sticky; left: 0; background-color: #0f172a; z-index: 10; }
+        .table-header-sticky { z-index: 20; }
+        .plan-table { table-layout: fixed; min-width: 0; width: 100%; }
+        .plan-table th, .plan-table td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* opacity defaults to 1 — keyframe sets 0→1 during animation. If animation fails (reduced-motion, iframe quirks),
+           content stays visible instead of stuck at opacity:0. Animation still plays normally. */
+        .animate-fade-up { animation: fadeInUp .8s cubic-bezier(.16,1,.3,1) forwards; }
+        @media (prefers-reduced-motion: reduce) { .animate-fade-up { animation: none; } }
+        .delay-100 { animation-delay: 100ms; } .delay-200 { animation-delay: 200ms; } .delay-300 { animation-delay: 300ms; }
+        .btn-disabled { opacity: .62; cursor: not-allowed; }
+        @media (max-width: 640px) {
+            .sticky-col { position: static; }
+            .plan-table th, .plan-table td { padding: 9px 5px !important; font-size: 10px !important; }
+            .plan-table th { letter-spacing: .04em !important; }
+            .phase-badge { gap: 3px !important; padding: 4px 5px !important; font-size: 8px !important; }
+            .phase-badge i { display: none; }
+        }
+    </style>
+</head>
+<body class="antialiased relative overflow-x-hidden selection:bg-blue-500/30 selection:text-blue-200">
+    <div class="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-blue-600/20 rounded-full blur-[150px] pointer-events-none mix-blend-screen"></div>
+    <div class="fixed bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-emerald-600/15 rounded-full blur-[150px] pointer-events-none mix-blend-screen"></div>
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6 max-w-7xl relative z-10 pb-8">
+        <header class="text-center mb-8 animate-fade-up delay-100">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-3 tracking-tight leading-tight">Sequential<br class="md:hidden" /><span class="text-gradient">Compounding Plan</span></h1>
+            <p class="text-slate-400 text-base md:text-lg max-w-2xl mx-auto mb-6 leading-relaxed">
+                <span id="stageSummary">50 tahap compound agresif berbasis algoritma.</span> Mulai dari modal real <strong id="startCapitalText" class="text-white bg-white/10 px-2 py-0.5 rounded-md">$9.54</strong> menuju <strong id="targetCapitalText" class="text-white bg-white/10 px-2 py-0.5 rounded-md">Jutaan Dolar</strong>.
+            </p>
+            <div class="inline-flex flex-wrap justify-center items-center gap-y-2 gap-x-3 sm:gap-x-4 max-w-4xl mx-auto text-[11px] sm:text-sm font-medium glass py-2.5 px-4 rounded-full shadow-lg">
+                <div class="flex items-center gap-1.5 sm:gap-2"><div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-[9px] sm:text-[10px]"><i class="fa-solid fa-1"></i></div><span class="text-slate-200">Validasi</span></div>
+                <i class="fa-solid fa-chevron-right text-slate-600 text-[8px] sm:text-[10px]"></i>
+                <div class="flex items-center gap-1.5 sm:gap-2"><div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-[9px] sm:text-[10px]"><i class="fa-solid fa-2"></i></div><span id="tradeCountText" class="text-slate-200">960 Trade</span></div>
+                <i class="fa-solid fa-chevron-right text-slate-600 text-[8px] sm:text-[10px]"></i>
+                <div class="flex items-center gap-1.5 sm:gap-2"><div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-[9px] sm:text-[10px]"><i class="fa-solid fa-3"></i></div><span class="text-slate-200">Compound</span></div>
+                <i class="fa-solid fa-chevron-right text-slate-600 text-[8px] sm:text-[10px]"></i>
+                <div class="flex items-center gap-1.5 sm:gap-2"><div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-[9px] sm:text-[10px]"><i class="fa-solid fa-rocket"></i></div><span class="text-emerald-400 font-bold">Accelerate</span></div>
+            </div>
+        </header>
+
+        <div class="mb-6 animate-fade-up delay-200 max-w-5xl mx-auto">
+            <div class="flex flex-row flex-wrap items-end justify-between gap-4 sm:gap-6 px-2">
+                <!-- Modal Awal -->
+                <div class="flex-1 min-w-[140px] text-left">
+                    <p class="text-blue-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><i class="fa-solid fa-wallet"></i> Modal Awal</p>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-xl sm:text-2xl font-bold text-white font-mono leading-none">$</span>
+                        <input id="kpiStartInput" type="number" step="0.01" min="0.01" value="9.54" class="w-24 sm:w-28 bg-transparent border-b border-slate-700 focus:border-blue-400 px-1 py-0.5 text-xl sm:text-2xl font-bold text-white font-mono leading-none outline-none transition-colors" />
+                    </div>
+                </div>
+                <!-- Lot Awal -->
+                <div class="flex-1 min-w-[140px] text-left">
+                    <p class="text-yellow-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><i class="fa-solid fa-coins"></i> Lot Awal</p>
+                    <div class="flex items-baseline gap-1">
+                        <input id="kpiLotInput" type="number" step="0.001" min="0.001" value="0.001" class="w-24 sm:w-28 bg-transparent border-b border-slate-700 focus:border-yellow-400 px-1 py-0.5 text-xl sm:text-2xl font-bold text-white font-mono leading-none outline-none transition-colors" />
+                    </div>
+                </div>
+                <!-- Ultimate Target -->
+                <div class="flex-[2] min-w-[180px] text-center">
+                    <div class="inline-flex items-center gap-1.5 mb-1.5"><i class="fa-solid fa-flag-checkered text-[10px] text-emerald-400"></i><span class="text-emerald-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest">Ultimate Target</span></div>
+                    <h2 id="kpiTarget" class="text-2xl sm:text-4xl font-black font-mono tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-emerald-400 to-cyan-400 leading-none">$6082.9M</h2>
+                </div>
+                <!-- Growth + Growth/Stage editable -->
+                <div class="flex-1 min-w-[160px] text-right flex flex-col items-end">
+                    <p class="text-purple-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><i class="fa-solid fa-arrow-trend-up"></i> Growth</p>
+                    <h2 id="kpiGrowth" class="text-xl sm:text-2xl font-bold text-white font-mono leading-none mb-1">63762M%</h2>
+                    <div class="flex items-baseline gap-1 text-[11px] text-slate-400">
+                        <span class="uppercase tracking-wider">Per Stage</span>
+                        <input id="growthStageInput" type="number" step="1" min="1" max="500" value="50" class="w-12 bg-transparent border-b border-slate-700 focus:border-purple-400 px-1 py-0.5 text-sm font-bold text-white font-mono outline-none transition-colors text-right" />
+                        <span class="text-white font-bold">%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <span id="growthPerStage" class="hidden">~50%</span>
+        <span id="totalStages" class="hidden">50 Stages</span>
+
+        <div class="animate-fade-up delay-300 relative">
+            <div class="glass-card rounded-3xl overflow-hidden border border-slate-700/50 shadow-2xl relative">
+                <div class="overflow-x-hidden relative">
+                    <table class="plan-table text-left border-collapse">
+                        <colgroup>
+                            <col style="width: 10%">
+                            <col style="width: 17%">
+                            <col style="width: 17%">
+                            <col style="width: 31%">
+                            <col style="width: 13%">
+                            <col style="width: 12%">
+                        </colgroup>
+                        <thead class="bg-slate-900/95 sticky top-0 table-header-sticky backdrop-blur-xl border-b border-slate-700/50">
+                            <tr>
+                                <th class="p-3 font-bold text-[11px] uppercase tracking-widest text-slate-400 w-16 text-center sticky-col border-b border-slate-700/50 shadow-[2px_0_5px_rgba(0,0,0,.1)]">Tahap</th>
+                                <th class="p-3 font-bold text-[11px] uppercase tracking-widest text-slate-400">Modal</th>
+                                <th class="p-3 font-bold text-[11px] uppercase tracking-widest text-slate-400">Target</th>
+                                <th class="p-3 font-bold text-[11px] uppercase tracking-widest text-slate-400">Fase Strategi</th>
+                                <th class="p-3 font-bold text-[11px] uppercase tracking-widest text-slate-400 text-center">Metode</th>
+                                <th class="p-3 font-bold text-[11px] uppercase tracking-widest text-slate-400 text-center">Lot</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="text-sm font-mono divide-y divide-slate-800/50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="mt-8 lg:hidden flex justify-center animate-fade-up delay-300">
+            <button id="syncBtnMobile" onclick="syncFromFarm()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-6 py-4 rounded-2xl font-bold shadow-[0_0_20px_rgba(59,130,246,.4)] flex items-center justify-center gap-3 text-lg active:scale-95 transition-all"><i class="fa-solid fa-bolt text-yellow-300"></i> Copy To Live</button>
+        </div>
+    </div>
+
+    <script>
+        const FALLBACK_DATA = [
+            { stage: 1, modal: "$9.54", target: "$14.31", phase: "VALIDATION", pool: 1 }, { stage: 2, modal: "$14.31", target: "$21.46", phase: "VALIDATION", pool: 2 }, { stage: 3, modal: "$21.46", target: "$32.20", phase: "VALIDATION", pool: 4 }, { stage: 4, modal: "$32.20", target: "$48.30", phase: "VALIDATION", pool: 8 },
+            { stage: 5, modal: "$48.30", target: "$72.44", phase: "ACCUMULATION", pool: 24 }, { stage: 6, modal: "$72.44", target: "$108.67", phase: "ACCUMULATION", pool: 49 }, { stage: 7, modal: "$108.67", target: "$163.00", phase: "ACCUMULATION", pool: 92 }, { stage: 8, modal: "$163.00", target: "$244.50", phase: "ACCUMULATION", pool: 153 }, { stage: 9, modal: "$244.50", target: "$366.75", phase: "ACCUMULATION", pool: 244 }, { stage: 10, modal: "$366.75", target: "$550.12", phase: "ACCUMULATION", pool: 367 }, { stage: 11, modal: "$550.12", target: "$825.19", phase: "ACCUMULATION", pool: 489 },
+            { stage: 12, modal: "$825.19", target: "$1.24K", phase: "COMPOUND", pool: 611 }, { stage: 13, modal: "$1.24K", target: "$1.86K", phase: "COMPOUND", pool: 611 }, { stage: 14, modal: "$1.86K", target: "$2.79K", phase: "COMPOUND", pool: 611 }, { stage: 15, modal: "$2.79K", target: "$4.18K", phase: "COMPOUND", pool: 611 }, { stage: 16, modal: "$4.18K", target: "$6.27K", phase: "COMPOUND", pool: 611 }, { stage: 17, modal: "$6.27K", target: "$9.40K", phase: "COMPOUND", pool: 611 }, { stage: 18, modal: "$9.40K", target: "$14.1K", phase: "COMPOUND", pool: 611 }, { stage: 19, modal: "$14.1K", target: "$21.1K", phase: "COMPOUND", pool: 611 }, { stage: 20, modal: "$21.1K", target: "$31.7K", phase: "COMPOUND", pool: 611 }, { stage: 21, modal: "$31.7K", target: "$47.6K", phase: "COMPOUND", pool: 611 }, { stage: 22, modal: "$47.6K", target: "$71.4K", phase: "COMPOUND", pool: 611 }, { stage: 23, modal: "$71.4K", target: "$107.1K", phase: "COMPOUND", pool: 611 }, { stage: 24, modal: "$107.1K", target: "$160.6K", phase: "COMPOUND", pool: 611 }, { stage: 25, modal: "$160.6K", target: "$240.9K", phase: "COMPOUND", pool: 611 },
+            { stage: 26, modal: "$240.9K", target: "$361.3K", phase: "ACCELERATION", pool: 611 }, { stage: 27, modal: "$361.3K", target: "$542.0K", phase: "ACCELERATION", pool: 611 }, { stage: 28, modal: "$542.0K", target: "$813.0K", phase: "ACCELERATION", pool: 611 }, { stage: 29, modal: "$813.0K", target: "$1.22M", phase: "ACCELERATION", pool: 611 }, { stage: 30, modal: "$1.22M", target: "$1.83M", phase: "ACCELERATION", pool: 611 }, { stage: 31, modal: "$1.83M", target: "$2.74M", phase: "ACCELERATION", pool: 611 }, { stage: 32, modal: "$2.74M", target: "$4.12M", phase: "ACCELERATION", pool: 611 }, { stage: 33, modal: "$4.12M", target: "$6.17M", phase: "ACCELERATION", pool: 611 }, { stage: 34, modal: "$6.17M", target: "$9.26M", phase: "ACCELERATION", pool: 611 }, { stage: 35, modal: "$9.26M", target: "$13.9M", phase: "ACCELERATION", pool: 611 }, { stage: 36, modal: "$13.9M", target: "$20.8M", phase: "ACCELERATION", pool: 611 }, { stage: 37, modal: "$20.8M", target: "$31.3M", phase: "ACCELERATION", pool: 611 }, { stage: 38, modal: "$31.3M", target: "$46.9M", phase: "ACCELERATION", pool: 611 }, { stage: 39, modal: "$46.9M", target: "$70.3M", phase: "ACCELERATION", pool: 611 }, { stage: 40, modal: "$70.3M", target: "$105.5M", phase: "ACCELERATION", pool: 611 }, { stage: 41, modal: "$105.5M", target: "$158.2M", phase: "ACCELERATION", pool: 611 }, { stage: 42, modal: "$158.2M", target: "$237.3M", phase: "ACCELERATION", pool: 611 }, { stage: 43, modal: "$237.3M", target: "$356.0M", phase: "ACCELERATION", pool: 611 }, { stage: 44, modal: "$356.0M", target: "$534.0M", phase: "ACCELERATION", pool: 611 }, { stage: 45, modal: "$534.0M", target: "$801.0M", phase: "ACCELERATION", pool: 611 }, { stage: 46, modal: "$801.0M", target: "$1201.6M", phase: "ACCELERATION", pool: 611 }, { stage: 47, modal: "$1201.6M", target: "$1802.3M", phase: "ACCELERATION", pool: 611 }, { stage: 48, modal: "$1802.3M", target: "$2703.5M", phase: "ACCELERATION", pool: 611 }, { stage: 49, modal: "$2703.5M", target: "$4055.3M", phase: "ACCELERATION", pool: 611 }, { stage: 50, modal: "$4055.3M", target: "$6082.9M", phase: "ACCELERATION", pool: 611 }
+        ];
+
+        let tableData = FALLBACK_DATA;
+        // Dynamic pool cap — di-fetch dari backtest_farm.json (strategi ready di production_locked).
+        // Fallback 611 kalau fetch gagal.
+        let POOL_CAP = 611;
+        async function loadPoolCap() {
+            try {
+                const res = await fetch('/data/backtest_farm.json', { cache: 'no-store' });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!Array.isArray(data)) return;
+                // Hitung strategi yang benar-benar ready (bukan archived/rejected).
+                const ready = data.filter(x =>
+                    x && x.visibility !== 'archive' && x.backtestInstituteStatus !== 'archive_reject'
+                );
+                const cnt = ready.length || data.length;
+                if (cnt > 0) POOL_CAP = cnt;
+            } catch (_) { /* keep default 611 */ }
+        }
+        const money = n => '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
+        const compactMoney = n => {
+            n = Number(n || 0);
+            if (n >= 1e9) return '$' + (n / 1e9).toFixed(1).replace('.0', '') + 'B';
+            if (n >= 1e6) return '$' + (n / 1e6).toFixed(1).replace('.0', '') + 'M';
+            if (n >= 1e3) return '$' + (n / 1e3).toFixed(2).replace(/\.00$/, '') + 'K';
+            return money(n);
+        };
+        const parseMoney = s => {
+            let v = parseFloat(String(s).replace('$','')) || 0;
+            if (String(s).includes('K')) v *= 1e3;
+            if (String(s).includes('M')) v *= 1e6;
+            if (String(s).includes('B')) v *= 1e9;
+            return v;
+        };
+        function getPhase(stage, total) {
+            if (stage <= 4) return 'VALIDATION';
+            if (stage <= 11) return 'ACCUMULATION';
+            if (stage <= Math.ceil(total * .5)) return 'COMPOUND';
+            return 'ACCELERATION';
+        }
+        function buildPlan(start = 9.54, profitPct = 50, steps = 50) {
+            const rows = [];
+            let modal = Number(start) || 9.54;
+            for (let i = 1; i <= steps; i++) {
+                const target = modal * (1 + profitPct / 100);
+                const pool = i <= 4 ? Math.pow(2, i - 1) : i <= 11 ? [24,49,92,153,244,367,489][i - 5] : POOL_CAP;
+                rows.push({ stage: i, modal: compactMoney(modal), target: compactMoney(target), phase: getPhase(i, steps), pool });
+                modal = target;
+            }
+            return rows;
+        }
+        function getPhaseStyles(phase) {
+            switch(phase) {
+                case 'VALIDATION': return { wrapper: 'bg-yellow-500/10 border-yellow-500/30', text: 'text-yellow-400', icon: 'fa-vial' };
+                case 'ACCUMULATION': return { wrapper: 'bg-blue-500/10 border-blue-500/30', text: 'text-blue-400', icon: 'fa-layer-group' };
+                case 'COMPOUND': return { wrapper: 'bg-purple-500/10 border-purple-500/30', text: 'text-purple-400', icon: 'fa-rotate' };
+                case 'ACCELERATION': return { wrapper: 'bg-emerald-500/10 border-emerald-500/30', text: 'text-emerald-400', icon: 'fa-rocket' };
+                default: return { wrapper: 'bg-slate-700/50 border-slate-600', text: 'text-slate-300', icon: 'fa-circle' };
+            }
+        }
+        function getLotAwal() { const el = document.getElementById('kpiLotInput'); const v = el ? parseFloat(el.value) : 0.001; return (isFinite(v) && v > 0) ? v : 0.001; }
+        function calculateLotSize(modalString, pool) {
+            const lotAwal = getLotAwal();
+            if (pool < POOL_CAP) return lotAwal.toFixed(3);
+            const val = parseMoney(modalString);
+            const lot = (val / 825.19) * lotAwal;
+            if (lot < 0.001) return '0.001';
+            if (lot >= 1000) return (lot / 1000).toFixed(2) + 'K';
+            if (lot >= 10) return lot.toFixed(1);
+            if (lot >= 1) return lot.toFixed(2);
+            return lot.toFixed(3);
+        }
+        function render(data = tableData) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = `hover:bg-slate-800/80 transition-all duration-200 group ${index < 10 ? 'animate-fade-up' : ''}`;
+                if (index < 10) tr.setAttribute('style', `animation-delay: ${300 + (index * 50)}ms`);
+                const style = getPhaseStyles(row.phase);
+                tr.innerHTML = `<td class="p-3 text-center font-bold text-slate-400 group-hover:text-white sticky-col shadow-[2px_0_5px_rgba(0,0,0,.1)] group-hover:bg-slate-800/80 transition-colors">${row.stage}</td><td class="p-3 text-slate-300 font-medium">${row.modal}</td><td class="p-3 text-emerald-400 font-bold">${row.target}</td><td class="p-3"><div class="phase-badge inline-flex items-center gap-2 px-2.5 py-1 rounded-md border text-[10px] sm:text-xs font-sans font-bold uppercase tracking-wider ${style.wrapper}"><i class="fa-solid ${style.icon} ${style.text}"></i><span class="${style.text}">${row.phase}</span></div></td><td class="p-3 text-center text-slate-400 bg-slate-900/20">${row.pool}</td><td class="p-3 text-center text-blue-400 font-bold bg-slate-900/40">${calculateLotSize(row.modal, row.pool)}</td>`;
+                tbody.appendChild(tr);
+            });
+            updateKpis(data);
+        }
+        function updateKpis(data) {
+            const first = data[0]; const last = data[data.length - 1];
+            const start = parseMoney(first.modal); const target = parseMoney(last.target);
+            const growth = start > 0 ? ((target - start) / start) * 100 : 0;
+            const startInput = document.getElementById('kpiStartInput');
+            if (startInput && document.activeElement !== startInput) startInput.value = parseMoney(first.modal).toFixed(2);
+            document.getElementById('kpiTarget').textContent = last.target;
+            document.getElementById('kpiGrowth').innerHTML = (growth >= 1e6 ? (growth / 1e6).toFixed(0) + '<span class="text-[9px] sm:text-sm text-purple-500 ml-0.5">M%</span>' : growth.toFixed(0) + '%');
+            document.getElementById('startCapitalText').textContent = first.modal;
+            document.getElementById('targetCapitalText').textContent = last.target;
+            document.getElementById('totalStages').textContent = data.length + ' Stages';
+            document.getElementById('stageSummary').textContent = `${data.length} tahap compound agresif berbasis algoritma.`;
+        }
+        function setEngine(active, text) {
+            const dot = document.getElementById('engineDot'); const label = document.getElementById('engineText');
+            if (!dot || !label) return;
+            dot.className = `relative inline-flex rounded-full h-2.5 w-2.5 ${active ? 'bg-green-500' : 'bg-yellow-500'}`;
+            label.className = `text-xs sm:text-sm font-semibold tracking-wide ${active ? 'text-green-400' : 'text-yellow-400'}`;
+            label.textContent = text;
+        }
+        async function hydrateFromEngine() {
+            try {
+                const res = await fetch('/trading/compounding/status', { cache: 'no-store' });
+                if (!res.ok) throw new Error('status offline');
+                const status = await res.json();
+                const start = status.capital_usd || status.initial_capital || 9.54;
+                const steps = status.total_stages || status.stages || 50;
+                const pct = status.profit_per_stage_pct || status.growth_per_stage_pct || 50;
+                tableData = Array.isArray(status.plan) && status.plan.length ? status.plan.map((x, i) => ({ stage: x.stage || i + 1, modal: compactMoney(x.modal || x.capital || x.start), target: compactMoney(x.target || x.end), phase: x.phase || getPhase(i + 1, status.plan.length), pool: x.pool || x.method || POOL_CAP })) : buildPlan(start, pct, steps);
+                document.getElementById('growthPerStage').textContent = '~' + pct + '%';
+                const gEl = document.getElementById('growthStageInput'); if (gEl && document.activeElement !== gEl) gEl.value = pct;
+                if (status.total_trades || status.trade_count) document.getElementById('tradeCountText').textContent = `${status.total_trades || status.trade_count} Trade`;
+                setEngine(true, 'Active');
+                render(tableData);
+            } catch (_) {
+                setEngine(false, 'Fallback Plan');
+                render(FALLBACK_DATA);
+            }
+        }
+        async function syncFromFarm() {
+            const buttons = [document.getElementById('syncBtn'), document.getElementById('syncBtnMobile')].filter(Boolean);
+            buttons.forEach(btn => { btn.disabled = true; btn.classList.add('btn-disabled'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-yellow-300"></i> Syncing...'; });
+            try {
+                const res = await fetch('/trading/compounding/strategy/sync-from-farm', { method: 'POST', cache: 'no-store' });
+                const data = await res.json().catch(() => ({}));
+                const sn1 = document.getElementById('syncNotice'); if (sn1) sn1.innerHTML = `<strong>Sync selesai:</strong> ${data.summary || data.status || 'Strategy farm tersinkron ke compounding engine.'}`;
+                await hydrateFromEngine();
+                buttons.forEach(btn => { btn.innerHTML = '<i class="fa-solid fa-check text-emerald-300"></i> Synced'; });
+            } catch (e) {
+                const sn2 = document.getElementById('syncNotice'); if (sn2) sn2.innerHTML = '<strong>Sync belum berhasil:</strong> Engine tidak merespons. Tampilan tetap memakai fallback plan dari halaman ini.';
+                buttons.forEach(btn => { btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-yellow-300"></i> Offline'; });
+            } finally {
+                setTimeout(() => buttons.forEach(btn => { btn.disabled = false; btn.classList.remove('btn-disabled'); btn.innerHTML = btn.id === 'syncBtn' ? '<i class="fa-solid fa-bolt text-yellow-300"></i> Sync & Copy To Live' : '<i class="fa-solid fa-bolt text-yellow-300"></i> Copy To Live'; }), 2500);
+            }
+        }
+        render(FALLBACK_DATA);
+        // Load POOL_CAP dulu, baru hydrate dari engine (atau fallback build ulang dengan cap baru).
+        loadPoolCap().then(() => {
+            tableData = buildPlan(9.54, 50, 50);
+            render(tableData);
+            hydrateFromEngine();
+        });
+
+        // Manual edit: Modal Awal (start) + Lot Awal + Growth/Stage
+        (function attachManualInputs() {
+            const startEl = document.getElementById('kpiStartInput');
+            const lotEl = document.getElementById('kpiLotInput');
+            const growthEl = document.getElementById('growthStageInput');
+            const rebuild = () => {
+                const start = parseFloat(startEl?.value);
+                const pct = parseFloat(growthEl?.value);
+                if (!isFinite(start) || start <= 0) return;
+                const steps = (tableData && tableData.length) || 50;
+                const validPct = (isFinite(pct) && pct > 0) ? pct : 50;
+                tableData = buildPlan(start, validPct, steps);
+                render(tableData);
+            };
+            const onLot = () => render(tableData); // recompute lot column only
+            if (startEl) { startEl.addEventListener('input', rebuild); startEl.addEventListener('change', rebuild); }
+            if (lotEl) { lotEl.addEventListener('input', onLot); lotEl.addEventListener('change', onLot); }
+            if (growthEl) { growthEl.addEventListener('input', rebuild); growthEl.addEventListener('change', rebuild); }
+        })();
+    </script>
+</body>
+</html>

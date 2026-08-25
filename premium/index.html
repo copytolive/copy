@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#050b13" />
+  <title>CopyToLive — Premium Login</title>
+  <style>
+    :root{color-scheme:dark;--bg:#050b13;--panel:#09131f;--panel2:#0d1a29;--line:#17324d;--muted:#8192a7;--text:#f4f8fb;--cyan:#23d3e6;--green:#1ee6a8;--gold:#f3d34a;--red:#ff6476}
+    *{box-sizing:border-box}html,body{min-height:100%;margin:0;background:radial-gradient(circle at 50% -20%,#12314b 0,#08131f 34%,var(--bg) 70%);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}
+    body{display:flex;align-items:center;justify-content:center;padding:24px}
+    .shell{width:min(460px,100%)}
+    .brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:22px}.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--green));display:grid;place-items:center;color:#031014;font-weight:950;box-shadow:0 0 34px rgba(35,211,230,.22)}
+    .brand h1{font-size:22px;margin:0;letter-spacing:-.02em}.brand small{display:block;color:var(--green);font-size:10px;letter-spacing:.15em;margin-top:3px;font-weight:800}
+    .card{background:linear-gradient(180deg,rgba(13,26,41,.98),rgba(7,16,27,.98));border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:0 28px 90px rgba(0,0,0,.38)}
+    .badge{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(243,211,74,.28);color:var(--gold);background:rgba(243,211,74,.07);padding:5px 9px;border-radius:999px;font-size:10px;font-weight:850;letter-spacing:.08em}.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+    h2{font-size:24px;margin:15px 0 7px;letter-spacing:-.025em}.sub{margin:0 0 22px;color:var(--muted);font-size:13px;line-height:1.6}
+    label{display:block;font-size:11px;font-weight:800;color:#a9b7c6;margin:15px 0 7px;letter-spacing:.04em;text-transform:uppercase}
+    input{width:100%;height:46px;border:1px solid #1b3b58;background:#06111c;color:#fff;border-radius:10px;padding:0 13px;font-size:14px;outline:none;transition:.18s}input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(35,211,230,.09)}
+    .btn{width:100%;height:47px;border:0;border-radius:11px;background:linear-gradient(135deg,#22c9e4,#2dd4bf);color:#021017;font-weight:950;font-size:14px;cursor:pointer;margin-top:20px;box-shadow:0 10px 28px rgba(35,211,230,.16)}.btn:disabled{opacity:.55;cursor:wait}.btn.secondary{background:#0b1a29;color:#9eb1c4;border:1px solid #1b3852;box-shadow:none;margin-top:9px}
+    .notice{display:flex;gap:10px;margin-top:18px;padding:12px;border-radius:11px;background:rgba(30,230,168,.055);border:1px solid rgba(30,230,168,.14);font-size:11px;line-height:1.55;color:#98adbf}.notice strong{color:#c9f8e8}.lock{font-size:16px}
+    .error,.ok{display:none;margin-top:13px;padding:10px 11px;border-radius:9px;font-size:12px;line-height:1.45}.error{color:#ff9aaa;background:rgba(255,100,118,.08);border:1px solid rgba(255,100,118,.24)}.ok{color:#8bf3ce;background:rgba(30,230,168,.08);border:1px solid rgba(30,230,168,.2)}
+    .mode{margin-top:16px;text-align:center;color:#65798e;font-size:10px}.mode b{color:#94a8bb}.reset{border:0;background:transparent;color:#6f8297;font-size:10px;cursor:pointer;text-decoration:underline;margin-top:13px;width:100%}
+    @media(max-width:520px){body{padding:12px;align-items:flex-start}.shell{margin-top:18px}.card{padding:22px 18px;border-radius:15px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="brand"><div class="logo">CTL</div><div><h1>CopyToLive</h1><small>PREMIUM · GITHUB PAGES</small></div></div>
+    <section class="card">
+      <span class="badge"><span class="dot"></span> PREMIUM ACCESS</span>
+      <h2 id="title">Login Premium</h2>
+      <p class="sub" id="subtitle">Masuk ke Sequential Compounding. Setelah itu koneksi Hyperliquid tetap Anda lakukan sendiri.</p>
+
+      <label for="email">Email Premium</label>
+      <input id="email" type="email" autocomplete="username" placeholder="email@contoh.com" />
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="Password Premium" />
+      <div id="confirmWrap" style="display:none">
+        <label for="confirm">Ulangi Password</label>
+        <input id="confirm" type="password" autocomplete="new-password" placeholder="Ulangi password" />
+      </div>
+
+      <div id="error" class="error"></div>
+      <div id="ok" class="ok"></div>
+      <button id="submit" class="btn" type="button">Masuk Premium</button>
+      <button id="continue" class="btn secondary" type="button" style="display:none">Buka Sequential Compounding</button>
+
+      <div class="notice"><div class="lock">🔒</div><div><strong>Password Premium tidak dikirim ke GitHub atau CopyToLive.</strong><br/>Browser hanya menyimpan salt + hash PBKDF2. Login ini membuka dashboard publik pada perangkat ini; kredensial/API key Hyperliquid tidak disimpan oleh halaman login ini.</div></div>
+      <div class="mode">Target setelah login: <b>Sequential Compounding → Hyperliquid</b></div>
+      <button id="reset" class="reset" type="button">Reset login Premium pada browser ini</button>
+    </section>
+  </main>
+<script>
+(function(){
+  'use strict';
+  var OWNER_KEY='ctl_pages_premium_owner_v1';
+  var SESSION_KEY='ctl_pages_premium_session_v1';
+  var LOCAL_TOKEN='pages-local-premium-v1';
+  var DEST='/copy/?view=live&premium=1';
+  var isPages=location.hostname==='narzulalistiqlal.github.io' && location.pathname.indexOf('/copy/')===0;
+  var $=function(id){return document.getElementById(id)};
+  var title=$('title'), subtitle=$('subtitle'), email=$('email'), password=$('password'), confirmInput=$('confirm'), confirmWrap=$('confirmWrap'), submit=$('submit'), reset=$('reset'), err=$('error'), ok=$('ok'), cont=$('continue');
+
+  function b64(bytes){var s=''; for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]); return btoa(s)}
+  function unb64(s){var raw=atob(s), out=new Uint8Array(raw.length); for(var i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i); return out}
+  function equal(a,b){if(a.length!==b.length)return false; var d=0; for(var i=0;i<a.length;i++)d|=a[i]^b[i]; return d===0}
+  async function derive(pass,salt){
+    var material=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveBits']);
+    var bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:salt,iterations:210000,hash:'SHA-256'},material,256);
+    return new Uint8Array(bits);
+  }
+  function readOwner(){try{return JSON.parse(localStorage.getItem(OWNER_KEY)||'null')}catch(e){return null}}
+  function showError(m){err.textContent=m;err.style.display='block';ok.style.display='none'}
+  function showOk(m){ok.textContent=m;ok.style.display='block';err.style.display='none'}
+  function busy(v){submit.disabled=v;submit.textContent=v?'Memproses…':(readOwner()?'Masuk Premium':'Buat Login Premium')}
+  function premiumUser(mail){var name=(mail.split('@')[0]||'Premium');return {id:'pages-premium:'+mail,name:name,email:mail,username:name,role:'user',avatar:'https://ui-avatars.com/api/?name='+encodeURIComponent(name),isLoggedIn:true,isPremium:true,isPro:true,status:'active',authProvider:'pages-local-premium',onboardingCompleted:true,karma:{post:0,comment:0},savedPostIds:[]}}
+  function establish(mail){
+    var user=premiumUser(mail);
+    localStorage.setItem('token',LOCAL_TOKEN);
+    localStorage.setItem('session_user',JSON.stringify(user));
+    sessionStorage.setItem(SESSION_KEY,JSON.stringify({email:mail,at:Date.now()}));
+    try{localStorage.setItem('ot_backtest_view_mode','live-trading')}catch(e){}
+    return user;
+  }
+  function refresh(){
+    var owner=readOwner();
+    if(owner){title.textContent='Login Premium';subtitle.textContent='Masuk ke Sequential Compounding. Setelah itu koneksi Hyperliquid tetap Anda lakukan sendiri.';confirmWrap.style.display='none';submit.textContent='Masuk Premium';email.value=owner.email||'';email.readOnly=!!owner.email;}
+    else{title.textContent='Aktifkan Login Premium';subtitle.textContent='Pertama kali: tentukan email dan password Premium khusus browser ini.';confirmWrap.style.display='block';submit.textContent='Buat Login Premium';email.readOnly=false;}
+    try{var s=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');if(owner&&s&&s.email===owner.email){cont.style.display='block';showOk('Sesi Premium aktif pada tab browser ini.')}}catch(e){}
+  }
+  async function submitLogin(){
+    err.style.display='none'; ok.style.display='none';
+    if(!isPages){showError('Login Premium lokal ini hanya aktif di narzulalistiqlal.github.io/copy/.');return}
+    var mail=(email.value||'').trim().toLowerCase(), pass=password.value||'', owner=readOwner();
+    if(!mail||mail.indexOf('@')<1){showError('Masukkan email yang valid.');return}
+    if(pass.length<8){showError('Password minimal 8 karakter.');return}
+    busy(true);
+    try{
+      if(!owner){
+        if(pass!==(confirmInput.value||'')){showError('Ulangi password belum sama.');return}
+        var salt=crypto.getRandomValues(new Uint8Array(16));
+        var hash=await derive(pass,salt);
+        owner={version:1,email:mail,salt:b64(salt),hash:b64(hash),iterations:210000,createdAt:new Date().toISOString()};
+        localStorage.setItem(OWNER_KEY,JSON.stringify(owner));
+        establish(mail);
+        showOk('Login Premium dibuat. Membuka Sequential Compounding…');
+      }else{
+        if(mail!==String(owner.email||'').toLowerCase()){showError('Email tidak cocok dengan pemilik Premium pada browser ini.');return}
+        var got=await derive(pass,unb64(owner.salt));
+        if(!equal(got,unb64(owner.hash))){showError('Password Premium salah.');return}
+        establish(mail);
+        showOk('Login Premium berhasil. Membuka Sequential Compounding…');
+      }
+      cont.style.display='block';
+      password.value='';confirmInput.value='';
+      setTimeout(function(){location.href=DEST},450);
+    }catch(e){console.error(e);showError('Browser tidak dapat membuat sesi Premium. Pastikan HTTPS/WebCrypto aktif.');}
+    finally{busy(false);refresh()}
+  }
+  submit.addEventListener('click',submitLogin);
+  password.addEventListener('keydown',function(e){if(e.key==='Enter')submitLogin()});
+  confirmInput.addEventListener('keydown',function(e){if(e.key==='Enter')submitLogin()});
+  cont.addEventListener('click',function(){var owner=readOwner();if(owner){establish(owner.email);location.href=DEST}});
+  reset.addEventListener('click',function(){if(!window.confirm('Hapus login Premium lokal dari browser ini?'))return;localStorage.removeItem(OWNER_KEY);localStorage.removeItem('token');localStorage.removeItem('session_user');sessionStorage.removeItem(SESSION_KEY);email.value='';password.value='';confirmInput.value='';cont.style.display='none';ok.style.display='none';err.style.display='none';refresh()});
+  refresh();
+})();
+</script>
+</body>
+</html>

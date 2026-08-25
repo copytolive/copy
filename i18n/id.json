@@ -1,0 +1,30 @@
+{
+  "site": {
+    "name": "CopyToLive",
+    "tagline": "Copy-trading di Hyperliquid"
+  },
+  "nav": {
+    "home": "Beranda",
+    "track_record": "Track Record",
+    "methodology": "Metodologi",
+    "faq": "FAQ",
+    "status": "Status",
+    "pricing": "Harga",
+    "login": "Masuk",
+    "signup": "Mulai gratis"
+  },
+  "hero": {
+    "title": "Algoritma profitable. Di akun Anda.",
+    "sub": "Berlangganan strategi terverifikasi. Trading otomatis di akun Hyperliquid Anda sendiri. Dana tetap di Anda.",
+    "cta_primary": "Mulai paper trial 14 hari gratis",
+    "cta_secondary": "Lihat track record"
+  },
+  "footer": {
+    "rights": "Hak cipta dilindungi",
+    "terms": "Syarat",
+    "privacy": "Privasi",
+    "risk": "Pengungkapan Risiko",
+    "refund": "Refund",
+    "sla": "SLA"
+  }
+}

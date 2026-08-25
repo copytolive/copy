@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FAQ — CopyToLive</title>
+<meta name="description" content="Frequently asked questions about CopyToLive copy-trading platform on Hyperliquid." />
+<link rel="canonical" href="https://copytolive.com/faq.html" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"What is CopyToLive?","acceptedAnswer":{"@type":"Answer","text":"CopyToLive is a copy-trading platform that lets you subscribe to algorithmic trading signals and execute them automatically on your own Hyperliquid account."}},
+{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{"@type":"Answer","text":"$70 per month, single tier, full access to paper and live trading."}},
+{"@type":"Question","name":"Is there a free trial?","acceptedAnswer":{"@type":"Answer","text":"Paper trading mode is free for 14 days after signup; live mode requires subscription."}},
+{"@type":"Question","name":"Do you have my funds?","acceptedAnswer":{"@type":"Answer","text":"No. Funds remain in your Hyperliquid account. We only have trade-permission API keys, never withdrawal."}}
+]}
+</script>
+<style>
+  :root{--bg:#0B0E14;--card:#151821;--border:#2A2F3D;--gold:#FFD700;--text:#fff;--muted:#94a3b8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",Inter,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+  .wrap{max-width:860px;margin:0 auto;padding:48px 24px}
+  .back{display:inline-flex;gap:8px;color:var(--gold);text-decoration:none;margin-bottom:24px;font-size:14px}
+  h1{font-size:32px;margin-bottom:8px;color:var(--gold)}
+  .sub{color:var(--muted);margin-bottom:32px;font-size:14px}
+  details{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:12px}
+  summary{cursor:pointer;font-weight:600;font-size:16px;color:var(--gold);outline:none}
+  details[open] summary{margin-bottom:10px}
+  details p,details li{font-size:15px;color:var(--text);margin:6px 0}
+  details ul{margin:6px 0 6px 24px}
+  .cat{font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:1px;margin:24px 0 8px}
+  .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:48px}
+  .footer a{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/welcome.html" class="back">← Back to CopyToLive</a>
+  <h1>Frequently Asked Questions</h1>
+  <p class="sub">Can't find what you're looking for? Email <a href="/cdn-cgi/l/email-protection#2b585e5b5b44595f6b48445b525f4447425d4e05484446" style="color:var(--gold)"><span class="__cf_email__" data-cfemail="bfcccacfcfd0cdcbffdcd0cfc6cbd0d3d6c9da91dcd0d2">[email&#160;protected]</span></a> — we respond within 24 hours.</p>
+
+  <div class="cat">🚀 Getting Started</div>
+
+  <details><summary>What is CopyToLive?</summary>
+    <p>CopyToLive is a copy-trading platform connected to <a href="https://hyperliquid.xyz" target="_blank" rel="noopener" style="color:var(--gold)">Hyperliquid</a>. You subscribe to vetted algorithmic strategies; our system executes their signals on YOUR Hyperliquid account using YOUR API key (with trade-only permission).</p>
+  </details>
+
+  <details><summary>How is this different from a trading bot?</summary>
+    <p>Traditional bots use one strategy. CopyToLive curates 100+ strategies that pass our Tier-4 backtest filter (PF 2-8, &gt;300 trades, drawdown &lt;25%). You can follow multiple strategies with custom risk limits per strategy.</p>
+  </details>
+
+  <details><summary>Do I need crypto/Hyperliquid experience?</summary>
+    <p>Basic familiarity helps. We provide an 8-video onboarding (connect wallet → pick strategy → adjust risk → emergency pause). If you're new to perps, start with paper trading for 2+ weeks.</p>
+  </details>
+
+  <div class="cat">💰 Pricing &amp; Payment</div>
+
+  <details><summary>How much does CopyToLive cost?</summary>
+    <p>$70/month, single tier. Includes paper + live trading, all strategies, weekly performance email, /learn video hub, Telegram/Discord trade notifications, and email support.</p>
+  </details>
+
+  <details><summary>How do I pay?</summary>
+    <p>Cryptocurrency only — USDT or USDC on Tron (TRC-20), Ethereum (ERC-20), or BNB Smart Chain. Payment is processed via NOWPayments. After confirmation (~10-30 minutes), your subscription activates immediately.</p>
+  </details>
+
+  <details><summary>Is there a free trial?</summary>
+    <p>Paper trading mode is free for 14 days after signup. You can simulate every strategy with real-time data without real capital. Live mode requires subscription.</p>
+  </details>
+
+  <details><summary>Can I get a refund?</summary>
+    <p>Yes — if no trades have been executed AND you request within 48 hours of payment. Otherwise, see our <a href="/refund-en.html" style="color:var(--gold)">Refund Policy</a> for SLA credits and other exceptions.</p>
+  </details>
+
+  <details><summary>How do I cancel?</summary>
+    <p>Click "Cancel subscription" on /account/billing. Your access remains active until the period expires (no auto-charge after that). Resubscribe anytime.</p>
+  </details>
+
+  <div class="cat">🔐 Security &amp; Funds</div>
+
+  <details><summary>Do you hold my crypto?</summary>
+    <p>NO. Your funds stay on your Hyperliquid account. We only have a trade-permission API key (encrypted with AES-256-GCM) — we cannot withdraw. You can revoke our key anytime via Hyperliquid settings.</p>
+  </details>
+
+  <details><summary>How is my API key protected?</summary>
+    <ul>
+      <li>Encrypted at rest (AES-256-GCM) with per-user data key</li>
+      <li>Master key stored in HSM-equivalent isolated env, never in code/repo</li>
+      <li>Never shown again after entering — only masked display</li>
+      <li>Audit log every decryption with IP + timestamp</li>
+    </ul>
+  </details>
+
+  <details><summary>Can I use 2FA?</summary>
+    <p>Yes — TOTP (Google Authenticator / Authy) is available in /account/security. Strongly recommended.</p>
+  </details>
+
+  <details><summary>What if your platform is hacked?</summary>
+    <p>Even if attackers got our database, they can't steal your funds because we don't have withdrawal permission. They could only place trades — your daily loss limit (default 10%) caps damage. We have a kill-switch that pauses ALL copy-trading globally if breach is detected.</p>
+  </details>
+
+  <div class="cat">📊 Trading &amp; Strategies</div>
+
+  <details><summary>How do I know strategies are real?</summary>
+    <p>Our /track-record.html page shows verifiable backtest data (with audit hash) for top strategies. After live attach, we publish live performance separately so you can compare backtest vs reality.</p>
+  </details>
+
+  <details><summary>What's the expected return?</summary>
+    <p>Historically, top-tier strategies range from <strong>+3% to +15% monthly</strong>, with drawdowns of <strong>10-25%</strong>. These are NOT guarantees — past performance does not predict future results. See /methodology.html for our calculator.</p>
+  </details>
+
+  <details><summary>Can I lose money?</summary>
+    <p>YES. Crypto perps are high-risk. You can lose more than your initial deposit due to leverage. Read our full <a href="/risk-en.html" style="color:var(--gold)">Risk Disclosure</a> before live trading. Set a daily loss limit and never risk capital you can't afford to lose entirely.</p>
+  </details>
+
+  <details><summary>How do I limit risk?</summary>
+    <ul>
+      <li>Max leverage cap (default 5x, max 20x)</li>
+      <li>Position size as % of wallet (default 20%)</li>
+      <li>Daily loss limit % (default 10% → auto-pause)</li>
+      <li>Per-trade max USD</li>
+      <li>Emergency kill-switch in /account/safety</li>
+    </ul>
+  </details>
+
+  <div class="cat">🛟 Support &amp; Issues</div>
+
+  <details><summary>How do I get help?</summary>
+    <p>Email <a href="/cdn-cgi/l/email-protection#4635333636293432062529363f32292a2f30236825292b" style="color:var(--gold)"><span class="__cf_email__" data-cfemail="f784828787988583b79498878e83989b9e8192d994989a">[email&#160;protected]</span></a> — we reply within 24 hours (usually under 4 hours during business days). Telegram/Discord community for quick peer help.</p>
+  </details>
+
+  <details><summary>What if a trade went wrong?</summary>
+    <p>Every trade has an immutable audit log with payload hash + Hyperliquid order ID. Open a dispute via /account/disputes citing the trade ID. We review with raw data; if our system was at fault, we credit you.</p>
+  </details>
+
+  <details><summary>What if Hyperliquid is down?</summary>
+    <p>We queue signals for up to 5 minutes; after that we skip + email you, and show a "Hyperliquid degraded" banner site-wide. Trade audit log shows skipped trades.</p>
+  </details>
+
+  <details><summary>What countries are supported?</summary>
+    <p>Most countries, EXCEPT OFAC-sanctioned regions (US — for now, due to derivatives regulation; North Korea, Iran, Syria, Cuba, Crimea). Check by visiting /signup; we geo-block at registration.</p>
+  </details>
+
+  <div class="footer">© 2026 CopyToLive · <a href="/terms-en.html">Terms</a> · <a href="/privacy-en.html">Privacy</a> · <a href="/risk-en.html">Risk</a> · <a href="/refund-en.html">Refund</a></div>
+</div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

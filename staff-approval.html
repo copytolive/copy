@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approve Karyawan — Premium | CopyToLive</title>
+  <style>
+    :root { --bg:#0b0911; --panel:#12111c; --line:#282435; --mint:#35e7a4; --cyan:#29d3ff; --muted:#918ba7; --red:#ff5d67; }
+    * { box-sizing: border-box; }
+    body {
+      margin:0; min-height:100vh; background:var(--bg); color:#f5f4fb;
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      display:flex; align-items:flex-start; justify-content:center; padding:32px 16px;
+    }
+    .card {
+      width:min(720px,100%); background:var(--panel); border:1px solid var(--line);
+      border-radius:14px; padding:26px; box-shadow:0 24px 70px rgba(0,0,0,.4);
+    }
+    h1 { margin:0 0 6px; font-size:22px; }
+    .sub { margin:0 0 20px; color:var(--muted); font-size:13px; line-height:1.5; }
+    label { display:block; font-size:12px; font-weight:700; color:var(--muted); margin:14px 0 6px; text-transform:uppercase; letter-spacing:.5px; }
+    input, textarea {
+      width:100%; background:#0a0710; border:1px solid var(--line); border-radius:9px;
+      color:#f5f4fb; padding:11px 13px; font-size:14px; outline:none; font-family:inherit;
+    }
+    input:focus, textarea:focus { border-color:var(--cyan); }
+    textarea { min-height:120px; resize:vertical; font-family:"JetBrains Mono",monospace; font-size:13px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    button {
+      border:0; border-radius:9px; padding:12px 18px; font-weight:800; font-size:14px; cursor:pointer;
+      color:#051018; background:linear-gradient(135deg,var(--mint),var(--cyan)); margin-top:8px;
+    }
+    button.secondary { color:#ffb2b8; background:transparent; border:1px solid rgba(255,93,103,.4); }
+    button:disabled { opacity:.6; cursor:wait; }
+    .hint { font-size:12px; color:#7c7690; margin-top:10px; line-height:1.5; }
+    .result { margin-top:18px; padding:14px; border-radius:10px; font-size:13px; white-space:pre-wrap; display:none; }
+    .result.ok { background:rgba(53,231,164,.09); border:1px solid rgba(53,231,164,.3); color:#8ff0c8; }
+    .result.err { background:rgba(255,93,103,.09); border:1px solid rgba(255,93,103,.3); color:#ffc3c7; }
+    .step { display:none; }
+    .step.active { display:block; }
+    .badge { display:inline-block; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:700; }
+    .badge.prem { background:rgba(53,231,164,.14); color:var(--mint); }
+    .badge.no { background:rgba(255,93,103,.12); color:var(--red); }
+    table { width:100%; border-collapse:collapse; margin-top:14px; font-size:13px; }
+    th,td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
+    th { color:var(--muted); font-size:11px; text-transform:uppercase; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Approve Karyawan &rarr; Premium</h1>
+    <p class="sub">Halaman admin. Aktifkan akses <b>Meteora + Hyperliquid</b> untuk email karyawan yang kamu pilih. Karyawan harus sudah <b>daftar</b> di copytolive.com dulu. Akses ini hanya <b>Premium</b> (bukan admin) &mdash; karyawan tetap tidak bisa withdraw.</p>
+
+    <div id="stepLogin" class="step active">
+      <label>Email Admin</label>
+      <input id="adminEmail" type="email" placeholder="admin@copytolive.com" autocomplete="username">
+      <label>Password Admin</label>
+      <input id="adminPassword" type="password" placeholder="********" autocomplete="current-password">
+      <button id="loginBtn">Login sebagai Admin</button>
+      <div class="hint">Login diperlukan agar hanya admin yang bisa meng-ACC. Token disimpan sementara di browser ini saja.</div>
+    </div>
+
+    <div id="stepApprove" class="step">
+      <div class="row" style="justify-content:space-between;">
+        <div class="hint" style="margin:0;">Login sebagai <b id="whoami"></b> &middot; <a href="#" id="logoutLink" style="color:var(--cyan);">keluar</a></div>
+      </div>
+      <label>Email karyawan yang di-ACC (satu per baris, atau pisah koma)</label>
+      <textarea id="emails" placeholder="karyawan1@gmail.com&#10;karyawan2@gmail.com&#10;narzul@copytolive.com"></textarea>
+      <div class="row">
+        <button id="grantBtn">Approve Premium</button>
+        <button id="revokeBtn" class="secondary">Cabut Premium</button>
+        <button id="listBtn" class="secondary" style="color:#c2a7ff;border-color:#443878;">Lihat daftar akun</button>
+      </div>
+      <div class="hint">Bulk: bisa tempel ribuan email sekaligus (maks 6000 per klik). Email yang belum terdaftar akan dilaporkan (tidak dibuat otomatis).</div>
+
+      <label>Atau approve semua karyawan 1 domain sekaligus (mis. perusahaan.com)</label>
+      <div class="row">
+        <input id="domain" type="text" placeholder="perusahaan.com" style="flex:1;min-width:180px;">
+        <button id="grantDomainBtn">Approve Se-Domain</button>
+        <button id="revokeDomainBtn" class="secondary">Cabut Se-Domain</button>
+      </div>
+      <div class="hint">Semua akun terdaftar dengan email @domain itu langsung premium. Cocok untuk 5.040 karyawan satu domain perusahaan.</div>
+      <div id="staffTableWrap"></div>
+    </div>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    var API = '';
+    var token = null;
+    var $ = function(id){ return document.getElementById(id); };
+    function showResult(msg, ok){
+      var r = $('result'); r.textContent = msg;
+      r.className = 'result ' + (ok ? 'ok' : 'err'); r.style.display = 'block';
+    }
+    function setStep(name){
+      $('stepLogin').classList.toggle('active', name==='login');
+      $('stepApprove').classList.toggle('active', name==='approve');
+    }
+
+    $('loginBtn').addEventListener('click', async function(){
+      var email = $('adminEmail').value.trim();
+      var password = $('adminPassword').value;
+      if(!email || !password){ showResult('Isi email & password admin.', false); return; }
+      this.disabled = true; this.textContent = 'Masuk...';
+      try {
+        var res = await fetch(API + '/api/auth/login', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email: email, password: password }),
+        });
+        var data = await res.json();
+        if(!res.ok){ throw new Error(data.error || 'Login gagal'); }
+        token = data.accessToken;
+        $('whoami').textContent = (data.user && data.user.email) || email;
+        setStep('approve');
+        showResult('Login berhasil. Kamu bisa mulai approve karyawan.', true);
+      } catch(e){ showResult('Gagal login: ' + e.message, false); }
+      finally { this.disabled = false; this.textContent = 'Login sebagai Admin'; }
+    });
+
+    $('logoutLink').addEventListener('click', function(e){ e.preventDefault(); token=null; setStep('login'); });
+
+    async function submitEmails(revoke){
+      var emails = $('emails').value.split(/[\s,;\n]+/).map(function(s){return s.trim();}).filter(Boolean);
+      if(!emails.length){ showResult('Isi minimal satu email karyawan.', false); return; }
+      var btn = revoke ? $('revokeBtn') : $('grantBtn');
+      btn.disabled = true;
+      try {
+        var res = await fetch(API + '/api/auth/admin/grant-premium', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          body: JSON.stringify({ emails: emails, revoke: revoke }),
+        });
+        var data = await res.json();
+        if(!res.ok){ throw new Error(data.error || 'Gagal'); }
+        var msg = (revoke?'Dicabut':'Di-approve')+' premium: '+data.grantedCount+' akun.\n';
+        if(data.granted && data.granted.length) msg += 'Berhasil: '+data.granted.join(', ')+'\n';
+        if(data.notFound && data.notFound.length) msg += '\nBELUM TERDAFTAR (harus daftar dulu): '+data.notFound.join(', ');
+        showResult(msg, true);
+      } catch(e){ showResult('Error: '+e.message, false); }
+      finally { btn.disabled = false; }
+    }
+    $('grantBtn').addEventListener('click', function(){ submitEmails(false); });
+    $('revokeBtn').addEventListener('click', function(){ submitEmails(true); });
+
+    async function submitDomain(revoke){
+      var domain = $('domain').value.trim();
+      if(!domain){ showResult('Isi domain, mis. perusahaan.com', false); return; }
+      var btn = revoke ? $('revokeDomainBtn') : $('grantDomainBtn');
+      btn.disabled = true;
+      try {
+        var res = await fetch(API + '/api/auth/admin/grant-premium-domain', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          body: JSON.stringify({ domain: domain, revoke: revoke }),
+        });
+        var data = await res.json();
+        if(!res.ok){ throw new Error(data.error || 'Gagal'); }
+        showResult((revoke?'Dicabut':'Di-approve')+' premium untuk @'+data.domain+': '+data.affectedCount+' akun.\n'+(data.note||''), true);
+      } catch(e){ showResult('Error: '+e.message, false); }
+      finally { btn.disabled = false; }
+    }
+    $('grantDomainBtn').addEventListener('click', function(){ submitDomain(false); });
+    $('revokeDomainBtn').addEventListener('click', function(){ submitDomain(true); });
+
+    $('listBtn').addEventListener('click', async function(){
+      try {
+        var res = await fetch(API + '/api/auth/admin/staff', { headers:{'Authorization':'Bearer '+token} });
+        var data = await res.json();
+        if(!res.ok){ throw new Error(data.error || 'Gagal'); }
+        var rows = (data.users||[]).map(function(u){
+          return '<tr><td>'+u.email+'</td><td>'+(u.name||'')+'</td><td>'+(u.isPremium
+            ?'<span class="badge prem">PREMIUM</span>':'<span class="badge no">-</span>')+'</td><td>'+(u.role||'')+'</td></tr>';
+        }).join('');
+        $('staffTableWrap').innerHTML = '<table><thead><tr><th>Email</th><th>Nama</th><th>Premium</th><th>Role</th></tr></thead><tbody>'+rows+'</tbody></table>';
+        showResult('Menampilkan '+data.count+' akun (maks 200).', true);
+      } catch(e){ showResult('Error: '+e.message, false); }
+    });
+  </script>
+</body>
+</html>

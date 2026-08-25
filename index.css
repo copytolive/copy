@@ -1,0 +1,845 @@
+/* ═══════════════════════════════════════════════════════
+   OpenTrue / Land — Binance Design System CSS
+   Complete global override system
+   ═══════════════════════════════════════════════════════ */
+
+/* ═══ CSS CUSTOM PROPERTIES (Binance Tokens) ═══ */
+:root {
+  --bn-body: #0B0E11;
+  --bn-card: #1E2329;
+  --bn-input: #2B3139;
+  --bn-border: #2B3139;
+  --bn-hover: #363C45;
+  --bn-accent: #F0B90B;
+  --bn-accent-hover: #D4A50A;
+  --bn-accent-bg: rgba(240, 185, 11, 0.08);
+  --bn-text: #EAECEF;
+  --bn-text2: #848E9C;
+  --bn-text3: #5E6673;
+  --bn-green: #0ECB81;
+  --bn-green-bg: rgba(14, 203, 129, 0.1);
+  --bn-red: #F6465D;
+  --bn-red-bg: rgba(246, 70, 93, 0.1);
+  --bn-radius-sm: 4px;
+  --bn-radius-md: 8px;
+  --bn-radius-lg: 12px;
+  --bn-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --bn-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  --bn-nav-height: 48px;
+  --bn-bottom-nav: 56px;
+  --bn-desktop-max: 1200px;
+  --bn-desktop-wide: 1400px;
+}
+
+/* ═══ GLOBAL RESETS ═══ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--bn-body);
+  color: var(--bn-text);
+  font-family: var(--bn-font);
+  font-size: 14px;
+  line-height: 1.5;
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+/* ═══ TYPOGRAPHY (Binance-exact) ═══ */
+h1 { font-size: 32px; font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; color: var(--bn-text); }
+h2 { font-size: 24px; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; color: var(--bn-text); }
+h3 { font-size: 20px; font-weight: 600; line-height: 1.3; color: var(--bn-text); }
+h4 { font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--bn-text); }
+h5 { font-size: 14px; font-weight: 600; line-height: 1.5; color: var(--bn-text); }
+h6 { font-size: 12px; font-weight: 600; line-height: 1.5; color: var(--bn-text2); }
+
+p { font-size: 14px; line-height: 1.6; color: var(--bn-text2); }
+
+small, .text-xs { font-size: 12px; }
+.text-xxs { font-size: 10px; }
+.text-sm { font-size: 13px; }
+.text-base { font-size: 14px; }
+.text-lg { font-size: 16px; }
+.text-xl { font-size: 20px; }
+.text-2xl { font-size: 24px; }
+.text-3xl { font-size: 30px; }
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromBottom {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulseFast {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes scan {
+  0%, 100% { top: 0; }
+  50% { top: calc(100% - 4px); }
+}
+
+@keyframes slideInLeftSidebar {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeInDown {
+  from { transform: translateY(-12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Animation Classes */
+.animate-in {
+  animation-duration: 200ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+
+.fade-in { animation-name: fadeIn; }
+.slide-in-from-bottom-2 { animation-name: slideInFromBottom; }
+.animate-fade-in { animation: fadeIn 300ms ease-out both; }
+.animate-slide-in-right { animation: slideInRight 300ms ease-out both; }
+.animate-slide-in-left { animation: slideInLeft 300ms ease-out both; }
+.animate-slide-in-up { animation: slideInUp 300ms ease-out both; }
+.animate-pulse-fast { animation: pulseFast 2s ease-in-out infinite; }
+.animate-shimmer {
+  background: linear-gradient(90deg, var(--bn-card) 25%, var(--bn-input) 50%, var(--bn-card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ═══ LEAFLET MAP STYLES ═══ */
+.leaflet-container {
+  background: #0a0a0a !important;
+  font-family: var(--bn-font);
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--bn-card) !important;
+  border: 1px solid var(--bn-border) !important;
+  border-radius: var(--bn-radius-lg) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(20px);
+  padding: 0 !important;
+  color: var(--bn-text) !important;
+}
+
+.leaflet-popup-content {
+  margin: 8px !important;
+  min-width: 200px;
+  color: var(--bn-text) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bn-card) !important;
+  border: 1px solid var(--bn-border) !important;
+}
+
+.leaflet-control-zoom { display: none !important; }
+
+/* Custom Marker */
+.custom-marker { background: none !important; border: none !important; }
+.custom-cluster-icon { background: none !important; border: none !important; }
+
+.property-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bn-accent);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  color: var(--bn-body);
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(240, 185, 11, 0.5);
+  transition: all 0.2s ease;
+}
+
+.property-cluster:hover {
+  transform: scale(1.15);
+  box-shadow: 0 6px 25px rgba(240, 185, 11, 0.7);
+}
+
+/* ═══ SCROLLBAR ═══ */
+.custom-scrollbar::-webkit-scrollbar,
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track,
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: var(--bn-input);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--bn-text3);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bn-input); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--bn-text3); }
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Safe area padding */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
+/* ═══ BINANCE UTILITY CLASSES ═══ */
+
+/* Backgrounds */
+.bg-bn-body { background-color: var(--bn-body); }
+.bg-bn-card { background-color: var(--bn-card); }
+.bg-bn-input { background-color: var(--bn-input); }
+.bg-bn-accent { background-color: var(--bn-accent); }
+.bg-bn-green { background-color: var(--bn-green); }
+.bg-bn-red { background-color: var(--bn-red); }
+
+/* Text colors */
+.text-bn { color: var(--bn-text); }
+.text-bn2 { color: var(--bn-text2); }
+.text-bn3 { color: var(--bn-text3); }
+.text-bn-accent { color: var(--bn-accent); }
+.text-bn-green { color: var(--bn-green); }
+.text-bn-red { color: var(--bn-red); }
+
+/* Border */
+.border-bn { border-color: var(--bn-border); }
+
+/* Font */
+.font-display, .font-sans {
+  font-family: var(--bn-font);
+}
+.font-mono-data {
+  font-family: var(--bn-mono);
+}
+
+/* ═══ BINANCE COMPONENT STYLES ═══ */
+
+/* Card */
+.bn-card {
+  background: var(--bn-card);
+  border: 1px solid var(--bn-border);
+  border-radius: var(--bn-radius-md);
+  padding: 16px;
+  transition: background 0.15s ease;
+}
+
+.bn-card:hover {
+  background: var(--bn-input);
+}
+
+/* Button Primary (Yellow) */
+.bn-btn {
+  background: var(--bn-accent);
+  color: var(--bn-body);
+  border: none;
+  border-radius: var(--bn-radius-sm);
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: var(--bn-font);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.bn-btn:hover { background: var(--bn-accent-hover); }
+.bn-btn:active { transform: scale(0.98); }
+
+/* Button Secondary (Outline) */
+.bn-btn-outline {
+  background: transparent;
+  color: var(--bn-accent);
+  border: 1px solid var(--bn-accent);
+  border-radius: var(--bn-radius-sm);
+  padding: 10px 16px;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: var(--bn-font);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bn-btn-outline:hover {
+  background: var(--bn-accent-bg);
+}
+
+/* Button Ghost */
+.bn-btn-ghost {
+  background: transparent;
+  color: var(--bn-text2);
+  border: none;
+  border-radius: var(--bn-radius-sm);
+  padding: 8px 12px;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: var(--bn-font);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bn-btn-ghost:hover {
+  color: var(--bn-text);
+  background: var(--bn-input);
+}
+
+/* Input */
+.bn-input {
+  background: var(--bn-input);
+  border: 1px solid var(--bn-border);
+  border-radius: var(--bn-radius-sm);
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--bn-text);
+  font-family: var(--bn-font);
+  outline: none;
+  transition: border-color 0.15s ease;
+  width: 100%;
+}
+
+.bn-input:focus {
+  border-color: var(--bn-accent);
+}
+
+.bn-input::placeholder {
+  color: var(--bn-text3);
+}
+
+/* Badge */
+.bn-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--bn-radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.bn-badge-green {
+  background: var(--bn-green-bg);
+  color: var(--bn-green);
+}
+
+.bn-badge-red {
+  background: var(--bn-red-bg);
+  color: var(--bn-red);
+}
+
+.bn-badge-yellow {
+  background: var(--bn-accent-bg);
+  color: var(--bn-accent);
+}
+
+/* ═══ TABLE STYLES (Binance-like) ═══ */
+.bn-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bn-table th {
+  color: var(--bn-text2);
+  font-weight: 500;
+  font-size: 12px;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--bn-border);
+  white-space: nowrap;
+}
+
+.bn-table td {
+  color: var(--bn-text);
+  font-size: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--bn-border);
+}
+
+.bn-table tr:hover {
+  background: var(--bn-input);
+}
+
+/* ═══ STAT DISPLAY (Binance number style) ═══ */
+.stat-value {
+  font-family: var(--bn-mono);
+  font-weight: 600;
+  color: var(--bn-text);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--bn-text2);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.stat-change-up { color: var(--bn-green); }
+.stat-change-down { color: var(--bn-red); }
+
+/* ═══ EXPLORE GRID (Instagram-style) ═══ */
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+@media (min-width: 640px) {
+  .masonry-grid { gap: 3px; }
+}
+
+@media (min-width: 768px) {
+  .masonry-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+}
+
+@media (min-width: 1024px) {
+  .masonry-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+}
+
+@media (min-width: 1400px) {
+  .masonry-grid { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+}
+
+.pin-wrapper {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: var(--bn-card);
+}
+
+.pin-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ═══ RESPONSIVE DESKTOP LAYOUT ═══ */
+
+/* Desktop content area — make all pages look great on wide screens */
+@media (min-width: 768px) {
+  .desktop-content {
+    padding-top: var(--bn-nav-height);
+  }
+  
+  .desktop-main {
+    max-width: var(--bn-desktop-max);
+    margin: 0 auto;
+    padding: 16px 24px;
+  }
+  
+  /* All page sections get proper desktop centering */
+  .bn-page-section {
+    max-width: var(--bn-desktop-max);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bn-page-section {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+/* ═══ RESPONSIVE GRID SYSTEM ═══ */
+.grid-responsive {
+  display: grid;
+  gap: 12px;
+}
+
+@media (max-width: 767px) {
+  .grid-responsive { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 768px) {
+  .grid-responsive { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+}
+
+@media (min-width: 1400px) {
+  .grid-responsive { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+}
+
+/* ═══ GLOBAL COLOR FORCE (all components get Binance look) ═══ */
+
+/* Force all backgrounds to Binance dark */
+.bg-white { background-color: var(--bn-card) !important; color: var(--bn-text) !important; }
+.bg-gray-50, .bg-gray-100, .bg-zinc-50, .bg-slate-50 { background-color: var(--bn-body) !important; color: var(--bn-text) !important; }
+.bg-gray-900, .bg-zinc-900 { background-color: var(--bn-card) !important; }
+.bg-gray-800, .bg-zinc-800 { background-color: var(--bn-input) !important; }
+
+/* Force text colors */
+.text-gray-900, .text-zinc-900, .text-slate-900, .text-gray-800, .text-zinc-800 { color: var(--bn-text) !important; }
+.text-gray-700, .text-zinc-700 { color: var(--bn-text) !important; }
+.text-gray-600, .text-zinc-600 { color: var(--bn-text2) !important; }
+.text-gray-500, .text-zinc-500 { color: var(--bn-text3) !important; }
+.text-gray-400, .text-zinc-400 { color: var(--bn-text2) !important; }
+.text-gray-300 { color: var(--bn-text2) !important; }
+
+/* Force border colors */
+.border-gray-100, .border-gray-200, .border-gray-300, .border-zinc-100, .border-zinc-200 { border-color: var(--bn-border) !important; }
+.border-zinc-700, .border-zinc-800 { border-color: var(--bn-border) !important; }
+
+/* Green accent → Binance accent */
+.bg-green-600, .bg-green-500, .bg-emerald-600, .bg-emerald-500 { background-color: var(--bn-accent) !important; color: var(--bn-body) !important; }
+.bg-green-100, .bg-green-50, .bg-emerald-100, .bg-emerald-50 { background-color: var(--bn-accent-bg) !important; }
+.text-green-600, .text-green-500, .text-emerald-600, .text-emerald-500 { color: var(--bn-accent) !important; }
+.text-green-700, .text-emerald-700 { color: var(--bn-accent) !important; }
+.text-green-400, .text-emerald-400 { color: var(--bn-green) !important; }
+.text-green-300, .text-emerald-300 { color: var(--bn-green) !important; }
+.shadow-green-500\/30, .shadow-green-500\/20 { --tw-shadow-color: rgba(240, 185, 11, 0.3) !important; }
+
+/* Blue → Binance accent */
+.text-blue-400, .text-blue-500, .text-blue-600 { color: var(--bn-accent) !important; }
+.bg-blue-500\/20, .bg-blue-500\/10, .bg-blue-600 { background-color: var(--bn-accent-bg) !important; }
+.border-blue-500 { border-color: var(--bn-accent) !important; }
+
+/* Gradient buttons → Binance accent solid */
+.bg-gradient-to-r.from-blue-600.to-indigo-600,
+.bg-gradient-to-r.from-green-600.to-emerald-600,
+.bg-gradient-to-r.from-green-600.to-emerald-500,
+.bg-gradient-to-tr.from-green-600.to-emerald-500 { 
+  background: var(--bn-accent) !important; 
+  color: var(--bn-body) !important; 
+}
+.from-blue-600, .from-blue-500 { --tw-gradient-from: var(--bn-accent) !important; }
+.to-indigo-600, .to-indigo-500, .to-emerald-600, .to-emerald-500, .to-emerald-300 { --tw-gradient-to: var(--bn-accent-hover) !important; }
+
+/* Force all white text sections to be properly themed */
+.bg-green-950\/95, .bg-green-950\/60 { background-color: rgba(11, 14, 17, 0.9) !important; }
+
+/* Hover states */
+.hover\:text-green-500:hover, .hover\:text-green-600:hover, .hover\:text-green-400:hover { color: var(--bn-accent) !important; }
+.hover\:bg-green-600:hover { background-color: var(--bn-accent) !important; color: var(--bn-body) !important; }
+.hover\:bg-zinc-100:hover, .hover\:bg-gray-100:hover { background-color: var(--bn-input) !important; }
+.hover\:bg-zinc-700:hover, .hover\:bg-zinc-800:hover { background-color: var(--bn-hover) !important; }
+
+/* Ring/focus states */
+.ring-white\/10 { --tw-ring-color: rgba(43, 49, 57, 0.8) !important; }
+.border-white\/10, .border-white\/5, .border-white\/30, .border-white\/20 { border-color: var(--bn-border) !important; }
+
+/* Fix backgrounds that should be body-colored */
+.bg-black { background-color: var(--bn-body) !important; }
+.bg-zinc-950, .bg-\[\#050505\], .bg-\[\#09090b\], .bg-\[\#0a0a0a\] { background-color: var(--bn-body) !important; }
+.bg-zinc-900\/60, .bg-zinc-900\/80, .bg-zinc-900\/50 { background-color: rgba(30, 35, 41, 0.8) !important; }
+
+/* Force white text sections to dark theme */
+section.bg-white, div.bg-white { background-color: var(--bn-card) !important; }
+
+/* Selection */
+::selection { background: var(--bn-accent); color: var(--bn-body); }
+
+/* ═══ DESKTOP-SPECIFIC ENHANCEMENTS ═══ */
+
+/* Cards grid on desktop */
+@media (min-width: 768px) {
+  /* Make product grids wider on desktop */
+  .grid.grid-cols-2 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Sticky headers get more padding */
+  .sticky.top-0 {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  
+  /* Bottom fixed bars adapt for desktop */
+  .fixed.bottom-\[60px\] {
+    bottom: 0 !important;
+    max-width: 800px;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid.grid-cols-2 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ═══ FORM ELEMENTS GLOBAL OVERRIDE ═══ */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+input[type="url"],
+textarea,
+select {
+  font-family: var(--bn-font);
+  font-size: 14px;
+}
+
+/* ═══ BUTTON GLOBAL STYLES ═══ */
+button {
+  font-family: var(--bn-font);
+}
+
+/* ═══ LANDING PAGE DARK THEME ENFORCEMENT ═══ */
+/* Force LandingPage sections to Binance dark */
+nav.bg-white, nav.bg-transparent {
+  background: var(--bn-body) !important;
+}
+
+section.py-24.bg-white,
+section.py-24.bg-zinc-50 {
+  background: var(--bn-body) !important;
+}
+
+section.py-24.bg-gradient-to-r {
+  background: linear-gradient(to right, var(--bn-accent), var(--bn-accent-hover)) !important;
+  color: var(--bn-body) !important;
+}
+
+footer.bg-zinc-950 {
+  background: var(--bn-card) !important;
+}
+
+/* Mobile app section */
+section.py-24.bg-zinc-900 {
+  background: var(--bn-card) !important;
+}
+
+/* Force all card-like elements in LandingPage to dark */
+.bg-white.p-4,
+.bg-white.p-5,
+.bg-white.p-10,
+.bg-white.rounded-2xl,
+.bg-white.rounded-3xl,
+.bg-white.rounded-xl,
+.bg-zinc-50.rounded-2xl {
+  background: var(--bn-card) !important;
+  border: 1px solid var(--bn-border) !important;
+  color: var(--bn-text) !important;
+}
+
+/* Fix white backgrounds in mobile phone mockup */
+.bg-zinc-50 {
+  background: var(--bn-body) !important;
+}
+
+/* LandingPage text overrides */
+.text-gray-900, .text-gray-800 { color: var(--bn-text) !important; }
+.text-gray-500, .text-gray-600 { color: var(--bn-text2) !important; }
+.text-gray-400 { color: var(--bn-text3) !important; }
+.text-gray-300 { color: var(--bn-text2) !important; }
+.text-gray-700 { color: var(--bn-text) !important; }
+
+/* WhyChooseUs / Feature icons */
+.bg-green-50 { background: var(--bn-accent-bg) !important; }
+.bg-green-100 { background: var(--bn-accent-bg) !important; }
+
+/* ═══ MOBILE-SPECIFIC TWEAKS ═══ */
+@media (max-width: 767px) {
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 16px; }
+  
+  .stat-value { font-size: 16px; }
+  
+  /* Bottom nav safe area */
+  #bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+/* ═══ DESKTOP CONTENT AREAS ═══ */
+@media (min-width: 768px) {
+  /* Hide mobile bottom nav on desktop unconditionally */
+  #bottom-nav { display: none !important; }
+  /* All content sections get proper max-width on desktop */
+  .bn-desktop-container {
+    max-width: var(--bn-desktop-max);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  
+  /* Wide variant */
+  .bn-desktop-wide {
+    max-width: var(--bn-desktop-wide);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+/* ═══ TRANSITION UTILITIES ═══ */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══ TOOLTIP ═══ */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: var(--bn-input);
+  color: var(--bn-text);
+  font-size: 12px;
+  border-radius: var(--bn-radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+/* ═══ LOADING SKELETON ═══ */
+.skeleton {
+  background: linear-gradient(90deg, var(--bn-card) 25%, var(--bn-input) 50%, var(--bn-card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--bn-radius-sm);
+}
+
+/* ═══ DIVIDER ═══ */
+.bn-divider {
+  height: 1px;
+  background: var(--bn-border);
+  border: none;
+  margin: 12px 0;
+}
+
+/* ═══ CHIP/TAG ═══ */
+.bn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 100px;
+  background: var(--bn-input);
+  color: var(--bn-text2);
+  border: 1px solid var(--bn-border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bn-chip:hover {
+  background: var(--bn-hover);
+  color: var(--bn-text);
+}
+
+.bn-chip.active {
+  background: var(--bn-accent-bg);
+  color: var(--bn-accent);
+  border-color: var(--bn-accent);
+}
+
+/* ═══ PROGRESS BAR ═══ */
+.bn-progress {
+  height: 4px;
+  background: var(--bn-input);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bn-progress-bar {
+  height: 100%;
+  background: var(--bn-accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.bn-progress-green .bn-progress-bar {
+  background: var(--bn-green);
+}
+
+/* ═══ MOBILE PULL-TO-REFRESH INDICATOR ═══ */
+.pull-indicator {
+  width: 36px;
+  height: 4px;
+  background: var(--bn-text3);
+  border-radius: 2px;
+  margin: 8px auto;
+}

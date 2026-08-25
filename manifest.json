@@ -1,0 +1,79 @@
+{
+    "name": "Land — Properti, Trading & Social",
+    "short_name": "Land",
+    "description": "Platform terpercaya untuk jual beli properti, trading saham & crypto, dan komunitas investor Indonesia",
+    "start_url": "/",
+    "display": "fullscreen",
+    "display_override": [
+        "fullscreen",
+        "standalone"
+    ],
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "categories": [
+        "finance",
+        "social",
+        "business",
+        "productivity",
+        "shopping"
+    ],
+    "lang": "id",
+    "dir": "ltr",
+    "scope": "/",
+    "shortcuts": [
+        {
+            "name": "Peta Properti",
+            "short_name": "Peta",
+            "url": "/?tab=map",
+            "icons": [
+                {
+                    "src": "/android-chrome-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Trading",
+            "short_name": "Trading",
+            "url": "/?tab=trading",
+            "icons": [
+                {
+                    "src": "/android-chrome-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Marketplace",
+            "short_name": "Market",
+            "url": "/?tab=market",
+            "icons": [
+                {
+                    "src": "/android-chrome-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "screenshots": [],
+    "prefer_related_applications": false
+}

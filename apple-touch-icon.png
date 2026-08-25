@@ -61,11 +61,11 @@
   <meta name="twitter:creator" content="@opentrue" />
 
   <!-- ═══ FAVICONS ═══ -->
-  <link rel="icon" type="image/x-icon" href="/copy/favicon.ico" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/copy/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/copy/favicon-16x16.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/copy/apple-touch-icon.png" />
-  <link rel="manifest" href="/copy/manifest.json" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
   <!-- build: webhook-auto-deploy 2026-05-23 v2 -->
 
   <!-- ═══ PWA & THEME ═══ -->
@@ -218,7 +218,6 @@
     .text-zinc-900 { color: #EAECEF !important; }
   </style>
 
-  <link rel="stylesheet" href="/copy/index.css">
 
   <!-- ═══ STRUCTURED DATA (JSON-LD) ═══ -->
   <script type="application/ld+json">
@@ -305,12 +304,13 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/copy/assets/js/index-DkOBfQdj.js"></script>
-  <link rel="modulepreload" crossorigin href="/copy/assets/js/dashboard-CZI4vaVV.js">
-  <link rel="modulepreload" crossorigin href="/copy/assets/js/vendor-vOxLAnsf.js">
-  <link rel="modulepreload" crossorigin href="/copy/assets/js/market-DoqinKXu.js">
-  <link rel="modulepreload" crossorigin href="/copy/assets/js/charting-BrGwxv_j.js">
-  <link rel="modulepreload" crossorigin href="/copy/assets/js/trading-PtZp_oH8.js">
+  <script type="module" crossorigin src="/assets/js/index-DtIRijkV.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/js/dashboard-WZpp2Gui.js">
+  <link rel="modulepreload" crossorigin href="/assets/js/vendor-rXCDSp0G.js">
+  <link rel="modulepreload" crossorigin href="/assets/js/market-DD_HSfzQ.js">
+  <link rel="modulepreload" crossorigin href="/assets/js/charting-C4jAt7iT.js">
+  <link rel="modulepreload" crossorigin href="/assets/js/trading-BeRNyRbU.js">
+  <link rel="stylesheet" crossorigin href="/assets/css/index-Dam86hTI.css">
 </head>
 
 <body class="bg-bn-body text-bn-text antialiased h-screen w-screen overflow-hidden selection:bg-bn-accent selection:text-bn-body font-sans">

@@ -1,0 +1,48 @@
+name: Inspect CopyToLive recovered routes
+
+on:
+  push:
+    paths:
+      - '.github/workflows/inspect-copy-routes.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract Backtest and trading route clues
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== BACKTEST CONTEXT ==='
+          python3 - <<'PY'
+          import re, pathlib
+          for p in pathlib.Path('assets/js').glob('*.js'):
+              try: s=p.read_text(errors='ignore')
+              except: continue
+              low=s.lower()
+              if 'backtest' not in low: continue
+              print('\nFILE',p)
+              seen=set()
+              for m in re.finditer('backtest',low):
+                  x=s[max(0,m.start()-180):m.end()+260].replace('\n',' ')
+                  if x in seen: continue
+                  seen.add(x)
+                  print(x[:500])
+                  if len(seen)>=30: break
+          PY
+
+          echo '=== ROUTE-LIKE STRINGS ==='
+          python3 - <<'PY'
+          import re,pathlib
+          pats=set()
+          for p in pathlib.Path('assets/js').glob('*.js'):
+              s=p.read_text(errors='ignore')
+              for x in re.findall(r'["\'`](/[^"\'`\s]{1,100})["\'`]',s):
+                  if any(k in x.lower() for k in ['backtest','trading','screener','fundamental','dashboard']): pats.add(x)
+          for x in sorted(pats): print(x)
+          PY

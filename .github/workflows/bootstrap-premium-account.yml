@@ -1,0 +1,91 @@
+name: Bootstrap CopyToLive Premium Account
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bootstrap-premium-account.yml'
+permissions:
+  contents: read
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create account and activate Pro access
+        shell: bash
+        env:
+          ACCOUNT_EMAIL: copytolive@gmail.com
+          ACCOUNT_NAME: CopyToLive
+        run: |
+          set -euo pipefail
+          API="https://copytolive.com/api"
+          WORK="$(mktemp -d)"
+          trap 'rm -rf "$WORK"' EXIT
+
+          # Generate a strong one-time password only inside the runner. Never print it.
+          PW="$(openssl rand -base64 48 | tr -d '\n' | tr '/+' '_-')"
+          export PW ACCOUNT_EMAIL ACCOUNT_NAME
+          node - <<'NODE' > "$WORK/register.json"
+          const fs = require('fs');
+          fs.writeFileSync('/dev/stdout', JSON.stringify({
+            name: process.env.ACCOUNT_NAME,
+            email: process.env.ACCOUNT_EMAIL,
+            password: process.env.PW
+          }));
+          NODE
+
+          REG_CODE="$(curl -sS -o "$WORK/register.out" -w '%{http_code}' \
+            -X POST "$API/auth/register" \
+            -H 'Content-Type: application/json' \
+            --data-binary @"$WORK/register.json")"
+
+          TOKEN=""
+          if [[ "$REG_CODE" =~ ^2 ]]; then
+            TOKEN="$(node -e "const x=require(process.argv[1]); process.stdout.write(x.accessToken||x.token||'')" "$WORK/register.out")"
+            echo "ACCOUNT_CREATE=CREATED"
+          else
+            echo "ACCOUNT_CREATE=EXISTS_OR_REJECTED HTTP_${REG_CODE}"
+          fi
+
+          if [ -n "$TOKEN" ]; then
+            TRIAL_CODE="$(curl -sS -o "$WORK/trial.out" -w '%{http_code}' \
+              -X POST "$API/subscription/trial" \
+              -H "Authorization: Bearer $TOKEN" \
+              -H 'Content-Type: application/json')"
+            echo "PRO_ACTIVATION_HTTP=$TRIAL_CODE"
+
+            ME_CODE="$(curl -sS -o "$WORK/me.out" -w '%{http_code}' \
+              "$API/auth/me" -H "Authorization: Bearer $TOKEN")"
+            echo "ACCOUNT_VERIFY_HTTP=$ME_CODE"
+            if [[ "$ME_CODE" =~ ^2 ]]; then
+              node - "$WORK/me.out" <<'NODE'
+          const fs=require('fs');
+          const p=process.argv[2];
+          const x=JSON.parse(fs.readFileSync(p,'utf8'));
+          const u=x.user||x;
+          console.log('ACCOUNT_EMAIL='+(u.email||''));
+          console.log('ACCOUNT_ROLE='+(u.role||''));
+          console.log('ACCOUNT_IS_PRO='+String(Boolean(u.isPro)));
+          console.log('ACCOUNT_IS_PREMIUM='+String(Boolean(u.isPremium)));
+          console.log('ACCOUNT_STATUS='+(u.status||''));
+          NODE
+            fi
+          fi
+
+          # Always request a reset link so the owner chooses the real password privately.
+          node - <<'NODE' > "$WORK/forgot.json"
+          process.stdout.write(JSON.stringify({email: process.env.ACCOUNT_EMAIL}));
+          NODE
+          RESET_CODE="$(curl -sS -o "$WORK/forgot.out" -w '%{http_code}' \
+            -X POST "$API/auth/forgot-password" \
+            -H 'Content-Type: application/json' \
+            --data-binary @"$WORK/forgot.json")"
+          echo "PASSWORD_SETUP_EMAIL_HTTP=$RESET_CODE"
+
+          if [[ "$REG_CODE" =~ ^2 ]] && [[ "${TRIAL_CODE:-000}" =~ ^2 ]] && [[ "$ME_CODE" =~ ^2 ]]; then
+            echo "BOOTSTRAP_RESULT=PASS"
+          elif [[ ! "$REG_CODE" =~ ^2 ]]; then
+            echo "BOOTSTRAP_RESULT=ACCOUNT_ALREADY_EXISTS_OR_REGISTER_REJECTED"
+          else
+            echo "BOOTSTRAP_RESULT=PARTIAL"
+            exit 1
+          fi

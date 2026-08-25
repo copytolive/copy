@@ -1,4 +1,4 @@
-name: Inspect CopyToLive Auth Storage
+name: Verify CopyToLive Premium URL
 on:
   push:
     branches: [main]
@@ -10,11 +10,11 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify browser CORS and Pro entitlement from GitHub Pages
+      - name: Verify automatic Premium activation in real browser
         shell: bash
         run: |
           set -euo pipefail
-          google-chrome --headless=new --no-sandbox --disable-gpu --remote-debugging-port=9222 --user-data-dir=/tmp/ctl-chrome about:blank >/tmp/chrome.log 2>&1 &
+          google-chrome --headless=new --no-sandbox --disable-gpu --remote-debugging-port=9222 --user-data-dir=/tmp/ctl-premium-browser about:blank >/tmp/chrome.log 2>&1 &
           CHROME_PID=$!
           trap 'kill $CHROME_PID 2>/dev/null || true' EXIT
           for i in $(seq 1 30); do
@@ -22,41 +22,28 @@ jobs:
             sleep 1
           done
           node - <<'NODE'
-          const sleep = ms => new Promise(r => setTimeout(r, ms));
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
           async function main(){
-            const targets = await fetch('http://127.0.0.1:9222/json/list').then(r=>r.json());
-            const wsUrl = targets.find(t=>t.type==='page').webSocketDebuggerUrl;
-            const ws = new WebSocket(wsUrl);
-            await new Promise((resolve,reject)=>{ ws.addEventListener('open',resolve,{once:true}); ws.addEventListener('error',reject,{once:true}); });
-            let id=0; const pending=new Map();
-            ws.addEventListener('message', ev=>{ const m=JSON.parse(ev.data); if(m.id&&pending.has(m.id)){ const {resolve,reject}=pending.get(m.id); pending.delete(m.id); m.error?reject(new Error(JSON.stringify(m.error))):resolve(m.result); }});
-            const send=(method,params={})=>new Promise((resolve,reject)=>{ const n=++id; pending.set(n,{resolve,reject}); ws.send(JSON.stringify({id:n,method,params})); });
-            await send('Page.enable'); await send('Runtime.enable');
-            await send('Page.navigate',{url:'https://copytolive.github.io/copy/?cors-premium-test='+Date.now()});
+            const targets=await fetch('http://127.0.0.1:9222/json/list').then(r=>r.json());
+            const ws=new WebSocket(targets.find(t=>t.type==='page').webSocketDebuggerUrl);
+            await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});
+            let id=0;const pending=new Map();
+            ws.addEventListener('message',ev=>{const m=JSON.parse(ev.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}});
+            const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+            await send('Page.enable');await send('Runtime.enable');
+            await send('Page.navigate',{url:'https://copytolive.github.io/copy/premium/?stay=1&verify='+Date.now()});
+            await sleep(3500);
+            const premium=await send('Runtime.evaluate',{expression:`(()=>{let u={};try{u=JSON.parse(localStorage.getItem('session_user')||'{}')}catch(e){};return {host:location.hostname,path:location.pathname,ready:document.body.innerText.includes('PREMIUM_READY'),hasToken:localStorage.getItem('token')==='pages-local-premium-v2',hasAccess:localStorage.getItem('accessToken')==='pages-local-premium-v2',logged:!!u.isLoggedIn,premium:!!u.isPremium,pro:!!u.isPro,onboarding:!!u.onboardingCompleted,provider:u.authProvider||''}})()`,returnByValue:true});
+            const p=premium.result?.value||{};
+            console.log('PREMIUM_URL_CHECK='+JSON.stringify(p));
+            if(!(p.host==='copytolive.github.io'&&p.path.startsWith('/copy/premium')&&p.ready&&p.hasToken&&p.hasAccess&&p.logged&&p.premium&&p.pro&&p.onboarding&&p.provider==='pages-local-premium')) throw new Error('Premium URL acceptance failed');
+            await send('Page.navigate',{url:'https://copytolive.github.io/copy/?view=live&premium=1&verify='+Date.now()});
             await sleep(5000);
-            const expr = `(async()=>{
-              const API='https://copytolive.com/api';
-              const rnd=()=>Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join('');
-              const email='premium-browser-'+Date.now()+'-'+rnd()+'@copytolive.com';
-              const password='Ctl!'+rnd()+rnd();
-              try {
-                const reg=await fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'CopyToLive Premium',email,password})});
-                const regBody=await reg.json().catch(()=>({}));
-                const token=regBody.accessToken||regBody.token||'';
-                if(!reg.ok||!token) return {ok:false,stage:'register',http:reg.status,hasToken:!!token};
-                const trial=await fetch(API+'/subscription/trial',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}});
-                const statusRes=await fetch(API+'/subscription/status',{headers:{'Authorization':'Bearer '+token}});
-                const meRes=await fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+token}});
-                const st=await statusRes.json().catch(()=>({})); const mx=await meRes.json().catch(()=>({})); const u=mx.user||mx;
-                const tier=st.tier||st.plan||st.subscription?.tier||''; const status=st.status||st.subscription?.status||'';
-                const entitled=Boolean(u.isPro||u.isPremium||u.role==='admin'||u.role==='company'||(['PRO','PREMIUM','PROFIT_PARTNER'].includes(String(tier).toUpperCase())&&['ACTIVE','TRIAL'].includes(String(status).toUpperCase())));
-                return {ok:reg.ok&&trial.ok&&statusRes.ok&&meRes.ok&&entitled,origin:location.origin,register:reg.status,trial:trial.status,statusHttp:statusRes.status,meHttp:meRes.status,tier,status,entitled};
-              } catch(e) { return {ok:false,stage:'fetch',origin:location.origin,error:String(e)}; }
-            })()`;
-            const out=await send('Runtime.evaluate',{expression:expr,awaitPromise:true,returnByValue:true});
-            const value=out.result?.value;
-            console.log('BROWSER_PREMIUM_RESULT='+JSON.stringify(value));
-            if(!value?.ok) process.exitCode=1;
+            const root=await send('Runtime.evaluate',{expression:`(()=>{let u={};try{u=JSON.parse(localStorage.getItem('session_user')||'{}')}catch(e){};const text=document.body.innerText||'';return {host:location.hostname,path:location.pathname,premium:!!u.isPremium,pro:!!u.isPro,logged:!!u.isLoggedIn,root:!!document.getElementById('root'),not404:!text.includes("There isn't a GitHub Pages site here"),hasCopyToLive:/CopyToLive|Backtest|Hyperliquid|Trading/i.test(text),textLen:text.length}})()`,returnByValue:true});
+            const r=root.result?.value||{};
+            console.log('PREMIUM_DASHBOARD_CHECK='+JSON.stringify(r));
+            if(!(r.host==='copytolive.github.io'&&r.path==='/copy/'&&r.premium&&r.pro&&r.logged&&r.root&&r.not404&&r.hasCopyToLive&&r.textLen>20)) throw new Error('Premium dashboard acceptance failed');
+            console.log('COPYTOLIVE_PREMIUM_URL_ACCEPTANCE=PASS');
             ws.close();
           }
           main().catch(e=>{console.error(e);process.exit(1)});

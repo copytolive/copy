@@ -17,8 +17,8 @@ jobs:
           API="https://copytolive.com/api"
           WORK="$(mktemp -d)"
           trap 'rm -rf "$WORK"' EXIT
-          RAND="$(openssl rand -hex 5)"
-          EMAIL="copytolive+auto-${GITHUB_RUN_ID}-${RAND}@gmail.com"
+          RAND="$(openssl rand -hex 8)"
+          EMAIL="premium-${GITHUB_RUN_ID}-${RAND}@copytolive.com"
           PW="$(openssl rand -base64 42 | tr -d '\n' | tr '/+' '_-')"
           export EMAIL PW
           node - <<'NODE' > "$WORK/register.json"

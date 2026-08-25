@@ -1,0 +1,42 @@
+name: Capture CopyToLive Pages visual parity snapshot
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/visual-parity-snapshot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Capture live GitHub Pages viewport
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          echo "Using $CHROME"
+          "$CHROME" \
+            --headless=new \
+            --no-sandbox \
+            --disable-dev-shm-usage \
+            --disable-gpu \
+            --hide-scrollbars \
+            --window-size=2048,1180 \
+            --virtual-time-budget=12000 \
+            --screenshot=copy-pages-live.png \
+            'https://copytolive.github.io/copy/?visual=parity'
+          test -s copy-pages-live.png
+          file copy-pages-live.png
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: copy-pages-live-visual
+          path: copy-pages-live.png
+          if-no-files-found: error
+          retention-days: 2

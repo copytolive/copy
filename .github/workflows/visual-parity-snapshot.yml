@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
 
+# Browser acceptance checkpoint: exact production bundles restored.
 jobs:
   capture:
     runs-on: ubuntu-latest
@@ -43,7 +44,7 @@ jobs:
           ws.onmessage=ev=>{const msg=JSON.parse(ev.data);if(msg.id&&pending.has(msg.id)){const p=pending.get(msg.id);pending.delete(msg.id);msg.error?p.reject(new Error(`${p.method}: ${JSON.stringify(msg.error)}`)):p.resolve(msg.result);return;}if(msg.method==='Runtime.exceptionThrown')events.push({type:'exception',data:msg.params.exceptionDetails});if(msg.method==='Runtime.consoleAPICalled')events.push({type:'console',data:msg.params});if(msg.method==='Log.entryAdded')events.push({type:'log',data:msg.params.entry});if(msg.method==='Network.loadingFailed')networkFailures.push(msg.params);};
           await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject;});
           await send('Runtime.enable'); await send('Log.enable'); await send('Page.enable'); await send('Network.enable');
-          await send('Page.navigate',{url:'https://copytolive.github.io/copy/?verify=production-bundle'});
+          await send('Page.navigate',{url:'https://copytolive.github.io/copy/?verify=production-bundle-final'});
           await new Promise(r=>setTimeout(r,15000));
           const res=await send('Runtime.evaluate',{expression:`JSON.stringify({href:location.href,title:document.title,readyState:document.readyState,rootExists:!!document.getElementById('root'),rootLength:document.getElementById('root')?.innerHTML.length||0,rootText:(document.getElementById('root')?.innerText||'').slice(0,1500),bodyText:document.body.innerText.slice(0,2000),scripts:Array.from(document.scripts).map(s=>s.src||'[inline]').slice(-20)})`,returnByValue:true});
           const state=JSON.parse(res.result.value); const exceptions=events.filter(e=>e.type==='exception');
@@ -65,7 +66,7 @@ jobs:
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
           "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --hide-scrollbars \
             --window-size=2048,1180 --virtual-time-budget=15000 \
-            --screenshot=copy-pages-live.png 'https://copytolive.github.io/copy/?visual=final'
+            --screenshot=copy-pages-live.png 'https://copytolive.github.io/copy/?visual=final-bundle'
           test -s copy-pages-live.png
           file copy-pages-live.png
 

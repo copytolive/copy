@@ -28,23 +28,8 @@ jobs:
             local tmp="recovered/probes/${name}.tmp"
             local hdr="recovered/probes/${name}.headers.txt"
             echo "PROBE $url"
-            if curl -L --fail --silent --show-error \
-              --connect-timeout 15 --max-time 90 \
-              -D "$hdr" -o "$tmp" "$url"; then
-              if python3 - "$tmp" <<'PY'
-import json, os, sys
-p=sys.argv[1]
-if os.path.getsize(p) < 100:
-    raise SystemExit(2)
-with open(p, 'rb') as f:
-    raw=f.read()
-try:
-    json.loads(raw)
-except Exception:
-    raise SystemExit(3)
-print('VALID_JSON', os.path.getsize(p))
-PY
-              then
+            if curl -L --fail --silent --show-error --connect-timeout 15 --max-time 90 -D "$hdr" -o "$tmp" "$url"; then
+              if python3 -c 'import json,os,sys; p=sys.argv[1]; assert os.path.getsize(p)>=100; json.load(open(p,"rb")); print("VALID_JSON",os.path.getsize(p))' "$tmp"; then
                 mv "$tmp" "recovered/${name}.json"
                 echo "FOUND ${name} $url"
               else

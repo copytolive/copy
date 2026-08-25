@@ -1,0 +1,45 @@
+name: Verify Automatic Premium URL
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-premium-url.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Browser acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          google-chrome --headless=new --no-sandbox --disable-gpu --remote-debugging-port=9222 --user-data-dir=/tmp/ctl-premium-verify about:blank >/tmp/chrome.log 2>&1 &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:9222/json/version >/dev/null && break || true; sleep 1; done
+          node - <<'NODE'
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function main(){
+            const targets=await fetch('http://127.0.0.1:9222/json/list').then(r=>r.json());
+            const ws=new WebSocket(targets.find(t=>t.type==='page').webSocketDebuggerUrl);
+            await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});
+            let id=0;const pending=new Map();
+            ws.addEventListener('message',ev=>{const m=JSON.parse(ev.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}});
+            const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+            await send('Page.enable');await send('Runtime.enable');
+            await send('Page.navigate',{url:'https://copytolive.github.io/copy/premium/?stay=1&verify='+Date.now()});
+            await sleep(3000);
+            let out=await send('Runtime.evaluate',{expression:`(()=>{let u={};try{u=JSON.parse(localStorage.getItem('session_user')||'{}')}catch(e){};return {ready:document.body.innerText.includes('PREMIUM_READY'),token:localStorage.getItem('token')==='pages-local-premium-v2',access:localStorage.getItem('accessToken')==='pages-local-premium-v2',logged:!!u.isLoggedIn,premium:!!u.isPremium,pro:!!u.isPro,provider:u.authProvider||''}})()`,returnByValue:true});
+            const a=out.result?.value||{}; console.log('URL='+JSON.stringify(a));
+            if(!(a.ready&&a.token&&a.access&&a.logged&&a.premium&&a.pro&&a.provider==='pages-local-premium')) throw new Error('URL activation failed');
+            await send('Page.navigate',{url:'https://copytolive.github.io/copy/?view=live&premium=1&verify='+Date.now()});
+            await sleep(5000);
+            out=await send('Runtime.evaluate',{expression:`(()=>{let u={};try{u=JSON.parse(localStorage.getItem('session_user')||'{}')}catch(e){};const t=document.body.innerText||'';return {logged:!!u.isLoggedIn,premium:!!u.isPremium,pro:!!u.isPro,provider:u.authProvider||'',not404:!t.includes("There isn't a GitHub Pages site here"),root:!!document.getElementById('root'),textLen:t.length}})()`,returnByValue:true});
+            const b=out.result?.value||{}; console.log('DASHBOARD='+JSON.stringify(b));
+            if(!(b.logged&&b.premium&&b.pro&&b.provider==='pages-local-premium'&&b.not404&&b.root&&b.textLen>20)) throw new Error('Dashboard session failed');
+            console.log('COPYTOLIVE_PREMIUM_URL_ACCEPTANCE=PASS');
+            ws.close();
+          }
+          main().catch(e=>{console.error(e);process.exit(1)});
+          NODE

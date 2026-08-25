@@ -11,38 +11,33 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     steps:
-      - uses: actions/checkout@v4
-      - name: Extract Backtest and trading route clues
+      - name: Verify production /trading with browser
         shell: bash
         run: |
           set -euo pipefail
-          echo '=== BACKTEST CONTEXT ==='
-          python3 - <<'PY'
-          import re, pathlib
-          for p in pathlib.Path('assets/js').glob('*.js'):
-              try: s=p.read_text(errors='ignore')
-              except: continue
-              low=s.lower()
-              if 'backtest' not in low: continue
-              print('\nFILE',p)
-              seen=set()
-              for m in re.finditer('backtest',low):
-                  x=s[max(0,m.start()-180):m.end()+260].replace('\n',' ')
-                  if x in seen: continue
-                  seen.add(x)
-                  print(x[:500])
-                  if len(seen)>=30: break
-          PY
-
-          echo '=== ROUTE-LIKE STRINGS ==='
-          python3 - <<'PY'
-          import re,pathlib
-          pats=set()
-          for p in pathlib.Path('assets/js').glob('*.js'):
-              s=p.read_text(errors='ignore')
-              for x in re.findall(r'["\'`](/[^"\'`\s]{1,100})["\'`]',s):
-                  if any(k in x.lower() for k in ['backtest','trading','screener','fundamental','dashboard']): pats.add(x)
-          for x in sorted(pats): print(x)
-          PY
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu \
+            --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 about:blank \
+            >/tmp/chrome.out 2>/tmp/chrome.err &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:9222/json/list >/tmp/pages.json && break || sleep .5; done
+          cat >/tmp/cdp.mjs <<'NODE'
+          import fs from 'node:fs';
+          const pages=JSON.parse(fs.readFileSync('/tmp/pages.json','utf8'));
+          const t=pages.find(x=>x.type==='page'); const ws=new WebSocket(t.webSocketDebuggerUrl);
+          let seq=0; const pending=new Map(); const exceptions=[];
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);return;}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params.exceptionDetails);};
+          await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j}); await send('Runtime.enable'); await send('Page.enable');
+          await send('Page.navigate',{url:'https://copytolive.com/trading'}); await new Promise(r=>setTimeout(r,15000));
+          const x=await send('Runtime.evaluate',{expression:`JSON.stringify({href:location.href,title:document.title,rootLength:document.getElementById('root')?.innerHTML.length||0,text:(document.getElementById('root')?.innerText||'').slice(0,2500)})`,returnByValue:true});
+          const state=JSON.parse(x.result.value); console.log('PRODUCTION_TRADING_STATE',JSON.stringify(state,null,2));
+          for(const e of exceptions) console.log('EXCEPTION',e.text,e.exception?.description||'',e.url||'');
+          if(state.rootLength<100) throw new Error('production trading root empty');
+          ws.close();
+          NODE
+          node /tmp/cdp.mjs

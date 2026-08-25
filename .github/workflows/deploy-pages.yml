@@ -27,3 +27,34 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify live CopyToLive Pages and Backtest parity data
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://copytolive.github.io/copy"
+          mkdir -p /tmp/copy-pages-verify
+
+          ok=0
+          for attempt in $(seq 1 18); do
+            echo "Acceptance attempt ${attempt}/18"
+            if curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/index.html \
+              && curl -LfsS --connect-timeout 10 --max-time 60 "$BASE/data/backtest_farm_1.json?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/farm1.json \
+              && curl -LfsS --connect-timeout 10 --max-time 60 "$BASE/data/backtest_farm_2.json?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/farm2.json \
+              && curl -LfsS --connect-timeout 10 --max-time 60 "$BASE/data/backtest_summary.json?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/summary.json \
+              && curl -LfsS --connect-timeout 10 --max-time 60 "$BASE/data/backtest_local.json?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/local.json \
+              && python3 -c 'import json; a=json.load(open("/tmp/copy-pages-verify/farm1.json")); b=json.load(open("/tmp/copy-pages-verify/farm2.json")); s=json.load(open("/tmp/copy-pages-verify/summary.json")); l=json.load(open("/tmp/copy-pages-verify/local.json")); assert len(a)+len(b)==118,(len(a),len(b)); assert len(s)==250,len(s); assert len(l)==650,len(l); r=a[0]; assert r["title"]=="ND MTF LINREG_SLP — GOLD"; assert r["totalTrades"]==319; assert round(float(r["profitFactor"]),2)==1.84; assert round(float(r["netProfit"]),1)==31516.8; print("LIVE_DATA_PASS",len(a),len(b),len(s),len(l),r["title"])'; then
+              ok=1
+              break
+            fi
+            sleep 5
+          done
+
+          test "$ok" = 1
+          grep -q '<div id="root"></div>' /tmp/copy-pages-verify/index.html
+          echo "LIVE_ROOT_BYTES=$(wc -c < /tmp/copy-pages-verify/index.html)"
+          echo "LIVE_FARM1_BYTES=$(wc -c < /tmp/copy-pages-verify/farm1.json)"
+          echo "LIVE_FARM2_BYTES=$(wc -c < /tmp/copy-pages-verify/farm2.json)"
+          echo "LIVE_SUMMARY_BYTES=$(wc -c < /tmp/copy-pages-verify/summary.json)"
+          echo "LIVE_LOCAL_BYTES=$(wc -c < /tmp/copy-pages-verify/local.json)"
+          echo "COPY_PAGES_ACCEPTANCE=PASS"

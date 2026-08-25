@@ -10,49 +10,54 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Validate register to trial to premium status flow
+      - name: Verify browser CORS and Pro entitlement from GitHub Pages
         shell: bash
         run: |
           set -euo pipefail
-          API="https://copytolive.com/api"
-          WORK="$(mktemp -d)"
-          trap 'rm -rf "$WORK"' EXIT
-          RAND="$(openssl rand -hex 8)"
-          EMAIL="premium-${GITHUB_RUN_ID}-${RAND}@copytolive.com"
-          PW="$(openssl rand -base64 42 | tr -d '\n' | tr '/+' '_-')"
-          export EMAIL PW
-          node - <<'NODE' > "$WORK/register.json"
-          process.stdout.write(JSON.stringify({name:'CopyToLive Premium',email:process.env.EMAIL,password:process.env.PW}));
-          NODE
-          REG="$(curl -sS -o "$WORK/reg.out" -w '%{http_code}' -X POST "$API/auth/register" -H 'Content-Type: application/json' --data-binary @"$WORK/register.json")"
-          echo "REGISTER_HTTP=$REG"
-          [[ "$REG" =~ ^2 ]] || { head -c 500 "$WORK/reg.out"; exit 1; }
-          TOKEN="$(node - "$WORK/reg.out" <<'NODE'
-          const fs=require('fs'); const x=JSON.parse(fs.readFileSync(process.argv[2],'utf8')); process.stdout.write(x.accessToken||x.token||'');
-          NODE
-          )"
-          test -n "$TOKEN"
-          TRIAL="$(curl -sS -o "$WORK/trial.out" -w '%{http_code}' -X POST "$API/subscription/trial" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json')"
-          echo "TRIAL_HTTP=$TRIAL"
-          [[ "$TRIAL" =~ ^2 ]] || { head -c 500 "$WORK/trial.out"; exit 1; }
-          STATUS="$(curl -sS -o "$WORK/status.out" -w '%{http_code}' "$API/subscription/status" -H "Authorization: Bearer $TOKEN")"
-          ME="$(curl -sS -o "$WORK/me.out" -w '%{http_code}' "$API/auth/me" -H "Authorization: Bearer $TOKEN")"
-          echo "STATUS_HTTP=$STATUS"
-          echo "AUTH_ME_HTTP=$ME"
-          [[ "$STATUS" =~ ^2 ]] || exit 1
-          [[ "$ME" =~ ^2 ]] || exit 1
-          node - "$WORK/status.out" "$WORK/me.out" <<'NODE'
-          const fs=require('fs');
-          const st=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-          const mx=JSON.parse(fs.readFileSync(process.argv[3],'utf8'));
-          const u=mx.user||mx;
-          const tier=st.tier||st.plan||st.subscription?.tier||'';
-          const status=st.status||st.subscription?.status||'';
-          const entitled=Boolean(u.isPro||u.isPremium||u.role==='admin'||u.role==='company'||(['PRO','PREMIUM','PROFIT_PARTNER'].includes(String(tier).toUpperCase())&&['ACTIVE','TRIAL'].includes(String(status).toUpperCase())));
-          console.log('SUBSCRIPTION_TIER='+tier);
-          console.log('SUBSCRIPTION_STATUS='+status);
-          console.log('AUTH_IS_PRO='+Boolean(u.isPro));
-          console.log('AUTH_IS_PREMIUM='+Boolean(u.isPremium));
-          console.log('PREMIUM_ENTITLED='+entitled);
-          if(!entitled) process.exit(2);
+          google-chrome --headless=new --no-sandbox --disable-gpu --remote-debugging-port=9222 --user-data-dir=/tmp/ctl-chrome about:blank >/tmp/chrome.log 2>&1 &
+          CHROME_PID=$!
+          trap 'kill $CHROME_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:9222/json/version >/dev/null && break
+            sleep 1
+          done
+          node - <<'NODE'
+          const sleep = ms => new Promise(r => setTimeout(r, ms));
+          async function main(){
+            const targets = await fetch('http://127.0.0.1:9222/json/list').then(r=>r.json());
+            const wsUrl = targets.find(t=>t.type==='page').webSocketDebuggerUrl;
+            const ws = new WebSocket(wsUrl);
+            await new Promise((resolve,reject)=>{ ws.addEventListener('open',resolve,{once:true}); ws.addEventListener('error',reject,{once:true}); });
+            let id=0; const pending=new Map();
+            ws.addEventListener('message', ev=>{ const m=JSON.parse(ev.data); if(m.id&&pending.has(m.id)){ const {resolve,reject}=pending.get(m.id); pending.delete(m.id); m.error?reject(new Error(JSON.stringify(m.error))):resolve(m.result); }});
+            const send=(method,params={})=>new Promise((resolve,reject)=>{ const n=++id; pending.set(n,{resolve,reject}); ws.send(JSON.stringify({id:n,method,params})); });
+            await send('Page.enable'); await send('Runtime.enable');
+            await send('Page.navigate',{url:'https://copytolive.github.io/copy/?cors-premium-test='+Date.now()});
+            await sleep(5000);
+            const expr = `(async()=>{
+              const API='https://copytolive.com/api';
+              const rnd=()=>Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join('');
+              const email='premium-browser-'+Date.now()+'-'+rnd()+'@copytolive.com';
+              const password='Ctl!'+rnd()+rnd();
+              try {
+                const reg=await fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'CopyToLive Premium',email,password})});
+                const regBody=await reg.json().catch(()=>({}));
+                const token=regBody.accessToken||regBody.token||'';
+                if(!reg.ok||!token) return {ok:false,stage:'register',http:reg.status,hasToken:!!token};
+                const trial=await fetch(API+'/subscription/trial',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}});
+                const statusRes=await fetch(API+'/subscription/status',{headers:{'Authorization':'Bearer '+token}});
+                const meRes=await fetch(API+'/auth/me',{headers:{'Authorization':'Bearer '+token}});
+                const st=await statusRes.json().catch(()=>({})); const mx=await meRes.json().catch(()=>({})); const u=mx.user||mx;
+                const tier=st.tier||st.plan||st.subscription?.tier||''; const status=st.status||st.subscription?.status||'';
+                const entitled=Boolean(u.isPro||u.isPremium||u.role==='admin'||u.role==='company'||(['PRO','PREMIUM','PROFIT_PARTNER'].includes(String(tier).toUpperCase())&&['ACTIVE','TRIAL'].includes(String(status).toUpperCase())));
+                return {ok:reg.ok&&trial.ok&&statusRes.ok&&meRes.ok&&entitled,origin:location.origin,register:reg.status,trial:trial.status,statusHttp:statusRes.status,meHttp:meRes.status,tier,status,entitled};
+              } catch(e) { return {ok:false,stage:'fetch',origin:location.origin,error:String(e)}; }
+            })()`;
+            const out=await send('Runtime.evaluate',{expression:expr,awaitPromise:true,returnByValue:true});
+            const value=out.result?.value;
+            console.log('BROWSER_PREMIUM_RESULT='+JSON.stringify(value));
+            if(!value?.ok) process.exitCode=1;
+            ws.close();
+          }
+          main().catch(e=>{console.error(e);process.exit(1)});
           NODE

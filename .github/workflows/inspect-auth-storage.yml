@@ -10,26 +10,49 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Inspect auth API and browser storage contract
+      - name: Validate register to trial to premium status flow
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          for fn in ['assets/js/dashboard-WZpp2Gui.js','assets/js/index-DNfwXZJH.js']:
-              p=Path(fn)
-              s=p.read_text(errors='replace')
-              print('===',fn,'bytes',len(s),'===')
-              for needle in ['/auth/login','/auth/register','/auth/me','accessToken','Authorization','Bearer','localStorage.setItem','localStorage.getItem','isPremium','isPro']:
-                  print('\n--',needle,'count',s.count(needle),'--')
-                  start=0
-                  for _ in range(min(s.count(needle),20)):
-                      i=s.find(needle,start)
-                      if i<0: break
-                      print(s[max(0,i-500):min(len(s),i+900)].replace('\n',' '))
-                      start=i+len(needle)
-              keys=sorted(set(re.findall(r'localStorage\.(?:getItem|setItem|removeItem)\(["\']([^"\']+)',s)))
-              print('\nLOCAL_STORAGE_KEYS',keys)
-          PY
+          API="https://copytolive.com/api"
+          WORK="$(mktemp -d)"
+          trap 'rm -rf "$WORK"' EXIT
+          RAND="$(openssl rand -hex 5)"
+          EMAIL="copytolive+auto-${GITHUB_RUN_ID}-${RAND}@gmail.com"
+          PW="$(openssl rand -base64 42 | tr -d '\n' | tr '/+' '_-')"
+          export EMAIL PW
+          node - <<'NODE' > "$WORK/register.json"
+          process.stdout.write(JSON.stringify({name:'CopyToLive Premium',email:process.env.EMAIL,password:process.env.PW}));
+          NODE
+          REG="$(curl -sS -o "$WORK/reg.out" -w '%{http_code}' -X POST "$API/auth/register" -H 'Content-Type: application/json' --data-binary @"$WORK/register.json")"
+          echo "REGISTER_HTTP=$REG"
+          [[ "$REG" =~ ^2 ]] || { head -c 500 "$WORK/reg.out"; exit 1; }
+          TOKEN="$(node - "$WORK/reg.out" <<'NODE'
+          const fs=require('fs'); const x=JSON.parse(fs.readFileSync(process.argv[2],'utf8')); process.stdout.write(x.accessToken||x.token||'');
+          NODE
+          )"
+          test -n "$TOKEN"
+          TRIAL="$(curl -sS -o "$WORK/trial.out" -w '%{http_code}' -X POST "$API/subscription/trial" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json')"
+          echo "TRIAL_HTTP=$TRIAL"
+          [[ "$TRIAL" =~ ^2 ]] || { head -c 500 "$WORK/trial.out"; exit 1; }
+          STATUS="$(curl -sS -o "$WORK/status.out" -w '%{http_code}' "$API/subscription/status" -H "Authorization: Bearer $TOKEN")"
+          ME="$(curl -sS -o "$WORK/me.out" -w '%{http_code}' "$API/auth/me" -H "Authorization: Bearer $TOKEN")"
+          echo "STATUS_HTTP=$STATUS"
+          echo "AUTH_ME_HTTP=$ME"
+          [[ "$STATUS" =~ ^2 ]] || exit 1
+          [[ "$ME" =~ ^2 ]] || exit 1
+          node - "$WORK/status.out" "$WORK/me.out" <<'NODE'
+          const fs=require('fs');
+          const st=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          const mx=JSON.parse(fs.readFileSync(process.argv[3],'utf8'));
+          const u=mx.user||mx;
+          const tier=st.tier||st.plan||st.subscription?.tier||'';
+          const status=st.status||st.subscription?.status||'';
+          const entitled=Boolean(u.isPro||u.isPremium||u.role==='admin'||u.role==='company'||(['PRO','PREMIUM','PROFIT_PARTNER'].includes(String(tier).toUpperCase())&&['ACTIVE','TRIAL'].includes(String(status).toUpperCase())));
+          console.log('SUBSCRIPTION_TIER='+tier);
+          console.log('SUBSCRIPTION_STATUS='+status);
+          console.log('AUTH_IS_PRO='+Boolean(u.isPro));
+          console.log('AUTH_IS_PREMIUM='+Boolean(u.isPremium));
+          console.log('PREMIUM_ENTITLED='+entitled);
+          if(!entitled) process.exit(2);
+          NODE

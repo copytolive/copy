@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var IS_PAGES = location.hostname === 'narzulalistiqlal.github.io' && location.pathname.indexOf('/copy/') === 0;
+  var IS_PAGES = location.hostname === 'copytolive.github.io' && location.pathname.indexOf('/copy/') === 0;
   if (!IS_PAGES) return;
 
   var HL_INFO = 'https://api.hyperliquid.xyz/info';
@@ -98,12 +98,7 @@
       var u = JSON.parse(localStorage.getItem('session_user') || 'null');
       if (u && u.email) candidates.push(localStorage.getItem('ot_wallet_' + u.email));
     } catch(e) {}
-    try {
-      for (var i=0;i<localStorage.length;i++) {
-        var k = localStorage.key(i) || '';
-        if (k.indexOf('ot_wallet_') === 0) candidates.push(localStorage.getItem(k));
-      }
-    } catch(e) {}
+    // Session isolation: never enumerate another Premium login's ot_wallet_* keys.
     for (var j=0;j<candidates.length;j++) if (validWallet(candidates[j])) return String(candidates[j]).toLowerCase();
     return '';
   }

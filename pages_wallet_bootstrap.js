@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var IS_PAGES = location.hostname === 'narzulalistiqlal.github.io' && location.pathname.indexOf('/copy/') === 0;
+  var IS_PAGES = location.hostname === 'copytolive.github.io' && location.pathname.indexOf('/copy/') === 0;
   if (!IS_PAGES) return;
 
   var loaded = false;

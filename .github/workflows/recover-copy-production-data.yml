@@ -7,7 +7,7 @@ on:
       - '.github/workflows/recover-copy-production-data.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   recover:
@@ -52,14 +52,35 @@ jobs:
           probe backtest_summary https://copytolive.com/data/backtest_summary.json
           probe backtest_local https://copytolive.com/data/backtest_local.json
 
-          echo '=== RECOVERED ==='
-          find recovered -maxdepth 1 -type f -name '*.json' -printf '%f %s bytes\n' | sort
-          test -n "$(find recovered -maxdepth 1 -type f -name '*.json' -print -quit)" || {
-            echo 'No valid JSON dataset recovered from public production paths.' >&2
-            exit 20
-          }
+          test -f recovered/backtest_farm_monolith.json
+          python3 -c 'import json; d=json.load(open("recovered/backtest_farm_monolith.json")); assert isinstance(d,list) and len(d)==118, len(d); print("FARM_OK",len(d))'
 
-      - name: Upload recovered production data
+      - name: Restore production datasets in Pages layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          python3 -c 'import json,pathlib,shutil; src=pathlib.Path("recovered/backtest_farm_monolith.json"); rows=json.load(src.open()); assert len(rows)==118; mid=(len(rows)+1)//2; out=pathlib.Path("data"); (out/"backtest_farm_1.json").write_text(json.dumps(rows[:mid],ensure_ascii=False,separators=(",",":"))+"\n"); (out/"backtest_farm_2.json").write_text(json.dumps(rows[mid:],ensure_ascii=False,separators=(",",":"))+"\n"); shutil.copy2(src,out/"backtest_farm.json"); [shutil.copy2(pathlib.Path("recovered")/n,out/n) for n in ("backtest_summary.json","backtest_local.json") if (pathlib.Path("recovered")/n).exists()]'
+          python3 -c 'import json; a=json.load(open("data/backtest_farm_1.json")); b=json.load(open("data/backtest_farm_2.json")); assert len(a)+len(b)==118; assert a[0]["totalTrades"]==319 and round(a[0]["profitFactor"],2)==1.84; print("SPLIT_OK",len(a),len(b),a[0]["title"])'
+          ls -lh data/backtest*.json
+
+      - name: Commit recovered production data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'copytolive-recovery-bot'
+          git config user.email 'copytolive-recovery-bot@users.noreply.github.com'
+          git add data/backtest_farm.json data/backtest_farm_1.json data/backtest_farm_2.json
+          test ! -f data/backtest_summary.json || git add data/backtest_summary.json
+          test ! -f data/backtest_local.json || git add data/backtest_local.json
+          if git diff --cached --quiet; then
+            echo 'Dataset already restored; no commit needed.'
+          else
+            git commit -m 'fix(pages): restore production Backtest datasets'
+            git push origin HEAD:main
+          fi
+
+      - name: Upload recovery evidence
         uses: actions/upload-artifact@v4
         with:
           name: copy-production-backtest-recovery

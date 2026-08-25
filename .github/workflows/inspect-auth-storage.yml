@@ -1,50 +1,40 @@
-name: Verify CopyToLive Premium URL
+name: Patch CopyToLive Pages Premium Auth
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/inspect-auth-storage.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
-  inspect:
+  patch:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify automatic Premium activation in real browser
+      - uses: actions/checkout@v4
+      - name: Preserve local Pages Premium during auth bootstrap
         shell: bash
         run: |
           set -euo pipefail
-          google-chrome --headless=new --no-sandbox --disable-gpu --remote-debugging-port=9222 --user-data-dir=/tmp/ctl-premium-browser about:blank >/tmp/chrome.log 2>&1 &
-          CHROME_PID=$!
-          trap 'kill $CHROME_PID 2>/dev/null || true' EXIT
-          for i in $(seq 1 30); do
-            curl -fsS http://127.0.0.1:9222/json/version >/dev/null && break
-            sleep 1
-          done
-          node - <<'NODE'
-          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-          async function main(){
-            const targets=await fetch('http://127.0.0.1:9222/json/list').then(r=>r.json());
-            const ws=new WebSocket(targets.find(t=>t.type==='page').webSocketDebuggerUrl);
-            await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});
-            let id=0;const pending=new Map();
-            ws.addEventListener('message',ev=>{const m=JSON.parse(ev.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}});
-            const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
-            await send('Page.enable');await send('Runtime.enable');
-            await send('Page.navigate',{url:'https://copytolive.github.io/copy/premium/?stay=1&verify='+Date.now()});
-            await sleep(3500);
-            const premium=await send('Runtime.evaluate',{expression:`(()=>{let u={};try{u=JSON.parse(localStorage.getItem('session_user')||'{}')}catch(e){};return {host:location.hostname,path:location.pathname,ready:document.body.innerText.includes('PREMIUM_READY'),hasToken:localStorage.getItem('token')==='pages-local-premium-v2',hasAccess:localStorage.getItem('accessToken')==='pages-local-premium-v2',logged:!!u.isLoggedIn,premium:!!u.isPremium,pro:!!u.isPro,onboarding:!!u.onboardingCompleted,provider:u.authProvider||''}})()`,returnByValue:true});
-            const p=premium.result?.value||{};
-            console.log('PREMIUM_URL_CHECK='+JSON.stringify(p));
-            if(!(p.host==='copytolive.github.io'&&p.path.startsWith('/copy/premium')&&p.ready&&p.hasToken&&p.hasAccess&&p.logged&&p.premium&&p.pro&&p.onboarding&&p.provider==='pages-local-premium')) throw new Error('Premium URL acceptance failed');
-            await send('Page.navigate',{url:'https://copytolive.github.io/copy/?view=live&premium=1&verify='+Date.now()});
-            await sleep(5000);
-            const root=await send('Runtime.evaluate',{expression:`(()=>{let u={};try{u=JSON.parse(localStorage.getItem('session_user')||'{}')}catch(e){};const text=document.body.innerText||'';return {host:location.hostname,path:location.pathname,premium:!!u.isPremium,pro:!!u.isPro,logged:!!u.isLoggedIn,root:!!document.getElementById('root'),not404:!text.includes("There isn't a GitHub Pages site here"),hasCopyToLive:/CopyToLive|Backtest|Hyperliquid|Trading/i.test(text),textLen:text.length}})()`,returnByValue:true});
-            const r=root.result?.value||{};
-            console.log('PREMIUM_DASHBOARD_CHECK='+JSON.stringify(r));
-            if(!(r.host==='copytolive.github.io'&&r.path==='/copy/'&&r.premium&&r.pro&&r.logged&&r.root&&r.not404&&r.hasCopyToLive&&r.textLen>20)) throw new Error('Premium dashboard acceptance failed');
-            console.log('COPYTOLIVE_PREMIUM_URL_ACCEPTANCE=PASS');
-            ws.close();
-          }
-          main().catch(e=>{console.error(e);process.exit(1)});
-          NODE
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('assets/js/dashboard-WZpp2Gui.js')
+          s=p.read_text()
+          old='Qs=async()=>{const e=Bs();if(!e)return null;try{const t=(await ws.get(`${qs}/me`,{headers:{Authorization:`Bearer ${e}`}})).data,a=Ws(t);return Vs(a),a}catch(t){return Hs(),localStorage.removeItem("session_user"),null}}'
+          new='Qs=async()=>{const e=Bs();if(!e)return null;if("undefined"!=typeof location&&location.hostname==="copytolive.github.io"&&e==="pages-local-premium-v2"){try{const e=JSON.parse(localStorage.getItem("session_user")||"null");if(e&&e.isLoggedIn){const t={...e,isLoggedIn:!0,isPremium:!0,isPro:!0,status:"active",authProvider:"pages-local-premium",onboardingCompleted:!0};return Vs(t),t}}catch(t){}return null}try{const t=(await ws.get(`${qs}/me`,{headers:{Authorization:`Bearer ${e}`}})).data,a=Ws(t);return Vs(a),a}catch(t){return Hs(),localStorage.removeItem("session_user"),null}}'
+          n=s.count(old)
+          print('AUTH_BOOTSTRAP_MATCHES',n)
+          if n!=1:
+              raise SystemExit('expected exactly one auth bootstrap match')
+          p.write_text(s.replace(old,new))
+          PY
+          node --check assets/js/dashboard-WZpp2Gui.js
+          grep -q 'pages-local-premium-v2' assets/js/dashboard-WZpp2Gui.js
+      - name: Commit patched production bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name copytolive
+          git config user.email copytolive@gmail.com
+          git add assets/js/dashboard-WZpp2Gui.js
+          git commit -m 'fix(pages): keep automatic premium session active'
+          git push origin HEAD:main

@@ -304,7 +304,27 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/copy/assets/js/index-DNfwXZJH.js"></script>
+  <script id="copy-pages-data-base-shim">
+(() => {
+  if (location.hostname !== 'copytolive.github.io') return;
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = (input, init) => {
+    try {
+      if (typeof input === 'string' && input.startsWith('/data/')) {
+        input = '/copy' + input;
+      } else if (input instanceof Request) {
+        const u = new URL(input.url);
+        if (u.origin === location.origin && u.pathname.startsWith('/data/')) {
+          const next = '/copy' + u.pathname + u.search + u.hash;
+          input = new Request(next, input);
+        }
+      }
+    } catch (_) {}
+    return originalFetch(input, init);
+  };
+})();
+</script>
+<script type="module" crossorigin src="/copy/assets/js/index-DNfwXZJH.js"></script>
   <link rel="modulepreload" crossorigin href="/copy/assets/js/dashboard-WZpp2Gui.js">
   <link rel="modulepreload" crossorigin href="/copy/assets/js/vendor-rXCDSp0G.js">
   <link rel="modulepreload" crossorigin href="/copy/assets/js/market-DD_HSfzQ.js">

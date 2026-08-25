@@ -1,0 +1,52 @@
+name: Fix CopyToLive Pages data base
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-pages-data-base.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inject GitHub Pages data base shim before app module
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          marker='<script type="module" crossorigin src="/copy/assets/js/index-DNfwXZJH.js"></script>'
+          if marker not in s:
+              raise SystemExit('Main production module marker not found')
+          shim='''<script id="copy-pages-data-base-shim">\n(() => {\n  if (location.hostname !== 'copytolive.github.io') return;\n  const originalFetch = window.fetch.bind(window);\n  window.fetch = (input, init) => {\n    try {\n      if (typeof input === 'string' && input.startsWith('/data/')) {\n        input = '/copy' + input;\n      } else if (input instanceof Request) {\n        const u = new URL(input.url);\n        if (u.origin === location.origin && u.pathname.startsWith('/data/')) {\n          const next = '/copy' + u.pathname + u.search + u.hash;\n          input = new Request(next, input);\n        }\n      }\n    } catch (_) {}\n    return originalFetch(input, init);\n  };\n})();\n</script>\n'''
+          if 'copy-pages-data-base-shim' not in s:
+              s=s.replace(marker,shim+marker,1)
+              p.write_text(s)
+              print('DATA_SHIM_INJECTED')
+          else:
+              print('DATA_SHIM_ALREADY_PRESENT')
+          PY
+          grep -q 'copy-pages-data-base-shim' index.html
+          grep -q "input = '/copy' + input" index.html
+
+      - name: Commit Pages data shim
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'copytolive-pages-bot'
+          git config user.email 'copytolive-pages-bot@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'Data shim already present.'
+          else
+            git commit -m 'fix(pages): resolve Backtest data under /copy/data'
+            git push origin HEAD:main
+          fi

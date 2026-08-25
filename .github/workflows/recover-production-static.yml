@@ -1,0 +1,57 @@
+name: Recover CopyToLive production static build
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/recover-production-static.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Fetch production HTML and asset manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p recovery
+          curl -LfsS --connect-timeout 15 --max-time 120 https://copytolive.com/ -o recovery/index-production.html
+          echo "PRODUCTION_HTML_BYTES=$(wc -c < recovery/index-production.html)"
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from urllib.parse import urljoin,urlparse
+          import json,pathlib
+          base='https://copytolive.com/'
+          html=pathlib.Path('recovery/index-production.html').read_text(errors='replace')
+          class P(HTMLParser):
+              def __init__(self): super().__init__(); self.urls=[]
+              def handle_starttag(self,tag,attrs):
+                  d=dict(attrs)
+                  for k in ('src','href'):
+                      if d.get(k): self.urls.append(d[k])
+          p=P(); p.feed(html)
+          urls=[]
+          for raw in p.urls:
+              u=urljoin(base,raw)
+              z=urlparse(u)
+              if z.scheme in ('http','https'):
+                  urls.append(u)
+          urls=list(dict.fromkeys(urls))
+          same=[u for u in urls if urlparse(u).netloc=='copytolive.com']
+          print('=== SAME ORIGIN ASSETS ===')
+          for u in same: print(u)
+          print('SAME_ORIGIN_COUNT',len(same))
+          print('ALL_ASSET_COUNT',len(urls))
+          pathlib.Path('recovery/assets.json').write_text(json.dumps({'all':urls,'same_origin':same},indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: copy-production-static-inspection
+          path: recovery/
+          if-no-files-found: error
+          retention-days: 2

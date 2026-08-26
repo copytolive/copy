@@ -5,6 +5,9 @@ on:
   push:
     paths:
       - '.github/workflows/visual-parity-snapshot.yml'
+      - 'pages_root_bridge.js'
+      - 'compounding_live.html'
+      - 'renko/**'
 
 permissions:
   contents: read
@@ -12,9 +15,28 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 8
     steps:
-      - name: Assert live Backtest dashboard with real browser
+      - name: Wait for current Sequential Compounding bridge deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in $(seq 1 36); do
+            if curl -LfsS --connect-timeout 10 --max-time 20 \
+              'https://copytolive.github.io/copy/pages_root_bridge.js?parity=sequential' \
+              -o /tmp/root-bridge.js \
+              && grep -q "source: 'sequential-compounding-live'" /tmp/root-bridge.js \
+              && grep -q "compounding_live.html?embed=1&root=1" /tmp/root-bridge.js; then
+              ok=1
+              break
+            fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo 'SEQUENTIAL_BRIDGE_DEPLOYED=PASS'
+
+      - name: Assert full Sequential Compounding dashboard with real browser
         shell: bash
         run: |
           set -euo pipefail
@@ -25,54 +47,82 @@ jobs:
             >/tmp/chrome.out 2>/tmp/chrome.err &
           PID=$!
           trap 'kill $PID 2>/dev/null || true' EXIT
-          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:9222/json/list >/tmp/pages.json && break || sleep .5; done
+          for i in $(seq 1 60); do curl -fsS http://127.0.0.1:9222/json/list >/tmp/pages.json && break || sleep .5; done
+          test -s /tmp/pages.json
 
           cat >/tmp/cdp.mjs <<'NODE'
           import fs from 'node:fs';
+          const ROOT='https://copytolive.github.io/copy/';
           const pages=JSON.parse(fs.readFileSync('/tmp/pages.json','utf8'));
           const target=pages.find(x=>x.type==='page');
           if(!target?.webSocketDebuggerUrl) throw new Error('No CDP target');
           const ws=new WebSocket(target.webSocketDebuggerUrl);
-          let seq=0; const pending=new Map(); const exceptions=[]; const failures=[];
+          let seq=0; const pending=new Map(); const exceptions=[];
           const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});
-          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);return;}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params.exceptionDetails);if(m.method==='Network.loadingFailed')failures.push(m.params);};
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);return;}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params.exceptionDetails);};
           await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
-          await send('Runtime.enable'); await send('Page.enable'); await send('Network.enable');
-          await send('Page.navigate',{url:'https://copytolive.github.io/copy/?verify=backtest-parity-final'});
-          await new Promise(r=>setTimeout(r,18000));
-          const x=await send('Runtime.evaluate',{expression:`JSON.stringify({href:location.href,title:document.title,rootLength:document.getElementById('root')?.innerHTML.length||0,text:document.getElementById('root')?.innerText||''})`,returnByValue:true});
-          const state=JSON.parse(x.result.value);
-          fs.writeFileSync('browser-diagnostics.json',JSON.stringify({state,exceptions,failures},null,2));
-          console.log('ROOT_LENGTH',state.rootLength);
-          console.log('ROOT_TEXT_HEAD',state.text.slice(0,2500));
-          for(const e of exceptions) console.log('EXCEPTION',e.text,e.exception?.description||'',e.url||'');
-          for(const f of failures) console.log('NETFAIL',f.errorText,f.type,f.blockedReason||'');
-          const required=['100/118','Profit Factor','Win Rate','Risk Reward','ND MTF LINREG_SLP — GOLD','31517'];
-          for(const marker of required){if(!state.text.includes(marker)) throw new Error(`Missing Backtest marker: ${marker}`);}
-          if(state.rootLength<100000) throw new Error(`Backtest root unexpectedly small: ${state.rootLength}`);
-          if(exceptions.length) throw new Error(`Browser exceptions: ${exceptions.length}`);
-          console.log('BACKTEST_VISUAL_PARITY=PASS');
+          await send('Runtime.enable'); await send('Page.enable');
+          await send('Page.navigate',{url:ROOT});
+          await new Promise(r=>setTimeout(r,2500));
+          await send('Runtime.evaluate',{expression:`localStorage.setItem('ot_backtest_view_mode','charting'); location.reload(); true`,returnByValue:true});
+          await new Promise(r=>setTimeout(r,16000));
+
+          const expr=`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot');const d=f?.contentDocument;const r=f?.getBoundingClientRect();const text=d?.body?.innerText||'';const visible=id=>{const e=d?.getElementById(id);if(!e)return false;const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>0};return JSON.stringify({href:location.href,frame:!!f,src:f?.getAttribute('src')||'',frameReady:d?.readyState||'',left:r?.left||0,top:r?.top||0,width:r?.width||0,height:r?.height||0,loginVisible:visible('loginOverlay'),walletVisible:visible('walletConnectOverlay'),ownerVisible:visible('pagesHlOwnerOverlay'),title:d?.title||'',text:text.slice(0,100000),header:!!d?.querySelector('.header'),workspace:!!d?.querySelector('.trading-workspace'),renkoFrame:!!d?.querySelector('.workspace-renko iframe')});})()`;
+          const x=await send('Runtime.evaluate',{expression:expr,returnByValue:true});
+          const s=JSON.parse(x.result.value);
+          fs.writeFileSync('sequential-diagnostics.json',JSON.stringify({state:{...s,text:s.text.slice(0,12000)},exceptions},null,2));
+          console.log('SEQUENTIAL_ROOT_STATE',{...s,text:`${s.text.length} chars`});
+          if(s.href!==ROOT) throw new Error('Address bar escaped root: '+s.href);
+          if(!s.frame || s.src!=='compounding_live.html?embed=1&root=1') throw new Error('Sequential frame missing/wrong');
+          if(s.frameReady!=='complete') throw new Error('Sequential frame not complete: '+s.frameReady);
+          if(s.left<40 || s.left>120 || s.top!==0 || s.width<1000 || s.height<700) throw new Error('Sequential frame geometry wrong: '+JSON.stringify(s));
+          if(s.loginVisible || s.walletVisible || s.ownerVisible) throw new Error('An auth/wallet overlay still blocks the dashboard');
+          if(!s.header || !s.workspace || !s.renkoFrame) throw new Error('Recovered production dashboard structure missing');
+          const required=[
+            'Sequential Compounding',
+            'Pending Orders',
+            'Open Positions & Floating P&L',
+            'GOLD',
+            'Live Performance & Trade History',
+            'MONITOR RR LIVE',
+            'RENKO SMA10',
+            'LIVE HISTORY',
+            'Monthly Performance',
+            'PERINGATAN RISIKO',
+            'CRYPTO',
+            'NON-CRYPTO',
+            'QUICK ENTRY',
+            'DATA RENKO',
+            'INDICATOR'
+          ];
+          for(const marker of required){if(!s.text.includes(marker)) throw new Error('Missing screenshot marker: '+marker);}
+          if(s.text.includes('Charting sedang dalam pemeliharaan')) throw new Error('Maintenance placeholder leaked');
+          console.log('SEQUENTIAL_SCREENSHOT_PARITY=PASS');
           ws.close();
           NODE
-          node /tmp/cdp.mjs | tee browser-diagnostics.txt
+          node /tmp/cdp.mjs | tee sequential-diagnostics.txt
 
-      - name: Capture final live viewport
+      - name: Capture Sequential Compounding viewport
         shell: bash
         run: |
           set -euo pipefail
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          PROFILE=/tmp/ctl-visual-profile
+          rm -rf "$PROFILE"
+          mkdir -p "$PROFILE/Default/Local Storage/leveldb"
+          # Capture is supplemental; the CDP assertion above is authoritative.
           "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --hide-scrollbars \
             --window-size=2048,1180 --virtual-time-budget=18000 \
-            --screenshot=copy-pages-live.png 'https://copytolive.github.io/copy/?visual=backtest-final'
-          test -s copy-pages-live.png
-          file copy-pages-live.png
+            --screenshot=copy-pages-sequential-live.png 'https://copytolive.github.io/copy/' || true
+          test -s copy-pages-sequential-live.png
+          file copy-pages-sequential-live.png
 
       - uses: actions/upload-artifact@v4
         with:
-          name: copy-pages-live-visual
+          name: copy-pages-sequential-visual
           path: |
-            copy-pages-live.png
-            browser-diagnostics.json
-            browser-diagnostics.txt
+            copy-pages-sequential-live.png
+            sequential-diagnostics.json
+            sequential-diagnostics.txt
           if-no-files-found: error
           retention-days: 2

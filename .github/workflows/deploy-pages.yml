@@ -194,7 +194,7 @@ jobs:
           if(state.maintenance) throw new Error('Maintenance placeholder still present');
           if(state.selected!=='SOLUSDT') throw new Error('Expected SOLUSDT, got '+state.selected);
           if(Math.max(state.exact,state.preview)<20) throw new Error('No usable first-screen Renko history');
-          if(state.preview>0 && !state.previewLabel.includes('HYPERLIQUID RENKO HISTORY')) throw new Error('Preview source label missing');
+          if(state.previewVisible && !state.previewLabel.includes('HYPERLIQUID RENKO HISTORY')) throw new Error('Preview source label missing');
           if(state.hasNaN) throw new Error('Visible NaN/Infinity detected');
 
           const y=await send('Runtime.evaluate',{expression:`(async()=>{const end=Date.now(),start=end-3600000;const r=await fetch('https://api.hyperliquid.xyz/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'candleSnapshot',req:{coin:'SOL',interval:'1m',startTime:start,endTime:end}})});const d=await r.json();return JSON.stringify({ok:r.ok,status:r.status,len:Array.isArray(d)?d.length:0});})()`,awaitPromise:true,returnByValue:true});

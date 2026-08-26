@@ -19,15 +19,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare devlog-aligned Hyperliquid and Renko runtime
+      - name: Prepare root-only dashboard and devlog-aligned runtime
         shell: bash
         run: |
           set -euo pipefail
 
-          # The authoritative dashboard devlog contract is:
+          # Dashboard devlog contract:
           # balance/positions/history = real Hyperliquid wallet data;
           # strategy/pending/runner = CopyToLive engine; never use global engine
           # history as a user's wallet history.
+          # User-facing navigation contract:
+          # the browser address remains https://copytolive.github.io/copy/.
+          test -f pages_root_bridge.js
           test -f pages_compounding_mirror.js
           test -f pages_wallet_bootstrap.js
           test -f pages_wallet_history.js
@@ -36,6 +39,19 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
 
+          # Root-only bridge: keep the recovered SPA shell and replace only the
+          # maintenance Charting view with the live same-origin chart runtime.
+          p = Path('index.html')
+          s = p.read_text()
+          root_loader = '<script src="/copy/pages_root_bridge.js?v=20260826-root"></script>'
+          if root_loader not in s:
+              if '</body>' not in s:
+                  raise SystemExit('Root </body> insertion anchor missing')
+              s = s.replace('</body>', root_loader + '\n</body>', 1)
+          p.write_text(s)
+
+          # Renko receives a deploy-time real-Hyperliquid history preview, then
+          # yields to exact tick-native Renko when enough exact bricks arrive.
           p = Path('renko/index.html')
           s = p.read_text()
           loader = '<script src="hl-history-preview.js?v=20260826-devlog"></script>'
@@ -53,8 +69,8 @@ jobs:
               raise SystemExit('Resolver/bootstrap order violates devlog contract')
           PY
 
-          # Generate a fresh deploy-time first-screen snapshot from Hyperliquid.
-          # This is public market data only. It contains no wallet/session secret.
+          # Generate fresh deploy-time first-screen snapshots from Hyperliquid.
+          # Public market data only; no wallet/session secret is stored.
           END_MS=$(date +%s%3N)
           START_MS=$((END_MS - 36*60*60*1000))
           for COIN in SOL BTC ETH; do
@@ -76,7 +92,9 @@ jobs:
           PY
           done
 
-          # Static contract checks derived from the devlog/handover.
+          # Static contracts derived from the dashboard devlog/handover.
+          grep -q 'pages_root_bridge.js?v=20260826-root' index.html
+          grep -q "ROOT_URL = 'https://copytolive.github.io/copy/'" pages_root_bridge.js
           grep -q "location.hostname === 'copytolive.github.io'" pages_compounding_mirror.js
           grep -q "location.hostname === 'copytolive.github.io'" pages_wallet_bootstrap.js
           grep -q "location.hostname === 'copytolive.github.io'" pages_wallet_history.js
@@ -86,11 +104,12 @@ jobs:
           grep -q "type:'userRole'" pages_compounding_mirror.js
           grep -q "type:'subAccounts'" pages_compounding_mirror.js
           grep -q 'hl-history-preview.js?v=20260826-devlog' renko/index.html
+          node --check pages_root_bridge.js
           node --check renko/hl-history-preview.js
           node --check pages_compounding_mirror.js
           node --check pages_wallet_bootstrap.js
           node --check pages_wallet_history.js
-          echo "DEVLOG_RUNTIME_CONTRACT=PASS"
+          echo "ROOT_ONLY_DEVLOG_RUNTIME_CONTRACT=PASS"
 
       - uses: actions/configure-pages@v5
         with:
@@ -102,7 +121,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Verify live CopyToLive Pages, wallet contract and Backtest parity data
+      - name: Verify live root shell, wallet contract and Backtest parity data
         shell: bash
         run: |
           set -euo pipefail
@@ -112,7 +131,8 @@ jobs:
           ok=0
           for attempt in $(seq 1 18); do
             echo "Acceptance attempt ${attempt}/18"
-            if curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/index.html \
+            if curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/" -o /tmp/copy-pages-verify/index.html \
+              && curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/pages_root_bridge.js?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/root-bridge.js \
               && curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/compounding_live.html?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/live.html \
               && curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/renko/?embed=1&symbol=SOL&verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/renko.html \
               && curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/renko/hl-bootstrap-SOL.json?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/hl-sol.json \
@@ -136,6 +156,11 @@ jobs:
           assert r['totalTrades']==319
           assert round(float(r['profitFactor']),2)==1.84
           assert round(float(r['netProfit']),1)==31516.8
+          root=open('/tmp/copy-pages-verify/index.html').read()
+          assert 'pages_root_bridge.js?v=20260826-root' in root
+          bridge=open('/tmp/copy-pages-verify/root-bridge.js').read()
+          assert "ROOT_URL = 'https://copytolive.github.io/copy/'" in bridge
+          assert "frame.src = 'renko/?embed=1&symbol=SOL'" in bridge
           live=open('/tmp/copy-pages-verify/live.html').read()
           ia=live.find('pages_compounding_mirror.js')
           ib=live.find('pages_wallet_bootstrap.js')
@@ -144,7 +169,7 @@ jobs:
           assert 'RENKO V12 — Tick Native' in renko
           assert 'hl-history-preview.js?v=20260826-devlog' in renko
           assert 'Charting sedang dalam pemeliharaan' not in renko
-          print('LIVE_ASSET_CONTRACT_PASS',len(h),len(a),len(b),len(s),len(l))
+          print('LIVE_ROOT_ASSET_CONTRACT_PASS',len(h),len(a),len(b),len(s),len(l))
           PY
             then
               ok=1
@@ -155,9 +180,9 @@ jobs:
 
           test "$ok" = 1
           grep -q '<div id="root"></div>' /tmp/copy-pages-verify/index.html
-          echo "COPY_PAGES_ASSET_ACCEPTANCE=PASS"
+          echo "COPY_ROOT_ASSET_ACCEPTANCE=PASS"
 
-      - name: Browser acceptance - Renko first screen and Hyperliquid CORS
+      - name: Browser acceptance - root URL Charting and Hyperliquid CORS
         shell: bash
         run: |
           set -euo pipefail
@@ -174,8 +199,9 @@ jobs:
           done
           test -s /tmp/pages.json
 
-          cat >/tmp/renko-cdp.mjs <<'NODE'
+          cat >/tmp/root-cdp.mjs <<'NODE'
           import fs from 'node:fs';
+          const ROOT='https://copytolive.github.io/copy/';
           const pages=JSON.parse(fs.readFileSync('/tmp/pages.json','utf8'));
           const target=pages.find(x=>x.type==='page');
           if(!target?.webSocketDebuggerUrl) throw new Error('No CDP target');
@@ -185,23 +211,32 @@ jobs:
           ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);}};
           await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
           await send('Runtime.enable'); await send('Page.enable');
-          await send('Page.navigate',{url:'https://copytolive.github.io/copy/renko/?embed=1&symbol=SOL&accept=devlog-final'});
-          await new Promise(r=>setTimeout(r,7000));
-          const x=await send('Runtime.evaluate',{expression:`JSON.stringify({title:document.title,selected:window.RWARenkoV3?.state?.selected||'',exact:window.RWARenkoV12?.state?.data?.length||0,preview:window.CTLHLRenkoPreview?.bars?.length||0,previewSource:window.CTLHLRenkoPreview?.source||'',previewLabel:document.getElementById('ctlHlHistoryLabel')?.textContent||'',previewVisible:!!document.getElementById('ctlHlHistoryPreview'),hostVisibility:getComputedStyle(document.getElementById('lwcRenkoHost')||document.body).visibility,maintenance:document.body.innerText.includes('Charting sedang dalam pemeliharaan'),hasNaN:/\\bNaN\\b|\\bInfinity\\b/.test(document.body.innerText)})`,returnByValue:true});
+
+          // The only browser navigation URL used by this acceptance test is ROOT.
+          await send('Page.navigate',{url:ROOT});
+          await new Promise(r=>setTimeout(r,2500));
+          await send('Runtime.evaluate',{expression:`localStorage.setItem('ot_backtest_view_mode','charting'); location.reload(); true`,returnByValue:true});
+          await new Promise(r=>setTimeout(r,12000));
+
+          const x=await send('Runtime.evaluate',{expression:`(()=>{const f=document.querySelector('iframe[title="CopyToLive Charting"]');const w=f?.contentWindow;const d=f?.contentDocument;return JSON.stringify({href:location.href,maintenance:document.body.innerText.includes('Charting sedang dalam pemeliharaan'),bridge:!!window.__COPYTOLIVE_ROOT_CHARTING__?.mounted,frame:!!f,frameSrc:f?.getAttribute('src')||'',frameReady:d?.readyState||'',selected:w?.RWARenkoV3?.state?.selected||'',exact:w?.RWARenkoV12?.state?.data?.length||0,preview:w?.CTLHLRenkoPreview?.bars?.length||0,frameMaintenance:d?.body?.innerText?.includes('Charting sedang dalam pemeliharaan')||false,hasNaN:/\\bNaN\\b|\\bInfinity\\b/.test(d?.body?.innerText||'')});})()`,returnByValue:true});
           const state=JSON.parse(x.result.value);
-          console.log('RENKO_FIRST_SCREEN',state);
-          if(!state.title.includes('RENKO V12')) throw new Error('Renko title missing');
-          if(state.maintenance) throw new Error('Maintenance placeholder still present');
+          console.log('ROOT_CHARTING_STATE',state);
+          if(state.href!==ROOT) throw new Error('Address bar escaped root: '+state.href);
+          if(state.maintenance) throw new Error('Root maintenance placeholder still visible');
+          if(!state.bridge || !state.frame) throw new Error('Root Charting bridge did not mount');
+          if(state.frameSrc!=='renko/?embed=1&symbol=SOL') throw new Error('Unexpected internal chart source: '+state.frameSrc);
+          if(state.frameReady!=='complete') throw new Error('Chart frame not ready: '+state.frameReady);
           if(state.selected!=='SOLUSDT') throw new Error('Expected SOLUSDT, got '+state.selected);
-          if(Math.max(state.exact,state.preview)<20) throw new Error('No usable first-screen Renko history');
-          if(state.previewVisible && !state.previewLabel.includes('HYPERLIQUID RENKO HISTORY')) throw new Error('Preview source label missing');
+          if(Math.max(state.exact,state.preview)<20) throw new Error('No usable first-screen Charting history');
+          if(state.frameMaintenance) throw new Error('Maintenance text leaked into live chart');
           if(state.hasNaN) throw new Error('Visible NaN/Infinity detected');
 
-          const y=await send('Runtime.evaluate',{expression:`(async()=>{const end=Date.now(),start=end-3600000;const r=await fetch('https://api.hyperliquid.xyz/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'candleSnapshot',req:{coin:'SOL',interval:'1m',startTime:start,endTime:end}})});const d=await r.json();return JSON.stringify({ok:r.ok,status:r.status,len:Array.isArray(d)?d.length:0});})()`,awaitPromise:true,returnByValue:true});
+          const y=await send('Runtime.evaluate',{expression:`(async()=>{const end=Date.now(),start=end-3600000;const r=await fetch('https://api.hyperliquid.xyz/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'candleSnapshot',req:{coin:'SOL',interval:'1m',startTime:start,endTime:end}})});const d=await r.json();return JSON.stringify({href:location.href,ok:r.ok,status:r.status,len:Array.isArray(d)?d.length:0});})()`,awaitPromise:true,returnByValue:true});
           const hl=JSON.parse(y.result.value);
-          console.log('HYPERLIQUID_BROWSER_CORS',hl);
+          console.log('ROOT_HYPERLIQUID_BROWSER_CORS',hl);
+          if(hl.href!==ROOT) throw new Error('Address bar changed during CORS test: '+hl.href);
           if(!hl.ok || hl.len<20) throw new Error('Hyperliquid browser CORS/data check failed');
-          console.log('RENKO_BROWSER_ACCEPTANCE=PASS');
+          console.log('ROOT_ONLY_BROWSER_ACCEPTANCE=PASS');
           ws.close();
           NODE
-          node /tmp/renko-cdp.mjs
+          node /tmp/root-cdp.mjs

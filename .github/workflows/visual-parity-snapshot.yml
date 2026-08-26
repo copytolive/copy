@@ -36,13 +36,14 @@ jobs:
           test "$ok" = 1
           echo 'SEQUENTIAL_BRIDGE_DEPLOYED=PASS'
 
-      - name: Assert full Sequential Compounding dashboard with real browser
+      - name: Assert and capture full Sequential Compounding dashboard
         shell: bash
         run: |
           set -euo pipefail
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
           test -n "$CHROME"
-          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu \
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --hide-scrollbars \
+            --window-size=2048,1180 \
             --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 about:blank \
             >/tmp/chrome.out 2>/tmp/chrome.err &
           PID=$!
@@ -62,58 +63,53 @@ jobs:
           ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);return;}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params.exceptionDetails);};
           await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
           await send('Runtime.enable'); await send('Page.enable');
+          await send('Emulation.setDeviceMetricsOverride',{width:2048,height:1180,deviceScaleFactor:1,mobile:false});
           await send('Page.navigate',{url:ROOT});
           await new Promise(r=>setTimeout(r,2500));
           await send('Runtime.evaluate',{expression:`localStorage.setItem('ot_backtest_view_mode','charting'); location.reload(); true`,returnByValue:true});
-          await new Promise(r=>setTimeout(r,16000));
+          await new Promise(r=>setTimeout(r,17000));
 
-          const expr=`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot');const d=f?.contentDocument;const r=f?.getBoundingClientRect();const text=d?.body?.innerText||'';const visible=id=>{const e=d?.getElementById(id);if(!e)return false;const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>0};return JSON.stringify({href:location.href,frame:!!f,src:f?.getAttribute('src')||'',frameReady:d?.readyState||'',left:r?.left||0,top:r?.top||0,width:r?.width||0,height:r?.height||0,loginVisible:visible('loginOverlay'),walletVisible:visible('walletConnectOverlay'),ownerVisible:visible('pagesHlOwnerOverlay'),title:d?.title||'',text:text.slice(0,100000),header:!!d?.querySelector('.header'),workspace:!!d?.querySelector('.trading-workspace'),renkoFrame:!!d?.querySelector('.workspace-renko iframe')});})()`;
+          const expr=`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot');const d=f?.contentDocument;const r=f?.getBoundingClientRect();const text=d?.body?.innerText||'';const rf=d?.querySelector('.workspace-renko iframe');const rd=rf?.contentDocument;const renkoText=rd?.body?.innerText||'';const hist=d?.querySelector('.workspace-renko-history');const visible=id=>{const e=d?.getElementById(id);if(!e)return false;const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>0};return JSON.stringify({href:location.href,frame:!!f,src:f?.getAttribute('src')||'',frameReady:d?.readyState||'',left:r?.left||0,top:r?.top||0,width:r?.width||0,height:r?.height||0,loginVisible:visible('loginOverlay'),walletVisible:visible('walletConnectOverlay'),ownerVisible:visible('pagesHlOwnerOverlay'),title:d?.title||'',text:text.slice(0,100000),renkoText:renkoText.slice(0,50000),header:!!d?.querySelector('.header'),workspace:!!d?.querySelector('.trading-workspace'),renkoFrame:!!rf,renkoReady:rd?.readyState||'',renkoHistoryExists:!!hist,renkoHistoryText:hist?.innerText||''});})()`;
           const x=await send('Runtime.evaluate',{expression:expr,returnByValue:true});
           const s=JSON.parse(x.result.value);
-          fs.writeFileSync('sequential-diagnostics.json',JSON.stringify({state:{...s,text:s.text.slice(0,12000)},exceptions},null,2));
-          console.log('SEQUENTIAL_ROOT_STATE',{...s,text:`${s.text.length} chars`});
+          const diagnostic={state:{...s,text:s.text.slice(0,12000),renkoText:s.renkoText.slice(0,12000)},exceptions};
+          fs.writeFileSync('sequential-diagnostics.json',JSON.stringify(diagnostic,null,2));
+          console.log('SEQUENTIAL_ROOT_STATE',{...s,text:`${s.text.length} chars`,renkoText:`${s.renkoText.length} chars`});
           if(s.href!==ROOT) throw new Error('Address bar escaped root: '+s.href);
           if(!s.frame || s.src!=='compounding_live.html?embed=1&root=1') throw new Error('Sequential frame missing/wrong');
           if(s.frameReady!=='complete') throw new Error('Sequential frame not complete: '+s.frameReady);
-          if(s.left<40 || s.left>120 || s.top!==0 || s.width<1000 || s.height<700) throw new Error('Sequential frame geometry wrong: '+JSON.stringify(s));
+          if(s.left<40 || s.left>120 || s.top!==0 || s.width<1500 || s.height<1000) throw new Error('Sequential frame geometry wrong: '+JSON.stringify({left:s.left,top:s.top,width:s.width,height:s.height}));
           if(s.loginVisible || s.walletVisible || s.ownerVisible) throw new Error('An auth/wallet overlay still blocks the dashboard');
-          if(!s.header || !s.workspace || !s.renkoFrame) throw new Error('Recovered production dashboard structure missing');
-          const required=[
+          if(!s.header || !s.workspace || !s.renkoFrame || s.renkoReady!=='complete') throw new Error('Recovered production dashboard structure missing');
+
+          const shellRequired=[
             'Sequential Compounding',
             'Pending Orders',
             'Open Positions & Floating P&L',
             'GOLD',
             'Live Performance & Trade History',
             'MONITOR RR LIVE',
-            'RENKO SMA10',
-            'LIVE HISTORY',
+            'TOTAL NET PROFIT',
+            'GROWTH',
+            'MAX DRAWDOWN',
+            'TOTAL TRADES',
+            'Grafik Pertumbuhan Equity',
+            'Detailed Trade Log',
             'Monthly Performance',
-            'PERINGATAN RISIKO',
-            'CRYPTO',
-            'NON-CRYPTO',
-            'QUICK ENTRY',
-            'DATA RENKO',
-            'INDICATOR'
+            'PERINGATAN RISIKO'
           ];
-          for(const marker of required){if(!s.text.includes(marker)) throw new Error('Missing screenshot marker: '+marker);}
-          if(s.text.includes('Charting sedang dalam pemeliharaan')) throw new Error('Maintenance placeholder leaked');
+          for(const marker of shellRequired){if(!s.text.includes(marker)) throw new Error('Missing screenshot shell marker: '+marker);}
+          const renkoRequired=['CRYPTO','NON-CRYPTO','QUICK ENTRY','DATA RENKO','INDICATOR','SMA10'];
+          for(const marker of renkoRequired){if(!s.renkoText.includes(marker)) throw new Error('Missing screenshot Renko marker: '+marker);}
+          if(s.text.includes('Charting sedang dalam pemeliharaan') || s.renkoText.includes('Charting sedang dalam pemeliharaan')) throw new Error('Maintenance placeholder leaked');
+
+          const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false,fromSurface:true});
+          fs.writeFileSync('copy-pages-sequential-live.png',Buffer.from(shot.data,'base64'));
+          console.log('RENKO_HISTORY_DIAGNOSTIC',{exists:s.renkoHistoryExists,text:s.renkoHistoryText.slice(0,500)});
           console.log('SEQUENTIAL_SCREENSHOT_PARITY=PASS');
           ws.close();
           NODE
           node /tmp/cdp.mjs | tee sequential-diagnostics.txt
-
-      - name: Capture Sequential Compounding viewport
-        shell: bash
-        run: |
-          set -euo pipefail
-          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
-          PROFILE=/tmp/ctl-visual-profile
-          rm -rf "$PROFILE"
-          mkdir -p "$PROFILE/Default/Local Storage/leveldb"
-          # Capture is supplemental; the CDP assertion above is authoritative.
-          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --hide-scrollbars \
-            --window-size=2048,1180 --virtual-time-budget=18000 \
-            --screenshot=copy-pages-sequential-live.png 'https://copytolive.github.io/copy/' || true
           test -s copy-pages-sequential-live.png
           file copy-pages-sequential-live.png
 

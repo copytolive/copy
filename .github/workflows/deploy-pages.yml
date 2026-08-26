@@ -39,16 +39,29 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
 
-          # Root-only bridge: keep the recovered SPA shell and replace only the
-          # maintenance Charting view with the live same-origin chart runtime.
-          p = Path('index.html')
-          s = p.read_text()
           root_loader = '<script src="/copy/pages_root_bridge.js?v=20260826-root"></script>'
-          if root_loader not in s:
-              if '</body>' not in s:
-                  raise SystemExit('Root </body> insertion anchor missing')
-              s = s.replace('</body>', root_loader + '\n</body>', 1)
-          p.write_text(s)
+
+          # Every HTML surface receives the same root guard. At top level it
+          # redirects standalone/deep pages back to /copy/. Inside an iframe it
+          # returns immediately, so the SPA can still use recovered modules.
+          html_pages = sorted(Path('.').rglob('*.html'))
+          if not html_pages:
+              raise SystemExit('No HTML pages found')
+          for p in html_pages:
+              s = p.read_text()
+              if root_loader in s:
+                  continue
+              if p.as_posix() == 'index.html':
+                  if '</body>' not in s:
+                      raise SystemExit('Root </body> insertion anchor missing')
+                  s = s.replace('</body>', root_loader + '\n</body>', 1)
+              elif '</head>' in s:
+                  s = s.replace('</head>', root_loader + '\n</head>', 1)
+              elif '</body>' in s:
+                  s = s.replace('</body>', root_loader + '\n</body>', 1)
+              else:
+                  s = root_loader + '\n' + s
+              p.write_text(s)
 
           # Renko receives a deploy-time real-Hyperliquid history preview, then
           # yields to exact tick-native Renko when enough exact bricks arrive.
@@ -67,6 +80,15 @@ jobs:
           b = c.find('pages_wallet_bootstrap.js')
           if a < 0 or b < 0 or a >= b:
               raise SystemExit('Resolver/bootstrap order violates devlog contract')
+
+          # Prove every deployed HTML surface is covered by the single-root guard.
+          missing=[]
+          for p in html_pages:
+              if root_loader not in p.read_text():
+                  missing.append(p.as_posix())
+          if missing:
+              raise SystemExit('Root guard missing: ' + ', '.join(missing))
+          print('ROOT_GUARD_HTML_COUNT', len(html_pages))
           PY
 
           # Generate fresh deploy-time first-screen snapshots from Hyperliquid.
@@ -95,6 +117,8 @@ jobs:
           # Static contracts derived from the dashboard devlog/handover.
           grep -q 'pages_root_bridge.js?v=20260826-root' index.html
           grep -q "ROOT_URL = 'https://copytolive.github.io/copy/'" pages_root_bridge.js
+          grep -q "location.pathname !== ROOT_PATH" pages_root_bridge.js
+          grep -q "location.replace(ROOT_PATH)" pages_root_bridge.js
           grep -q "location.hostname === 'copytolive.github.io'" pages_compounding_mirror.js
           grep -q "location.hostname === 'copytolive.github.io'" pages_wallet_bootstrap.js
           grep -q "location.hostname === 'copytolive.github.io'" pages_wallet_history.js
@@ -160,12 +184,15 @@ jobs:
           assert 'pages_root_bridge.js?v=20260826-root' in root
           bridge=open('/tmp/copy-pages-verify/root-bridge.js').read()
           assert "ROOT_URL = 'https://copytolive.github.io/copy/'" in bridge
+          assert "location.replace(ROOT_PATH)" in bridge
           assert "frame.src = 'renko/?embed=1&symbol=SOL'" in bridge
           live=open('/tmp/copy-pages-verify/live.html').read()
+          assert 'pages_root_bridge.js?v=20260826-root' in live
           ia=live.find('pages_compounding_mirror.js')
           ib=live.find('pages_wallet_bootstrap.js')
           assert 0 <= ia < ib,(ia,ib)
           renko=open('/tmp/copy-pages-verify/renko.html').read()
+          assert 'pages_root_bridge.js?v=20260826-root' in renko
           assert 'RENKO V12 — Tick Native' in renko
           assert 'hl-history-preview.js?v=20260826-devlog' in renko
           assert 'Charting sedang dalam pemeliharaan' not in renko
@@ -182,7 +209,7 @@ jobs:
           grep -q '<div id="root"></div>' /tmp/copy-pages-verify/index.html
           echo "COPY_ROOT_ASSET_ACCEPTANCE=PASS"
 
-      - name: Browser acceptance - root URL Charting and Hyperliquid CORS
+      - name: Browser acceptance - single root URL Charting and deep-link redirect
         shell: bash
         run: |
           set -euo pipefail
@@ -212,7 +239,7 @@ jobs:
           await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
           await send('Runtime.enable'); await send('Page.enable');
 
-          // The only browser navigation URL used by this acceptance test is ROOT.
+          // Main application acceptance starts and remains on the sole root URL.
           await send('Page.navigate',{url:ROOT});
           await new Promise(r=>setTimeout(r,2500));
           await send('Runtime.evaluate',{expression:`localStorage.setItem('ot_backtest_view_mode','charting'); location.reload(); true`,returnByValue:true});
@@ -236,7 +263,16 @@ jobs:
           console.log('ROOT_HYPERLIQUID_BROWSER_CORS',hl);
           if(hl.href!==ROOT) throw new Error('Address bar changed during CORS test: '+hl.href);
           if(!hl.ok || hl.len<20) throw new Error('Hyperliquid browser CORS/data check failed');
-          console.log('ROOT_ONLY_BROWSER_ACCEPTANCE=PASS');
+
+          // A representative standalone deep page must redirect back to ROOT.
+          await send('Page.navigate',{url:'https://copytolive.github.io/copy/renko/?embed=1&symbol=SOL'});
+          await new Promise(r=>setTimeout(r,3000));
+          const z=await send('Runtime.evaluate',{expression:`JSON.stringify({href:location.href,pathname:location.pathname})`,returnByValue:true});
+          const redirected=JSON.parse(z.result.value);
+          console.log('DEEP_LINK_REDIRECT_STATE',redirected);
+          if(redirected.href!==ROOT || redirected.pathname!=='/copy/') throw new Error('Deep page did not return to root');
+
+          console.log('SINGLE_PUBLIC_ROOT_ACCEPTANCE=PASS');
           ws.close();
           NODE
           node /tmp/root-cdp.mjs

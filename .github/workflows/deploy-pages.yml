@@ -18,6 +18,80 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare devlog-aligned Hyperliquid and Renko runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # The authoritative dashboard devlog contract is:
+          # balance/positions/history = real Hyperliquid wallet data;
+          # strategy/pending/runner = CopyToLive engine; never use global engine
+          # history as a user's wallet history.
+          test -f pages_compounding_mirror.js
+          test -f pages_wallet_bootstrap.js
+          test -f pages_wallet_history.js
+          test -f renko/hl-history-preview.js
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('renko/index.html')
+          s = p.read_text()
+          loader = '<script src="hl-history-preview.js?v=20260826-devlog"></script>'
+          anchor = '<script src="renko-v12-instant-history.js?v=2"></script>'
+          if loader not in s:
+              if anchor not in s:
+                  raise SystemExit('Renko preview insertion anchor missing')
+              s = s.replace(anchor, anchor + loader, 1)
+          p.write_text(s)
+
+          c = Path('compounding_live.html').read_text()
+          a = c.find('pages_compounding_mirror.js')
+          b = c.find('pages_wallet_bootstrap.js')
+          if a < 0 or b < 0 or a >= b:
+              raise SystemExit('Resolver/bootstrap order violates devlog contract')
+          PY
+
+          # Generate a fresh deploy-time first-screen snapshot from Hyperliquid.
+          # This is public market data only. It contains no wallet/session secret.
+          END_MS=$(date +%s%3N)
+          START_MS=$((END_MS - 36*60*60*1000))
+          for COIN in SOL BTC ETH; do
+            OUT="renko/hl-bootstrap-${COIN}.json"
+            curl -LfsS --connect-timeout 10 --max-time 30 \
+              -H 'Content-Type: application/json' \
+              -X POST https://api.hyperliquid.xyz/info \
+              --data "{\"type\":\"candleSnapshot\",\"req\":{\"coin\":\"${COIN}\",\"interval\":\"1m\",\"startTime\":${START_MS},\"endTime\":${END_MS}}}" \
+              -o "$OUT"
+            python3 - "$OUT" <<'PY'
+          import json, sys
+          path=sys.argv[1]
+          data=json.load(open(path))
+          assert isinstance(data,list), type(data)
+          assert len(data) >= 60, len(data)
+          for row in data[-20:]:
+              assert row.get('c') is not None and row.get('t') is not None, row
+          print('HL_BOOTSTRAP_PASS', path, len(data))
+          PY
+          done
+
+          # Static contract checks derived from the devlog/handover.
+          grep -q "location.hostname === 'copytolive.github.io'" pages_compounding_mirror.js
+          grep -q "location.hostname === 'copytolive.github.io'" pages_wallet_bootstrap.js
+          grep -q "location.hostname === 'copytolive.github.io'" pages_wallet_history.js
+          ! grep -q "for (var i=0;i<localStorage.length;i++)" pages_wallet_history.js
+          grep -q "type:'userFills'" pages_wallet_history.js
+          grep -q "type:'clearinghouseState'" pages_wallet_history.js
+          grep -q "type:'userRole'" pages_compounding_mirror.js
+          grep -q "type:'subAccounts'" pages_compounding_mirror.js
+          grep -q 'hl-history-preview.js?v=20260826-devlog' renko/index.html
+          node --check renko/hl-history-preview.js
+          node --check pages_compounding_mirror.js
+          node --check pages_wallet_bootstrap.js
+          node --check pages_wallet_history.js
+          echo "DEVLOG_RUNTIME_CONTRACT=PASS"
+
       - uses: actions/configure-pages@v5
         with:
           enablement: true
@@ -28,7 +102,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Verify live CopyToLive Pages and Backtest parity data
+      - name: Verify live CopyToLive Pages, wallet contract and Backtest parity data
         shell: bash
         run: |
           set -euo pipefail
@@ -39,11 +113,40 @@ jobs:
           for attempt in $(seq 1 18); do
             echo "Acceptance attempt ${attempt}/18"
             if curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/index.html \
+              && curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/compounding_live.html?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/live.html \
+              && curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/renko/?embed=1&symbol=SOL&verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/renko.html \
+              && curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/renko/hl-bootstrap-SOL.json?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/hl-sol.json \
               && curl -LfsS --connect-timeout 10 --max-time 60 "$BASE/data/backtest_farm_1.json?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/farm1.json \
               && curl -LfsS --connect-timeout 10 --max-time 60 "$BASE/data/backtest_farm_2.json?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/farm2.json \
               && curl -LfsS --connect-timeout 10 --max-time 60 "$BASE/data/backtest_summary.json?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/summary.json \
               && curl -LfsS --connect-timeout 10 --max-time 60 "$BASE/data/backtest_local.json?verify=${GITHUB_SHA}" -o /tmp/copy-pages-verify/local.json \
-              && python3 -c 'import json; a=json.load(open("/tmp/copy-pages-verify/farm1.json")); b=json.load(open("/tmp/copy-pages-verify/farm2.json")); s=json.load(open("/tmp/copy-pages-verify/summary.json")); l=json.load(open("/tmp/copy-pages-verify/local.json")); assert len(a)+len(b)==118,(len(a),len(b)); assert len(s)==250,len(s); assert len(l)==650,len(l); r=a[0]; assert r["title"]=="ND MTF LINREG_SLP — GOLD"; assert r["totalTrades"]==319; assert round(float(r["profitFactor"]),2)==1.84; assert round(float(r["netProfit"]),1)==31516.8; print("LIVE_DATA_PASS",len(a),len(b),len(s),len(l),r["title"])'; then
+              && python3 - <<'PY'
+          import json
+          a=json.load(open('/tmp/copy-pages-verify/farm1.json'))
+          b=json.load(open('/tmp/copy-pages-verify/farm2.json'))
+          s=json.load(open('/tmp/copy-pages-verify/summary.json'))
+          l=json.load(open('/tmp/copy-pages-verify/local.json'))
+          h=json.load(open('/tmp/copy-pages-verify/hl-sol.json'))
+          assert len(a)+len(b)==118,(len(a),len(b))
+          assert len(s)==250,len(s)
+          assert len(l)==650,len(l)
+          assert isinstance(h,list) and len(h)>=60,len(h)
+          r=a[0]
+          assert r['title']=='ND MTF LINREG_SLP — GOLD'
+          assert r['totalTrades']==319
+          assert round(float(r['profitFactor']),2)==1.84
+          assert round(float(r['netProfit']),1)==31516.8
+          live=open('/tmp/copy-pages-verify/live.html').read()
+          ia=live.find('pages_compounding_mirror.js')
+          ib=live.find('pages_wallet_bootstrap.js')
+          assert 0 <= ia < ib,(ia,ib)
+          renko=open('/tmp/copy-pages-verify/renko.html').read()
+          assert 'RENKO V12 — Tick Native' in renko
+          assert 'hl-history-preview.js?v=20260826-devlog' in renko
+          assert 'Charting sedang dalam pemeliharaan' not in renko
+          print('LIVE_ASSET_CONTRACT_PASS',len(h),len(a),len(b),len(s),len(l))
+          PY
+            then
               ok=1
               break
             fi
@@ -52,9 +155,53 @@ jobs:
 
           test "$ok" = 1
           grep -q '<div id="root"></div>' /tmp/copy-pages-verify/index.html
-          echo "LIVE_ROOT_BYTES=$(wc -c < /tmp/copy-pages-verify/index.html)"
-          echo "LIVE_FARM1_BYTES=$(wc -c < /tmp/copy-pages-verify/farm1.json)"
-          echo "LIVE_FARM2_BYTES=$(wc -c < /tmp/copy-pages-verify/farm2.json)"
-          echo "LIVE_SUMMARY_BYTES=$(wc -c < /tmp/copy-pages-verify/summary.json)"
-          echo "LIVE_LOCAL_BYTES=$(wc -c < /tmp/copy-pages-verify/local.json)"
-          echo "COPY_PAGES_ACCEPTANCE=PASS"
+          echo "COPY_PAGES_ASSET_ACCEPTANCE=PASS"
+
+      - name: Browser acceptance - Renko first screen and Hyperliquid CORS
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu \
+            --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 about:blank \
+            >/tmp/chrome.out 2>/tmp/chrome.err &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:9222/json/list >/tmp/pages.json; then break; fi
+            sleep .5
+          done
+          test -s /tmp/pages.json
+
+          cat >/tmp/renko-cdp.mjs <<'NODE'
+          import fs from 'node:fs';
+          const pages=JSON.parse(fs.readFileSync('/tmp/pages.json','utf8'));
+          const target=pages.find(x=>x.type==='page');
+          if(!target?.webSocketDebuggerUrl) throw new Error('No CDP target');
+          const ws=new WebSocket(target.webSocketDebuggerUrl);
+          let seq=0; const pending=new Map();
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);}};
+          await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
+          await send('Runtime.enable'); await send('Page.enable');
+          await send('Page.navigate',{url:'https://copytolive.github.io/copy/renko/?embed=1&symbol=SOL&accept=devlog-final'});
+          await new Promise(r=>setTimeout(r,7000));
+          const x=await send('Runtime.evaluate',{expression:`JSON.stringify({title:document.title,selected:window.RWARenkoV3?.state?.selected||'',exact:window.RWARenkoV12?.state?.data?.length||0,preview:window.CTLHLRenkoPreview?.bars?.length||0,previewSource:window.CTLHLRenkoPreview?.source||'',previewLabel:document.getElementById('ctlHlHistoryLabel')?.textContent||'',previewVisible:!!document.getElementById('ctlHlHistoryPreview'),hostVisibility:getComputedStyle(document.getElementById('lwcRenkoHost')||document.body).visibility,maintenance:document.body.innerText.includes('Charting sedang dalam pemeliharaan'),hasNaN:/\\bNaN\\b|\\bInfinity\\b/.test(document.body.innerText)})`,returnByValue:true});
+          const state=JSON.parse(x.result.value);
+          console.log('RENKO_FIRST_SCREEN',state);
+          if(!state.title.includes('RENKO V12')) throw new Error('Renko title missing');
+          if(state.maintenance) throw new Error('Maintenance placeholder still present');
+          if(state.selected!=='SOLUSDT') throw new Error('Expected SOLUSDT, got '+state.selected);
+          if(Math.max(state.exact,state.preview)<20) throw new Error('No usable first-screen Renko history');
+          if(state.preview>0 && !state.previewLabel.includes('HYPERLIQUID RENKO HISTORY')) throw new Error('Preview source label missing');
+          if(state.hasNaN) throw new Error('Visible NaN/Infinity detected');
+
+          const y=await send('Runtime.evaluate',{expression:`(async()=>{const end=Date.now(),start=end-3600000;const r=await fetch('https://api.hyperliquid.xyz/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'candleSnapshot',req:{coin:'SOL',interval:'1m',startTime:start,endTime:end}})});const d=await r.json();return JSON.stringify({ok:r.ok,status:r.status,len:Array.isArray(d)?d.length:0});})()`,awaitPromise:true,returnByValue:true});
+          const hl=JSON.parse(y.result.value);
+          console.log('HYPERLIQUID_BROWSER_CORS',hl);
+          if(!hl.ok || hl.len<20) throw new Error('Hyperliquid browser CORS/data check failed');
+          console.log('RENKO_BROWSER_ACCEPTANCE=PASS');
+          ws.close();
+          NODE
+          node /tmp/renko-cdp.mjs

@@ -4,7 +4,16 @@
   var ROOT_PATH = '/copy/';
   var ROOT_URL = 'https://copytolive.github.io/copy/';
   var IS_PAGES = location.hostname === 'copytolive.github.io' && location.pathname.indexOf(ROOT_PATH) === 0;
-  if (!IS_PAGES || window.top !== window.self) return;
+  if (!IS_PAGES) return;
+
+  // Public/top-level navigation has exactly one address. Internal HTML files
+  // may still be used inside same-origin iframes, but opening one directly
+  // returns immediately to the single CopyToLive root URL.
+  if (window.top === window.self && location.pathname !== ROOT_PATH) {
+    location.replace(ROOT_PATH);
+    return;
+  }
+  if (window.top !== window.self) return;
 
   function pinRootUrl() {
     try {

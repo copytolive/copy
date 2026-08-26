@@ -75,6 +75,19 @@
     return best;
   }
 
+  function applyFrameGeometry(frame) {
+    if (!frame) return;
+    var left = detectSidebarWidth();
+    frame.style.left = left + 'px';
+    frame.style.right = 'auto';
+    frame.style.top = '0';
+    frame.style.bottom = 'auto';
+    frame.style.width = 'calc(100vw - ' + left + 'px)';
+    frame.style.height = '100vh';
+    frame.style.minWidth = '0';
+    frame.style.maxWidth = 'none';
+  }
+
   function hideEmbeddedGates(frame) {
     try {
       var d = frame.contentDocument;
@@ -107,10 +120,8 @@
     frame.style.cssText = [
       'position:fixed',
       'top:0',
-      'right:0',
-      'bottom:0',
-      'left:' + detectSidebarWidth() + 'px',
-      'width:auto',
+      'left:0',
+      'width:100vw',
       'height:100vh',
       'border:0',
       'margin:0',
@@ -119,8 +130,10 @@
       'background:#0a0e17',
       'z-index:2147482000'
     ].join(';');
+    applyFrameGeometry(frame);
 
     frame.addEventListener('load', function () {
+      applyFrameGeometry(frame);
       hideEmbeddedGates(frame);
       try {
         var d = frame.contentDocument;
@@ -142,7 +155,7 @@
       return false;
     }
     frame = frame || createSequentialFrame();
-    frame.style.left = detectSidebarWidth() + 'px';
+    applyFrameGeometry(frame);
     frame.style.display = 'block';
     hideEmbeddedGates(frame);
     return true;

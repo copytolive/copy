@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><title>V30 real metrics</title><style>:root{--text-muted:#66788a;--green:#00e676;--red:#ff5252;--gold:#ffd740;--accent:#00d4ff;--border:#1e3a5f}body{background:#09121f;color:#fff;font:13px Arial}.history-type-filter{padding:6px}</style></head><body>
+<div id="backtestHistoryPanel"><div>📋 Detailed Trade Log · ALL PAIRS</div><div id="ctlHistoryPnlSummaryV11"></div><div id="historyTypeFilters"><button class="history-type-filter" data-history-type="all">ALL</button><button class="history-type-filter" data-history-type="pending">PENDING ORDER</button><button class="history-type-filter" data-history-type="direct">LANGSUNG ENTRY</button></div><table id="historyTable"><tbody id="historyTableBody"></tbody></table><div id="emptyHistory"></div></div><pre id="result">WAITING</pre>
+<script>
+var A='0x1111111111111111111111111111111111111111';
+function f(id,oid,sym,cls,side,qty,pnl,ts){return{trade_id:id,_hlOid:oid,_hlAccount:A,timestamp:new Date(ts).toISOString(),symbol:sym+'/USD',side:side,type:side,volume:qty,lot:qty,price:100,is_entry:cls==='ENTRY',_fillClass:cls,pnl:pnl};}
+window.__CTL_HISTORY_MODE_V20__={ready:true,meta:{parentBracket:{p1:1},triggers:[{account:A,parentOid:'p1',order:{oid:'tp1',coin:'ATOM',orderType:'Take Profit'},wrap:{status:'FILLED'}}]}};
+var base=function(){ctlHistoryPnlSummaryV11.innerHTML='<b>OLD WRONG SUMMARY</b>';};base.__ctlV29=true;base.__ctlV23=true;
+window.__CTL_HISTORY_STABLE__={ready:true,version:10,mode:'all',fills:[
+ f('p1a','p1','ATOM','ENTRY','BUY',0.4,null,1000),
+ f('p1b','p1','ATOM','ENTRY','BUY',0.6,null,1100),
+ f('d1','d1','ADA','ENTRY','BUY',1,null,1200),
+ f('pc','tp1','ATOM','CLOSE','SELL',1,2,2000),
+ f('dc','dclose','ADA','CLOSE','SELL',1,-1,2100)
+],render:base};
+window.__CTL_HISTORY_STABLE__.setMode=function(m){this.mode=m;this.render();};
+</script><script src="../history_real_metrics_v30.js"></script><script>
+setTimeout(function(){
+ var st=window.__CTL_HISTORY_STABLE__,texts={};['all','pending','direct'].forEach(function(m){st.setMode(m);texts[m]=ctlHistoryPnlSummaryV11.textContent.replace(/\s+/g,' ').trim();});
+ var L=window.__CTL_REAL_METRICS_V30__&&window.__CTL_REAL_METRICS_V30__.lastLedger;
+ var ok=!!L&&L.all.entries===2&&L.pending.entries===1&&L.direct.entries===1&&Math.abs(L.all.pnl-1)<1e-9&&Math.abs(L.pending.pnl-2)<1e-9&&Math.abs(L.direct.pnl+1)<1e-9&&L.all.prob===50&&Math.abs(L.all.rr-2)<1e-9&&ctlHistoryPnlSummaryV11.dataset.metricVersion==='30'&&texts.all.indexOf('TOTAL ENTRY 2')>=0&&texts.pending.indexOf('TOTAL ENTRY 1')>=0&&texts.direct.indexOf('TOTAL ENTRY 1')>=0;
+ result.textContent=(ok?'V30_REAL_METRICS=PASS':'V30_REAL_METRICS=FAIL')+' | all='+texts.all+' | pending='+texts.pending+' | direct='+texts.direct+' | invariantEntries='+(L?L.all.entries===L.pending.entries+L.direct.entries:false)+' | invariantPnl='+(L?Math.abs(L.all.pnl-(L.pending.pnl+L.direct.pnl))<1e-9:false);
+},250);
+</script></body></html>

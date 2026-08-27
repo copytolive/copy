@@ -117,16 +117,16 @@
   function ensureTradeHistoryStability(d, w) {
     if (!d || !w || !d.getElementById('historyTypeFilters') || !d.getElementById('historyTableBody')) return;
     try {
-      if (w.__CTL_HISTORY_STABLE__ && w.__CTL_HISTORY_STABLE__.version >= 6 && typeof w.__ctlInstallHlHistoryV5 === 'function') {
+      if (w.__CTL_HISTORY_STABLE__ && w.__CTL_HISTORY_STABLE__.version >= 7 && typeof w.__ctlInstallHlHistoryV7 === 'function') {
         return;
       }
-      if (d.getElementById('ctlHlHistoryV6Script')) return;
+      if (d.getElementById('ctlHlHistoryV7Script')) return;
       var script = d.createElement('script');
-      script.id = 'ctlHlHistoryV6Script';
-      script.src = 'history_hl_sync_v5.js?v=20260827-6';
+      script.id = 'ctlHlHistoryV7Script';
+      script.src = 'history_hl_sync_v7.js?v=20260827-7';
       script.async = false;
       script.onload = function () {
-        try { if (typeof w.__ctlInstallHlHistoryV5 === 'function' && (!w.__CTL_HISTORY_STABLE__ || w.__CTL_HISTORY_STABLE__.version < 6)) w.__ctlInstallHlHistoryV5(); } catch (e) {}
+        try { if (typeof w.__ctlInstallHlHistoryV7 === 'function' && (!w.__CTL_HISTORY_STABLE__ || w.__CTL_HISTORY_STABLE__.version < 7)) w.__ctlInstallHlHistoryV7(); } catch (e) {}
       };
       (d.head || d.documentElement).appendChild(script);
     } catch (e) {}
@@ -260,7 +260,7 @@
         visualReference: 'recovered-SolRenkoTerminal-BpQZEung',
         compatibilitySource: 'renko-v12',
         visualContract: 'devlog-20260417-v3',
-        historyControls: 'hyperliquid-direct-v6',
+        historyControls: 'hyperliquid-direct-v7',
         mountedAt: Date.now()
       };
     }

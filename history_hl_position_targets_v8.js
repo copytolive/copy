@@ -1,0 +1,10 @@
+(function(){
+'use strict';
+function n(v){var x=Number(v);return Number.isFinite(x)?x:0;}
+function coin(v){v=String(v||'').toUpperCase().trim();if(v.indexOf(':')>=0)v=v.split(':').pop();return v.replace('/USDC','').replace('/USDT','').replace('/USD','').replace('-USD','')||'-';}
+function key(o){return [o&&o.strategy_id||'',coin(o&& (o.symbol||o.coin)),o&&o.stop_loss||'',o&&o.take_profit||''].join('|');}
+function build(){var pos=Array.isArray(window._enginePositions)?window._enginePositions:[],out=[],seen={};pos.forEach(function(p,i){if(!p)return;var sl=n(p.stop_loss!=null?p.stop_loss:(p.sl!=null?p.sl:p.stopLoss)),tp=n(p.take_profit!=null?p.take_profit:(p.tp!=null?p.tp:p.takeProfit));if(!(sl>0||tp>0))return;var o={_ctlPositionTarget:true,_pendingSource:'POSITION_TARGET',strategy_id:p.strategy_id||p.strategy||('position-'+i),order_id:'position-target-'+(p.trade_id||p.strategy_id||i),symbol:coin(p.symbol||p.coin)+'/USD',coin:coin(p.symbol||p.coin),direction:p.direction||p.side||((n(p.size||p.szi)>=0)?'LONG':'SHORT'),side:p.side||p.direction||'',lot:Math.abs(n(p.lot!=null?p.lot:(p.volume!=null?p.volume:(p.size!=null?p.size:p.szi)))),volume:Math.abs(n(p.volume!=null?p.volume:(p.lot!=null?p.lot:(p.size!=null?p.size:p.szi)))),stop_loss:sl,take_profit:tp,created_at:p.created_at||p.opened_at||p.entry_time||p.timestamp||new Date().toISOString()};var k=key(o);if(seen[k])return;seen[k]=1;out.push(o);});return out;}
+function sync(){var targets=build(),base=Array.isArray(window._allPending)?window._allPending.filter(function(x){return x&&!x._ctlPositionTarget;}):[],seen={};base.forEach(function(x){seen[key(x)]=1;});targets.forEach(function(x){var k=key(x);if(!seen[k]){seen[k]=1;base.push(x);}});window._allPending=base;window._ctlPositionPendingTargets=targets;}
+if(window.__CTL_POSITION_TARGETS_V8__&&window.__CTL_POSITION_TARGETS_V8__.timer)try{clearInterval(window.__CTL_POSITION_TARGETS_V8__.timer);}catch(e){}
+var state={ready:true,version:1,timer:setInterval(sync,350),sync:sync};window.__CTL_POSITION_TARGETS_V8__=state;sync();
+})();

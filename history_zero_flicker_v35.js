@@ -36,8 +36,10 @@ function style(){
 function stabilizeTitle(state){
   var p=document.getElementById('backtestHistoryPanel');if(!p)return false;
   p.dataset.zeroFlicker='35';
+  try{p.style.setProperty('display','block','important');p.style.setProperty('visibility','visible','important');p.style.setProperty('opacity','1','important');p.style.setProperty('animation','none','important');p.style.setProperty('transition','none','important');}catch(e){}
+  var wp=p.closest&&p.closest('.workspace-performance');if(wp)try{wp.style.setProperty('display','block','important');wp.style.setProperty('visibility','visible','important');wp.style.setProperty('opacity','1','important');}catch(e){}
   var head=p.firstElementChild,title=head&&head.firstElementChild;
-  if(title){var want='📋 Detailed Trade Log · ALL PAIRS';if(String(title.textContent||'').trim()!==want){title.textContent=want;state.titleRepairs++;}title.dataset.zeroFlicker='35';}
+  if(title){var want='📋 Detailed Trade Log · ALL PAIRS';if(String(title.textContent||'').trim()!==want){title.textContent=want;state.titleRepairs++;}title.dataset.zeroFlicker='35';try{title.style.setProperty('visibility','visible','important');title.style.setProperty('opacity','1','important');title.style.setProperty('animation','none','important');title.style.setProperty('transition','none','important');}catch(e){}}
   return true;
 }
 function stopPeriodicWriters(state){
@@ -49,7 +51,7 @@ function install(){
   var old=window.__CTL_ZERO_FLICKER_V35__;if(old&&old.ready&&st.render&&st.render.__ctlV35){style();stabilizeTitle(old);stopPeriodicWriters(old);return true;}
   style();
   var base=st.render;
-  var state={ready:true,version:VERSION,source:'single-render-fingerprint+periodic-summary-off+panel-compositor-lock',baseRender:base,lastSig:'',renders:0,skipped:0,titleRepairs:0,timersStopped:0,badFrames:0,samples:0,observer:null,sampling:true,lastError:''};
+  var state={ready:true,version:VERSION,source:'single-render-fingerprint+periodic-summary-off+panel-compositor-lock+first-frame-lock',baseRender:base,lastSig:'',renders:0,skipped:0,titleRepairs:0,timersStopped:0,badFrames:0,samples:0,observer:null,sampling:true,lastError:''};
   window.__CTL_ZERO_FLICKER_V35__=state;
   function render(){
     var sig=signature(st);
@@ -82,5 +84,6 @@ function install(){
   return true;
 }
 window.__ctlInstallHistoryZeroFlickerV35=install;
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,0);},{once:true});else setTimeout(install,0);
+try{install();}catch(e){}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){try{install();}catch(e){}},{once:true});
 })();

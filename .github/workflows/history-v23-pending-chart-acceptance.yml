@@ -1,0 +1,79 @@
+name: History V23 Pending + Chart Acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'history_hl_fix_v23.js'
+      - 'history_hl_sync_v7_guard.js'
+      - 'history_hl_pending_v19.js'
+      - 'history_hl_mode_v20.js'
+      - 'history_hl_ui_arbiter_v22.js'
+      - 'tests/history_v23_pending_chart_fixture.html'
+      - '.github/workflows/history-v23-pending-chart-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check history_hl_fix_v23.js
+          node --check history_hl_sync_v7_guard.js
+          grep -q 'history_hl_fix_v23.js' history_hl_sync_v7_guard.js
+          grep -q 'history_hl_pending_v19.js' history_hl_fix_v23.js
+          grep -q '#equityChart{visibility:hidden!important' history_hl_fix_v23.js
+          grep -q 'PENDING ORDER hanya menampilkan' history_hl_fix_v23.js
+          echo V23_STATIC_CONTRACT=PASS
+      - name: Headless Chrome active TP SL and chart stress
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/http.log 2>&1 &
+          HPID=$!
+          trap 'kill $HPID 2>/dev/null || true' EXIT
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/tests/history_v23_pending_chart_fixture.html >/dev/null && break || sleep .2; done
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=8000 --dump-dom http://127.0.0.1:8000/tests/history_v23_pending_chart_fixture.html >/tmp/v23-dom.html
+          python3 - <<'PY'
+          import html,re
+          s=open('/tmp/v23-dom.html').read()
+          m=re.search(r'<pre id="result"[^>]*>(.*?)</pre>',s,re.S)
+          assert m, 'result missing'
+          result=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip()
+          print('V23_RENDERED_RESULT',result)
+          assert result.startswith('V23_PENDING_CHART_ACCEPTANCE=PASS'), result
+          assert 'rows=2' in result, result
+          assert 'SL · ACTIVE' in result, result
+          assert 'TP · ACTIVE' in result, result
+          assert 'TOTAL ENTRY 1' in result, result
+          assert 'baseVis=hidden' in result, result
+          assert 'baseOpacity=0' in result, result
+          assert 'overlay=true' in result, result
+          PY
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=8000 --screenshot=/tmp/history-v23-pending-chart.png http://127.0.0.1:8000/tests/history_v23_pending_chart_fixture.html
+          echo V23_BROWSER_STRESS=PASS
+      - name: Verify production loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://copytolive.github.io/copy'
+          ok=0
+          for i in $(seq 1 36); do
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_fix_v23.js?sha=${GITHUB_SHA}" -o /tmp/v23.js || true
+            if grep -q 'history_hl_fix_v23.js' /tmp/guard.js 2>/dev/null && grep -q 'active-tpsl+chart-single-writer' /tmp/v23.js 2>/dev/null; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo V23_PRODUCTION_LOADER=PASS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: history-v23-pending-chart-screenshot
+          path: /tmp/history-v23-pending-chart.png

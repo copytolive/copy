@@ -1,0 +1,65 @@
+name: History V29 ALL Summary Acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'history_all_summary_v29.js'
+      - 'history_hl_sync_v7_guard.js'
+      - 'tests/history_v29_all_summary_fixture.html'
+      - '.github/workflows/history-v29-all-summary-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check history_all_summary_v29.js
+          node --check history_hl_sync_v7_guard.js
+          grep -q 'all-summary-only-preserve-pending-direct' history_all_summary_v29.js
+          grep -q 'renkoSmaHistoryPanel' history_hl_sync_v7_guard.js
+          grep -q 'history_all_summary_v29.js' history_hl_sync_v7_guard.js
+          grep -q 'version:29' history_hl_sync_v7_guard.js
+          echo V29_STATIC=PASS
+      - name: Browser ALL summary and Renko retirement
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8010 --bind 127.0.0.1 >/tmp/http-v29.log 2>&1 &
+          HPID=$!
+          trap 'kill $HPID 2>/dev/null || true' EXIT
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8010/tests/history_v29_all_summary_fixture.html >/dev/null && break || sleep .2; done
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1400,700 --virtual-time-budget=1200 --dump-dom http://127.0.0.1:8010/tests/history_v29_all_summary_fixture.html >/tmp/v29-dom.html
+          python3 - <<'PY'
+          import html,re
+          s=open('/tmp/v29-dom.html').read(); m=re.search(r'<pre id="result"[^>]*>(.*?)</pre>',s,re.S); assert m
+          r=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip(); print(r)
+          assert r.startswith('V29_ALL_SUMMARY=PASS'),r
+          for x in ['PNL +$1.0000','TOTAL ENTRY 3','PROBABILITAS 50.00%','RISK/REWARD 2.00','pending=PENDING BASE','direct=DIRECT BASE','renkoGone=true','guard=29']: assert x in r,r
+          PY
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1400,700 --virtual-time-budget=1200 --screenshot=/tmp/history-v29-all-summary.png http://127.0.0.1:8010/tests/history_v29_all_summary_fixture.html
+      - name: Verify production assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://copytolive.github.io/copy'; ok=0
+          for i in $(seq 1 36); do
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_all_summary_v29.js?sha=${GITHUB_SHA}" -o /tmp/v29.js || true
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
+            if grep -q 'all-summary-only-preserve-pending-direct' /tmp/v29.js 2>/dev/null && grep -q 'renkoSmaHistoryPanel' /tmp/guard.js 2>/dev/null && grep -q 'version:29' /tmp/guard.js 2>/dev/null; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo V29_PRODUCTION_ASSETS=PASS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: history-v29-all-summary-proof
+          path: /tmp/history-v29-all-summary.png

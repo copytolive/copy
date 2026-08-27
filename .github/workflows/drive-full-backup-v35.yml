@@ -17,36 +17,39 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Build source, history, refs and integrity manifest
+      - name: Build exact V35 source, full history, refs and integrity manifest
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p backup
-          git rev-parse HEAD > backup/HEAD.txt
-          git status --porcelain=v1 > backup/git-status.txt
+          V35_HEAD="d60f909958675b0c11c84e60e0da973e4b5c563f"
+          git cat-file -e "${V35_HEAD}^{commit}"
+          git rev-parse "${V35_HEAD}" > backup/HEAD.txt
           git show-ref > backup/git-refs.txt
           git log --all --oneline --decorate > backup/git-log-all.txt
-          git ls-files > backup/repository-files.txt
-          FILE_COUNT="$(git ls-files | wc -l | tr -d ' ')"
+          git ls-tree -r --name-only "${V35_HEAD}" > backup/repository-files.txt
+          FILE_COUNT="$(wc -l < backup/repository-files.txt | tr -d ' ')"
           COMMIT_COUNT="$(git rev-list --all --count)"
           REF_COUNT="$(git show-ref | wc -l | tr -d ' ')"
           {
             echo "repository=copytolive/copy"
             echo "backup_branch=backup/drive-v35-20260827"
-            echo "v35_production_head=d60f909958675b0c11c84e60e0da973e4b5c563f"
-            echo "artifact_head=$(git rev-parse HEAD)"
-            echo "tracked_file_count=${FILE_COUNT}"
-            echo "commit_count=${COMMIT_COUNT}"
-            echo "ref_count=${REF_COUNT}"
+            echo "v35_production_head=${V35_HEAD}"
+            echo "production_tracked_file_count=${FILE_COUNT}"
+            echo "all_fetched_commit_count=${COMMIT_COUNT}"
+            echo "all_fetched_ref_count=${REF_COUNT}"
             echo "created_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           } > backup/MANIFEST.txt
+          git archive --format=zip --output=backup/copytolive-copy-v35-source-tree.zip "${V35_HEAD}"
           git bundle create backup/copytolive-copy-full-history.bundle --all
-          zip -q -r backup/copytolive-copy-source-tree.zip . \
-            -x '.git/*' 'backup/*'
           (
             cd backup
-            sha256sum HEAD.txt git-status.txt git-refs.txt git-log-all.txt repository-files.txt MANIFEST.txt copytolive-copy-full-history.bundle copytolive-copy-source-tree.zip > SHA256SUMS.txt
+            sha256sum HEAD.txt git-refs.txt git-log-all.txt repository-files.txt MANIFEST.txt copytolive-copy-v35-source-tree.zip copytolive-copy-full-history.bundle > SHA256SUMS.txt
           )
+          echo '--- BACKUP MANIFEST ---'
+          cat backup/MANIFEST.txt
+          echo '--- SHA256 ---'
+          cat backup/SHA256SUMS.txt
 
       - name: Upload complete backup artifact
         uses: actions/upload-artifact@v4

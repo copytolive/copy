@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><title>V30 real metrics</title><style>:root{--text-muted:#66788a;--green:#00e676;--red:#ff5252;--gold:#ffd740;--accent:#00d4ff;--border:#1e3a5f}body{background:#09121f;color:#fff;font:13px Arial}.history-type-filter{padding:6px}</style></head><body>
+<!doctype html><html><head><meta charset="utf-8"><title>V31 real metrics</title><style>:root{--text-muted:#66788a;--green:#00e676;--red:#ff5252;--gold:#ffd740;--accent:#00d4ff;--border:#1e3a5f}body{background:#09121f;color:#fff;font:13px Arial}.history-type-filter{padding:6px}</style></head><body>
 <div id="backtestHistoryPanel"><div>📋 Detailed Trade Log · ALL PAIRS</div><div id="ctlHistoryPnlSummaryV11"></div><div id="historyTypeFilters"><button class="history-type-filter" data-history-type="all">ALL</button><button class="history-type-filter" data-history-type="pending">PENDING ORDER</button><button class="history-type-filter" data-history-type="direct">LANGSUNG ENTRY</button></div><table id="historyTable"><tbody id="historyTableBody"></tbody></table><div id="emptyHistory"></div></div><pre id="result">WAITING</pre>
 <script>
 var A='0x1111111111111111111111111111111111111111';
@@ -14,10 +14,11 @@ window.__CTL_HISTORY_STABLE__={ready:true,version:10,mode:'all',fills:[
 ],render:base};
 window.__CTL_HISTORY_STABLE__.setMode=function(m){this.mode=m;this.render();};
 </script><script src="../history_real_metrics_v30.js"></script><script>
+var rogue=0;var rt=setInterval(function(){rogue++;try{ctlHistoryPnlSummaryV11.innerHTML='<b>ROGUE '+rogue+'</b>';}catch(e){}},25);
 setTimeout(function(){
- var st=window.__CTL_HISTORY_STABLE__,texts={};['all','pending','direct'].forEach(function(m){st.setMode(m);texts[m]=ctlHistoryPnlSummaryV11.textContent.replace(/\s+/g,' ').trim();});
- var L=window.__CTL_REAL_METRICS_V30__&&window.__CTL_REAL_METRICS_V30__.lastLedger;
- var ok=!!L&&L.all.entries===2&&L.pending.entries===1&&L.direct.entries===1&&Math.abs(L.all.pnl-1)<1e-9&&Math.abs(L.pending.pnl-2)<1e-9&&Math.abs(L.direct.pnl+1)<1e-9&&L.all.prob===50&&Math.abs(L.all.rr-2)<1e-9&&ctlHistoryPnlSummaryV11.dataset.metricVersion==='30'&&texts.all.indexOf('TOTAL ENTRY 2')>=0&&texts.pending.indexOf('TOTAL ENTRY 1')>=0&&texts.direct.indexOf('TOTAL ENTRY 1')>=0;
- result.textContent=(ok?'V30_REAL_METRICS=PASS':'V30_REAL_METRICS=FAIL')+' | all='+texts.all+' | pending='+texts.pending+' | direct='+texts.direct+' | invariantEntries='+(L?L.all.entries===L.pending.entries+L.direct.entries:false)+' | invariantPnl='+(L?Math.abs(L.all.pnl-(L.pending.pnl+L.direct.pnl))<1e-9:false);
-},250);
+ clearInterval(rt);var st=window.__CTL_HISTORY_STABLE__,texts={};['pending','direct','all'].forEach(function(m){st.setMode(m);texts[m]=ctlHistoryPnlSummaryV11.textContent.replace(/\s+/g,' ').trim();});
+ var V=window.__CTL_REAL_METRICS_V31__,L=V&&V.lastLedger;
+ var ok=!!L&&L.all.entries===2&&L.pending.entries===1&&L.direct.entries===1&&Math.abs(L.all.pnl-1)<1e-9&&Math.abs(L.pending.pnl-2)<1e-9&&Math.abs(L.direct.pnl+1)<1e-9&&L.all.prob===50&&Math.abs(L.all.rr-2)<1e-9&&L.invariantEntries===true&&L.invariantPnl===true&&ctlHistoryPnlSummaryV11.dataset.metricVersion==='31'&&texts.all.indexOf('PNL +$1.0000')>=0&&texts.all.indexOf('TOTAL ENTRY 2')>=0&&texts.pending.indexOf('PNL +$2.0000')>=0&&texts.pending.indexOf('TOTAL ENTRY 1')>=0&&texts.direct.indexOf('PNL -$1.0000')>=0&&texts.direct.indexOf('TOTAL ENTRY 1')>=0&&V.blocked>0;
+ result.textContent=(ok?'V31_REAL_METRICS=PASS':'V31_REAL_METRICS=FAIL')+' | all='+texts.all+' | pending='+texts.pending+' | direct='+texts.direct+' | invariantEntries='+(L&&L.invariantEntries)+' | invariantPnl='+(L&&L.invariantPnl)+' | rawPnl='+(L&&L.rawClosePnl)+' | blocked='+(V&&V.blocked)+' | rogue='+rogue;
+},900);
 </script></body></html>

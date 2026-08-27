@@ -1,0 +1,67 @@
+name: History V25 Restore Acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'history_ui_restore_v25.js'
+      - 'history_hl_sync_v7_guard.js'
+      - 'tests/history_v25_restore_history_fixture.html'
+      - '.github/workflows/history-v25-restore-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check history_ui_restore_v25.js
+          node --check history_hl_sync_v7_guard.js
+          grep -q 'history_ui_restore_v25.js' history_hl_sync_v7_guard.js
+          grep -q 'history-restore-1' history_hl_sync_v7_guard.js
+          grep -q 'disabledBy=.v25-history-restore' history_hl_sync_v7_guard.js
+          grep -q 'restore-performance-history' history_ui_restore_v25.js
+          grep -q 'backtestHistoryPanel' history_ui_restore_v25.js
+          echo V25_STATIC=PASS
+      - name: Headless Chrome restore Detailed Trade Log stress
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8010 --bind 127.0.0.1 >/tmp/http-v25.log 2>&1 &
+          HPID=$!
+          trap 'kill $HPID 2>/dev/null || true' EXIT
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8010/tests/history_v25_restore_history_fixture.html >/dev/null && break || sleep .2; done
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=7000 --dump-dom http://127.0.0.1:8010/tests/history_v25_restore_history_fixture.html >/tmp/v25-dom.html
+          python3 - <<'PY'
+          import html,re
+          s=open('/tmp/v25-dom.html').read(); m=re.search(r'<pre id="result"[^>]*>(.*?)</pre>',s,re.S); assert m, 'result missing'
+          result=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip(); print(result)
+          assert result.startswith('V25_HISTORY_RESTORE=PASS'), result
+          for token in ['bad=0','samples=40','rows=2','rrHidden=true','renkoHidden=true','cacheGone=true']: assert token in result, result
+          PY
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=7000 --screenshot=/tmp/history-v25-restore.png http://127.0.0.1:8010/tests/history_v25_restore_history_fixture.html
+      - name: Verify production V25 loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://copytolive.github.io/copy'
+          ok=0
+          for i in $(seq 1 36); do
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_ui_restore_v25.js?sha=${GITHUB_SHA}" -o /tmp/v25.js || true
+            if grep -q 'history-restore-1' /tmp/guard.js 2>/dev/null && grep -q 'restore-performance-history' /tmp/v25.js 2>/dev/null; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo V25_PRODUCTION_LOADER=PASS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: history-v25-restore-screenshot
+          path: /tmp/history-v25-restore.png

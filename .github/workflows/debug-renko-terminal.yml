@@ -22,7 +22,7 @@ jobs:
             sleep 5
           done
           exit 1
-      - name: Browser diagnostics
+      - name: Browser diagnostics embedded
         shell: bash
         run: |
           set -euo pipefail
@@ -39,8 +39,10 @@ jobs:
           const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});
           ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);return;}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params.exceptionDetails);if(m.method==='Runtime.consoleAPICalled')consoleLogs.push(m.params.args?.map(x=>x.value||x.description||'').join(' '));};
           await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});await send('Runtime.enable');await send('Page.enable');
-          await send('Page.navigate',{url:'https://copytolive.github.io/copy/renko-terminal.html?embed=1&symbol=SOL&smaPeriod=10&v=debug'});await new Promise(r=>setTimeout(r,12000));
-          const x=await send('Runtime.evaluate',{expression:`JSON.stringify({href:location.href,text:document.body.innerText,html:document.getElementById('root')?.innerHTML.slice(0,1000),shim:window.__CTL_RENKO_TERMINAL_SHIM__,mount:window.__CTL_RENKO_TERMINAL_MOUNT__})`,returnByValue:true});
+          await send('Page.navigate',{url:'https://copytolive.github.io/copy/'});await new Promise(r=>setTimeout(r,1800));
+          await send('Runtime.evaluate',{expression:`(()=>{document.body.innerHTML='';const f=document.createElement('iframe');f.id='debugRenko';f.src='renko-terminal.html?embed=1&symbol=SOL&smaPeriod=10&v=debug';f.style='width:1600px;height:900px;border:0';document.body.appendChild(f);return true})()`,returnByValue:true});
+          await new Promise(r=>setTimeout(r,14000));
+          const x=await send('Runtime.evaluate',{expression:`(()=>{const f=document.getElementById('debugRenko');const w=f?.contentWindow,d=f?.contentDocument;return JSON.stringify({outer:location.href,src:f?.getAttribute('src'),href:w?.location?.href,text:d?.body?.innerText,html:d?.getElementById('root')?.innerHTML.slice(0,1400),shim:w?.__CTL_RENKO_TERMINAL_SHIM__,mount:w?.__CTL_RENKO_TERMINAL_MOUNT__})})()`,returnByValue:true});
           console.log('RENKO_DEBUG_STATE',x.result.value);console.log('RENKO_DEBUG_EXCEPTIONS',exceptions.map(e=>e.exception?.description||e.text));console.log('RENKO_DEBUG_CONSOLE',consoleLogs.slice(-20));
           ws.close();
           NODE

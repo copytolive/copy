@@ -20,6 +20,13 @@ function install(){
     inject('ctlHlPendingV13Script','history_hl_pending_v13.js?v=20260827-1',function(){try{if(typeof window.__ctlInstallHlPendingV13==='function')window.__ctlInstallHlPendingV13();}catch(e){}});
     return false;
   }
+  function loadV14(){
+    if(!(window.__CTL_HISTORY_STABLE__&&window.__CTL_HISTORY_STABLE__.version>=10))return false;
+    if(window.__CTL_HL_PENDING_BRIDGE_V14__&&window.__CTL_HL_PENDING_BRIDGE_V14__.ready)return true;
+    if(typeof window.__ctlInstallHlPendingBridgeV14==='function'){try{window.__ctlInstallHlPendingBridgeV14();}catch(e){}return !!(window.__CTL_HL_PENDING_BRIDGE_V14__&&window.__CTL_HL_PENDING_BRIDGE_V14__.ready);}
+    inject('ctlHlPendingBridgeV14Script','history_hl_pending_bridge_v14.js?v=20260827-1',function(){try{if(typeof window.__ctlInstallHlPendingBridgeV14==='function')window.__ctlInstallHlPendingBridgeV14();}catch(e){}});
+    return false;
+  }
   function loadV12(){
     if(!(window.__CTL_HISTORY_STABLE__&&window.__CTL_HISTORY_STABLE__.version>=10))return false;
     if(window.__CTL_HL_SUMMARY_V12__&&window.__CTL_HL_SUMMARY_V12__.ready)return true;
@@ -27,10 +34,10 @@ function install(){
     inject('ctlHlSummaryV12Script','history_hl_summary_v12.js?v=20260827-1',function(){try{if(typeof window.__ctlInstallHlSummaryV12==='function')window.__ctlInstallHlSummaryV12();}catch(e){}});
     return false;
   }
-  var state={ready:true,version:13,source:'persistent-v10+pending-v13+summary-v12',timer:null};
+  var state={ready:true,version:14,source:'persistent-v10+pending-v13+bridge-v14+summary-v12',timer:null};
   window.__CTL_HISTORY_V7_GUARD__=state;
-  loadV10();loadV13();loadV12();
-  state.timer=setInterval(function(){var a=loadV10(),b=loadV13(),c=loadV12();if(a&&b&&c){clearInterval(state.timer);state.timer=null;}},500);
+  loadV10();loadV13();loadV14();loadV12();
+  state.timer=setInterval(function(){var a=loadV10(),b=loadV13(),c=loadV14(),d12=loadV12();if(a&&b&&c&&d12){clearInterval(state.timer);state.timer=null;}},500);
   return true;
 }
 window.__ctlInstallHlHistoryV7Guard=install;

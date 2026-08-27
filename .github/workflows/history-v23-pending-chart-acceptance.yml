@@ -1,15 +1,17 @@
-name: History V23 Pending + Chart Acceptance
+name: History V23/V24 Pending + UI Acceptance
 on:
   push:
     branches: [main]
     paths:
       - 'history_hl_fix_v23.js'
+      - 'history_ui_cleanup_v24.js'
       - 'history_hl_sync_v7_guard.js'
       - 'history_hl_pending_v19.js'
       - 'history_hl_mode_v20.js'
       - 'history_hl_ui_arbiter_v22.js'
       - 'tests/history_v23_pending_chart_fixture.html'
       - 'tests/history_v23_pending_antiflicker_fixture.html'
+      - 'tests/history_v24_cleanup_fixture.html'
       - '.github/workflows/history-v23-pending-chart-acceptance.yml'
   workflow_dispatch:
 permissions:
@@ -24,18 +26,24 @@ jobs:
         run: |
           set -euo pipefail
           node --check history_hl_fix_v23.js
+          node --check history_ui_cleanup_v24.js
           node --check history_hl_sync_v7_guard.js
           node --check history_hl_mode_v20.js
           grep -q 'history_hl_fix_v23.js' history_hl_sync_v7_guard.js
+          grep -q 'history_ui_cleanup_v24.js' history_hl_sync_v7_guard.js
           grep -q 'renderOwnerAware:true' history_hl_mode_v20.js
           grep -q 'function ownerRender' history_hl_mode_v20.js
           grep -q 'owner-aware-5' history_hl_sync_v7_guard.js
           grep -q 'st.render.__ctlV23' history_hl_sync_v7_guard.js
+          grep -q 'pending-lastgood' history_ui_cleanup_v24.js
+          grep -q 'rrMonitorBox' history_ui_cleanup_v24.js
+          grep -q 'renkoSmaHistoryTable' history_ui_cleanup_v24.js
+          grep -q 'HL CACHE ACCOUNT' history_ui_cleanup_v24.js
           grep -q 'history_hl_pending_v19.js' history_hl_fix_v23.js
           grep -q '#equityChart{visibility:hidden!important' history_hl_fix_v23.js
           grep -q 'pending-dom-arbiter' history_hl_fix_v23.js
           grep -q 'pendingDomMatches' history_hl_fix_v23.js
-          echo V23_STATIC_CONTRACT=PASS
+          echo V24_STATIC_CONTRACT=PASS
       - name: Headless Chrome active TP SL and chart stress
         shell: bash
         run: |
@@ -79,6 +87,26 @@ jobs:
           PY
           "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=7000 --screenshot=/tmp/history-v23-pending-antiflicker.png http://127.0.0.1:8001/tests/history_v23_pending_antiflicker_fixture.html
           echo V23_PENDING_ANTIFLICKER_STRESS=PASS
+      - name: Headless Chrome V24 cleanup stress
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8002 --bind 127.0.0.1 >/tmp/http-v24.log 2>&1 &
+          HPID3=$!
+          trap 'kill $HPID3 2>/dev/null || true' EXIT
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8002/tests/history_v24_cleanup_fixture.html >/dev/null && break || sleep .2; done
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=7000 --dump-dom http://127.0.0.1:8002/tests/history_v24_cleanup_fixture.html >/tmp/v24-dom.html
+          python3 - <<'PY'
+          import html,re
+          s=open('/tmp/v24-dom.html').read(); m=re.search(r'<pre id="result"[^>]*>(.*?)</pre>',s,re.S); assert m, 'v24 result missing'
+          result=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip(); print('V24_CLEANUP_RESULT',result)
+          assert result.startswith('V24_CLEANUP=PASS'), result
+          for token in ['bad=0','samples=40','rows=2','rrHidden=true','renkoHidden=true','cacheGone=true']: assert token in result, result
+          PY
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=7000 --screenshot=/tmp/history-v24-cleanup.png http://127.0.0.1:8002/tests/history_v24_cleanup_fixture.html
+          echo V24_CLEANUP_STRESS=PASS
       - name: Verify production loader
         shell: bash
         run: |
@@ -89,15 +117,17 @@ jobs:
             curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
             curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_fix_v23.js?sha=${GITHUB_SHA}" -o /tmp/v23.js || true
             curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_mode_v20.js?sha=${GITHUB_SHA}" -o /tmp/v20.js || true
-            if grep -q 'owner-aware-5' /tmp/guard.js 2>/dev/null && grep -q 'pending-dom-arbiter-4' /tmp/guard.js 2>/dev/null && grep -q 'pending-dom-arbiter' /tmp/v23.js 2>/dev/null && grep -q 'renderOwnerAware:true' /tmp/v20.js 2>/dev/null; then ok=1; break; fi
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_ui_cleanup_v24.js?sha=${GITHUB_SHA}" -o /tmp/v24.js || true
+            if grep -q 'owner-aware-5' /tmp/guard.js 2>/dev/null && grep -q 'pending-dom-arbiter-4' /tmp/guard.js 2>/dev/null && grep -q 'cleanup-1' /tmp/guard.js 2>/dev/null && grep -q 'pending-dom-arbiter' /tmp/v23.js 2>/dev/null && grep -q 'renderOwnerAware:true' /tmp/v20.js 2>/dev/null && grep -q 'pending-lastgood' /tmp/v24.js 2>/dev/null; then ok=1; break; fi
             sleep 5
           done
           test "$ok" = 1
-          echo V23_PRODUCTION_LOADER=PASS
+          echo V24_PRODUCTION_LOADER=PASS
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: history-v23-pending-regression-screenshots
+          name: history-v24-ui-regression-screenshots
           path: |
             /tmp/history-v23-pending-chart.png
             /tmp/history-v23-pending-antiflicker.png
+            /tmp/history-v24-cleanup.png

@@ -22,9 +22,51 @@ function match(e,h){if(coin(e.symbol||e.coin)!==coin(h.symbol||h.coin)||side(e)!
 function reconcile(engine,hl){var used={},rows=[],matched=0;engine.forEach(function(e){var c=clone([e])[0]||{},mi=-1;for(var i=0;i<hl.length;i++)if(!used[i]&&match(c,hl[i])){mi=i;break;}c.timestamp=iso(c.created_at||c.timestamp||c.time)||new Date().toISOString();c.symbol=(coin(c.symbol||c.coin))+'/USD';c.type=side(c);c.direction=side(c)==='SELL'?'SHORT':'LONG';c.volume=sz(c);c.price=px(c);c.pnl=null;c._logKind='pending';if(mi>=0){used[mi]=1;matched++;c._pendingSource='ENGINE+HL';c.direction+=' · HL OPEN';c._hlMatch=hl[mi];}else{c._pendingSource='ENGINE';c.direction+=' · ENGINE';}rows.push(c);});hl.forEach(function(h,i){if(!used[i]){var c=clone([h])[0];c.direction=(c.direction||'')+' · HL OPEN';rows.push(c);}});return{rows:rows,matched:matched};}
 function fmtTime(v){if(!v)return'-';var d=new Date(v);if(isNaN(d))return String(v).replace('T',' ').slice(0,19);return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');}
 function fmtPx(v){v=n(v,0);if(!v)return'—';if(v>=1000)return v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});if(v>=1)return v.toFixed(5).replace(/0+$/,'').replace(/\.$/,'');return v.toFixed(7).replace(/0+$/,'').replace(/\.$/,'');}
+
+// Keep the performance summary on one source of truth. The base dashboard has
+// another renderHistory() path that recalculates these four values from the
+// engine ledger (_hlTotalDeposits). That path races with applyHlPortfolioStats()
+// and used to make the UI alternate between e.g. +$1.39/$13.40 and
+// -$14.60/$29.40 every poll. Canonical live values are the Hyperliquid
+// portfolio values already used by applyHlPortfolioStats().
+function applyCanonicalPerf(){
+    if(window._historySymbolFilter)return false;
+    var p=window._hlPortfolio;
+    if(!p)return false;
+    var net=Number(p.netPnl),end=Number(p.endEquity),dd=Number(p.maxDDpct);
+    if(!Number.isFinite(net)||!Number.isFinite(end))return false;
+    var basis=end-net;
+    function set(id,v,c){var e=document.getElementById(id);if(!e)return;if(e.textContent!==v)e.textContent=v;if(c&&e.style.color!==c)e.style.color=c;}
+    set('statNetPnl',(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(4),net>=0?'var(--green)':'var(--red)');
+    if(basis>0.01){var g=net/basis*100;set('statGrowth',(g>=0?'+':'')+g.toFixed(2)+'%',g>=0?'var(--green)':'var(--red)');set('dInitDeposit','$'+basis.toFixed(2));}
+    if(Number.isFinite(dd))set('statMaxDD',dd.toFixed(2)+'%','var(--red)');
+    return true;
+}
+function installPerfStability(){
+    var old=window.__CTL_PERF_STABLE__;
+    if(old&&old.version>=1){try{old.apply();}catch(e){}return old;}
+    var ctl={ready:true,version:1,source:'hyperliquid-portfolio-single-writer',observer:null,timer:null,wrapped:false,apply:applyCanonicalPerf};
+    function wrapHistory(){
+        var f=window.renderHistory;
+        if(typeof f!=='function'||f.__ctlPerfStable)return;
+        var wrapped=function(){var r=f.apply(this,arguments);applyCanonicalPerf();return r;};
+        wrapped.__ctlPerfStable=true;wrapped.__ctlPerfOriginal=f;window.renderHistory=wrapped;ctl.wrapped=true;
+    }
+    wrapHistory();
+    try{
+        var obs=new MutationObserver(function(){applyCanonicalPerf();});
+        ['statNetPnl','statGrowth','statMaxDD','dInitDeposit'].forEach(function(id){var e=document.getElementById(id);if(e)obs.observe(e,{childList:true,subtree:true,characterData:true});});
+        ctl.observer=obs;
+    }catch(e){}
+    ctl.timer=setInterval(function(){wrapHistory();applyCanonicalPerf();},1000);
+    window.__CTL_PERF_STABLE__=ctl;
+    applyCanonicalPerf();
+    return ctl;
+}
+
 function install(){var d=document,oldCtl=window.__CTL_HISTORY_STABLE__;try{if(oldCtl&&oldCtl.timer)clearInterval(oldCtl.timer);if(oldCtl&&oldCtl.observer)oldCtl.observer.disconnect();}catch(e){}
 var old=d.getElementById('historyTypeFilters'),tbody=d.getElementById('historyTableBody');if(!old||!tbody)return false;var filters=old.cloneNode(true);old.parentNode.replaceChild(filters,old);filters.querySelectorAll('.history-type-filter').forEach(function(b){b.removeAttribute('onclick');b.style.pointerEvents='auto';b.style.cursor='pointer';});
-var ctl={ready:true,version:5,source:'hyperliquid-userfills+frontendOpenOrders+engine-reconcile',mode:'all',fills:[],hlOpen:[],engine:[],accounts:[],matched:0,shown:0,polling:false,lastGood:0,lastError:'',page:PAGE};window.__CTL_HISTORY_STABLE__=ctl;
+var ctl={ready:true,version:5,source:'hyperliquid-userfills+frontendOpenOrders+engine-reconcile+perf-stable-v1',mode:'all',fills:[],hlOpen:[],engine:[],accounts:[],matched:0,shown:0,polling:false,lastGood:0,lastError:'',page:PAGE};window.__CTL_HISTORY_STABLE__=ctl;installPerfStability();
 function selected(){if(ctl.mode==='direct')return ctl.fills.filter(function(x){return x.is_entry;});if(ctl.mode==='pending'){var r=reconcile(ctl.engine,ctl.hlOpen);ctl.matched=r.matched;return r.rows;}return ctl.fills;}
 function active(){filters.querySelectorAll('.history-type-filter').forEach(function(b){var a=b.dataset.historyType===ctl.mode;b.classList.toggle('active',a);b.setAttribute('aria-pressed',a?'true':'false');});}
 function info(rows){var el=d.getElementById('tradeLogInfo');if(!el)return;if(ctl.mode==='all')el.textContent='Hyperliquid fills · '+ctl.fills.length+' fills · menampilkan '+Math.min(rows.length,ctl.shown);else if(ctl.mode==='direct')el.textContent='LANGSUNG ENTRY · '+rows.length+' open fills · Hyperliquid'+(ctl.accounts.length>1?' · '+ctl.accounts.length+' accounts':'');else el.textContent='PENDING ORDER · Engine '+ctl.engine.length+' · HL open '+ctl.hlOpen.length+' · matched '+ctl.matched;el.style.color=ctl.lastError?'var(--gold)':'var(--green)';el.title='Wallet source: Hyperliquid userFills + frontendOpenOrders. Engine pending direkonsiliasi dengan order aktif Hyperliquid Main/xyz/km/vntl.';}
@@ -33,7 +75,7 @@ function openChart(x){try{if(typeof window.openPendingChart==='function')window.
 function render(){active();var rows=selected(),max=Math.min(rows.length,ctl.shown||PAGE);tbody.innerHTML='';for(var i=0;i<max;i++){(function(x,idx){var tr=d.createElement('tr'),entry=!!x.is_entry,pnl=x.pnl==null?'—':((n(x.pnl)>=0?'+$':'-$')+Math.abs(n(x.pnl)).toFixed(4)),kind=ctl.mode==='pending'?'PENDING':(entry?'ENTRY':'CLOSE'),dir=ctl.mode==='pending'?(x.direction||side(x)):(x._hlDir||x.direction||kind),color=x.pnl==null?'var(--text-muted)':(n(x.pnl)>=0?'var(--green)':'var(--red)');tr.style.cursor='pointer';tr.title='Klik: lihat chart';tr.innerHTML='<td style="color:var(--text-muted);font-size:11px">'+fmtTime(x.timestamp||x.created_at)+'</td><td>'+(idx+1)+'</td><td style="font-weight:700">'+String(x.symbol||'-')+'</td><td class="'+(side(x)==='BUY'?'side-long':'side-short')+'" style="font-weight:800">'+side(x)+'</td><td title="'+String(dir).replace(/"/g,'&quot;')+'">'+kind+'</td><td>'+String(x.volume!=null?x.volume:(x.lot||0))+'</td><td>'+fmtPx(x.price||x.trigger_price||x.entry_price)+'</td><td style="color:'+color+';font-weight:800">'+pnl+'</td><td style="font-weight:700;color:var(--text-muted)">HL</td>';tr.addEventListener('click',function(){openChart(x);});tbody.appendChild(tr);})(rows[i],i);}ctl.shown=max;var wrap=d.getElementById('loadMoreDealsWrap'),btn=d.getElementById('loadMoreDealsBtn');if(wrap){if(max<rows.length){wrap.style.display='';if(btn)btn.textContent='📋 Load More +'+Math.min(PAGE,rows.length-max)+' ('+(rows.length-max)+' remaining)';}else wrap.style.display='none';}empty(rows);info(rows);}
 ctl.setMode=function(m){ctl.mode=['all','pending','direct'].indexOf(m)>=0?m:'all';window._historyTypeFilter=ctl.mode;ctl.shown=PAGE;render();};ctl.loadMore=function(){ctl.shown=Math.min(selected().length,(ctl.shown||PAGE)+PAGE);render();};window._loadMoreDeals=ctl.loadMore;window.setHistoryTypeFilter=ctl.setMode;
 filters.addEventListener('click',function(ev){var b=ev.target.closest&&ev.target.closest('.history-type-filter');if(!b||!filters.contains(b))return;ev.preventDefault();ev.stopPropagation();ctl.setMode(b.dataset.historyType||'all');},true);
-async function poll(){if(ctl.polling)return;var master=wallet();if(!master){ctl.lastError='wallet belum tersedia';info(selected());return;}ctl.polling=true;try{var ac=await accounts(master),r=await Promise.allSettled([fetchFills(ac),fetchOpen(ac)]);ctl.accounts=ac;ctl.engine=clone(enginePending());if(r[0].status==='fulfilled')ctl.fills=r[0].value;if(r[1].status==='fulfilled')ctl.hlOpen=r[1].value;if(r[0].status==='rejected'&&r[1].status==='rejected')throw r[0].reason;ctl.lastGood=Date.now();ctl.lastError='';window._allFillsForLog=clone(ctl.fills);window._tradeLogAllFills=clone(ctl.fills);render();}catch(e){ctl.lastError=String(e&&e.message||e);ctl.engine=clone(enginePending());render();}finally{ctl.polling=false;}}
+async function poll(){if(ctl.polling)return;var master=wallet();if(!master){ctl.lastError='wallet belum tersedia';info(selected());return;}ctl.polling=true;try{var ac=await accounts(master),r=await Promise.allSettled([fetchFills(ac),fetchOpen(ac)]);ctl.accounts=ac;ctl.engine=clone(enginePending());if(r[0].status==='fulfilled')ctl.fills=r[0].value;if(r[1].status==='fulfilled')ctl.hlOpen=r[1].value;if(r[0].status==='rejected'&&r[1].status==='rejected')throw r[0].reason;ctl.lastGood=Date.now();ctl.lastError='';window._allFillsForLog=clone(ctl.fills);window._tradeLogAllFills=clone(ctl.fills);render();applyCanonicalPerf();}catch(e){ctl.lastError=String(e&&e.message||e);ctl.engine=clone(enginePending());render();applyCanonicalPerf();}finally{ctl.polling=false;}}
 ctl.poll=poll;ctl.timer=setInterval(poll,POLL);ctl.setMode(window._historyTypeFilter||'all');poll();return true;}
 window.__ctlInstallHlHistoryV5=install;if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();

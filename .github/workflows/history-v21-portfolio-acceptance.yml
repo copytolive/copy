@@ -34,11 +34,20 @@ jobs:
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
           test -n "$CHROME"
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/tests/history_v21_portfolio_fixture.html >/dev/null && break || sleep .2; done
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=3000 --dump-dom http://127.0.0.1:8000/tests/history_v21_portfolio_fixture.html >/tmp/v21-dom.html
-          grep -q 'V21_PORTFOLIO_ACCEPTANCE=PASS' /tmp/v21-dom.html
-          grep -q 'HYPERLIQUID · ALL PAIRS · 3 SYMBOL · 4 CLOSED FILLS' /tmp/v21-dom.html
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=3000 --screenshot=/tmp/history-v21-portfolio.png http://127.0.0.1:8000/tests/history_v21_portfolio_fixture.html
-          grep 'V21_PORTFOLIO_ACCEPTANCE=PASS' /tmp/v21-dom.html | tail -1
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=5000 --dump-dom http://127.0.0.1:8000/tests/history_v21_portfolio_fixture.html >/tmp/v21-dom.html
+          python3 - <<'PY'
+          import html,re
+          s=open('/tmp/v21-dom.html').read()
+          m=re.search(r'<pre id="result">(.*?)</pre>',s,re.S)
+          assert m, 'result element missing'
+          result=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip()
+          print('V21_RENDERED_RESULT',result)
+          assert result.startswith('V21_PORTFOLIO_ACCEPTANCE=PASS'), result
+          assert 'HYPERLIQUID · ALL PAIRS · 3 SYMBOL · 4 CLOSED FILLS' in result, result
+          assert 'filter=GOLD' in result, result
+          assert 'errors=' in result and result.endswith('errors='), result
+          PY
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=5000 --screenshot=/tmp/history-v21-portfolio.png http://127.0.0.1:8000/tests/history_v21_portfolio_fixture.html
           echo V21_BROWSER_FIXTURE=PASS
       - name: Verify production loader
         shell: bash
@@ -55,6 +64,7 @@ jobs:
           test "$ok" = 1
           echo V21_PRODUCTION_LOADER=PASS
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: history-v21-portfolio-screenshot
           path: /tmp/history-v21-portfolio.png

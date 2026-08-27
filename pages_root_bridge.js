@@ -114,10 +114,28 @@
     } catch (e) {}
   }
 
+  function ensureHistoryV7Guard(d, w) {
+    if (!d || !w) return;
+    try {
+      if (typeof w.__ctlInstallHlHistoryV7Guard === 'function') {
+        w.__ctlInstallHlHistoryV7Guard();
+        return;
+      }
+      if (d.getElementById('ctlHlHistoryV7GuardScript')) return;
+      var g = d.createElement('script');
+      g.id = 'ctlHlHistoryV7GuardScript';
+      g.src = 'history_hl_sync_v7_guard.js?v=20260827-2';
+      g.async = false;
+      g.onload = function () { try { if (typeof w.__ctlInstallHlHistoryV7Guard === 'function') w.__ctlInstallHlHistoryV7Guard(); } catch (e) {} };
+      (d.head || d.documentElement).appendChild(g);
+    } catch (e) {}
+  }
+
   function ensureTradeHistoryStability(d, w) {
     if (!d || !w || !d.getElementById('historyTypeFilters') || !d.getElementById('historyTableBody')) return;
     try {
       if (w.__CTL_HISTORY_STABLE__ && w.__CTL_HISTORY_STABLE__.version >= 7 && typeof w.__ctlInstallHlHistoryV7 === 'function') {
+        ensureHistoryV7Guard(d, w);
         return;
       }
       if (d.getElementById('ctlHlHistoryV7Script')) return;
@@ -127,6 +145,7 @@
       script.async = false;
       script.onload = function () {
         try { if (typeof w.__ctlInstallHlHistoryV7 === 'function' && (!w.__CTL_HISTORY_STABLE__ || w.__CTL_HISTORY_STABLE__.version < 7)) w.__ctlInstallHlHistoryV7(); } catch (e) {}
+        ensureHistoryV7Guard(d, w);
       };
       (d.head || d.documentElement).appendChild(script);
     } catch (e) {}

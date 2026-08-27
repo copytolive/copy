@@ -13,9 +13,11 @@ function install(){
   function loadUi22(){if(!(window.__CTL_HISTORY_STABLE__&&window.__CTL_HISTORY_STABLE__.version>=10))return false;if(window.__CTL_HL_UI_ARBITER_V22__&&window.__CTL_HL_UI_ARBITER_V22__.ready)return true;if(typeof window.__ctlInstallHlUiArbiterV22==='function'){try{window.__ctlInstallHlUiArbiterV22();}catch(e){}return !!(window.__CTL_HL_UI_ARBITER_V22__&&window.__CTL_HL_UI_ARBITER_V22__.ready);}inject('ctlHlUiArbiterV22Script','history_hl_ui_arbiter_v22.js?v=20260827-single-writer-1',function(){try{window.__ctlInstallHlUiArbiterV22&&window.__ctlInstallHlUiArbiterV22();}catch(e){}});return false;}
   function fix23Ok(){var f=window.__CTL_HL_FIX_V23__,st=window.__CTL_HISTORY_STABLE__;return !!(mode20Ok()&&f&&f.ready&&String(f.source||'').indexOf('pending-dom-arbiter')>=0&&st&&st.render&&st.render.__ctlV23===true);}
   function loadFix23(){if(!mode20Ok())return false;if(fix23Ok())return true;if(typeof window.__ctlInstallHlFixV23==='function'){try{window.__ctlInstallHlFixV23();}catch(e){}if(fix23Ok())return true;}inject('ctlHlFixV23Script','history_hl_fix_v23.js?v=20260827-pending-dom-arbiter-4',function(){try{window.__ctlInstallHlFixV23&&window.__ctlInstallHlFixV23();}catch(e){}});return false;}
-  var state={ready:true,version:23,source:'persistent-v10+owner-aware-v20+ui-v22+active-tpsl+pending-dom-arbiter-v23',timer:null};window.__CTL_HISTORY_V7_GUARD__=state;
-  loadV10();loadMode20();loadInfer20();loadUi22();loadFix23();
-  state.timer=setInterval(function(){var a=loadV10(),b=loadMode20(),c=loadInfer20(),u=loadUi22(),f=loadFix23();if(a&&b&&c&&u&&f){clearInterval(state.timer);state.timer=null;}},500);
+  function cleanup24Ok(){var c=window.__CTL_UI_CLEANUP_V24__;return !!(c&&c.ready&&c.version>=24&&String(c.source||'').indexOf('pending-lastgood')>=0);}
+  function loadCleanup24(){if(!fix23Ok())return false;if(cleanup24Ok())return true;if(typeof window.__ctlInstallUiCleanupV24==='function'){try{window.__ctlInstallUiCleanupV24();}catch(e){}if(cleanup24Ok())return true;}inject('ctlUiCleanupV24Script','history_ui_cleanup_v24.js?v=20260827-cleanup-1',function(){try{window.__ctlInstallUiCleanupV24&&window.__ctlInstallUiCleanupV24();}catch(e){}});return false;}
+  var state={ready:true,version:24,source:'persistent-v10+owner-aware-v20+ui-v22+active-tpsl+pending-dom-arbiter-v23+cleanup-v24',timer:null};window.__CTL_HISTORY_V7_GUARD__=state;
+  loadV10();loadMode20();loadInfer20();loadUi22();loadFix23();loadCleanup24();
+  state.timer=setInterval(function(){var a=loadV10(),b=loadMode20(),c=loadInfer20(),u=loadUi22(),f=loadFix23(),g=loadCleanup24();if(a&&b&&c&&u&&f&&g){clearInterval(state.timer);state.timer=null;}},500);
   return true;
 }
 window.__ctlInstallHlHistoryV7Guard=install;if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,0);},{once:true});else setTimeout(install,0);

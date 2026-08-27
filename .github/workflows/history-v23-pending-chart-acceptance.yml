@@ -118,7 +118,7 @@ jobs:
             curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_fix_v23.js?sha=${GITHUB_SHA}" -o /tmp/v23.js || true
             curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_mode_v20.js?sha=${GITHUB_SHA}" -o /tmp/v20.js || true
             curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_ui_cleanup_v24.js?sha=${GITHUB_SHA}" -o /tmp/v24.js || true
-            if grep -q 'owner-aware-5' /tmp/guard.js 2>/dev/null && grep -q 'pending-dom-arbiter-4' /tmp/guard.js 2>/dev/null && grep -q 'cleanup-1' /tmp/guard.js 2>/dev/null && grep -q 'pending-dom-arbiter' /tmp/v23.js 2>/dev/null && grep -q 'renderOwnerAware:true' /tmp/v20.js 2>/dev/null && grep -q 'pending-lastgood' /tmp/v24.js 2>/dev/null; then ok=1; break; fi
+            if grep -q 'owner-aware-5' /tmp/guard.js 2>/dev/null && grep -q 'pending-dom-arbiter-4' /tmp/guard.js 2>/dev/null && grep -q 'cleanup-2' /tmp/guard.js 2>/dev/null && grep -q 'pending-dom-arbiter' /tmp/v23.js 2>/dev/null && grep -q 'renderOwnerAware:true' /tmp/v20.js 2>/dev/null && grep -q 'pending-lastgood' /tmp/v24.js 2>/dev/null; then ok=1; break; fi
             sleep 5
           done
           test "$ok" = 1

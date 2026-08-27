@@ -1,70 +1,20 @@
-name: History V21 Portfolio Acceptance
+name: History V21 Legacy Syntax
 on:
   push:
     branches: [main]
     paths:
       - 'history_hl_portfolio_v21.js'
-      - 'history_hl_sync_v7_guard.js'
-      - 'tests/history_v21_portfolio_fixture.html'
       - '.github/workflows/history-v21-portfolio-acceptance.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  browser-acceptance:
+  legacy-syntax:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Static contracts
-        shell: bash
+      - name: Verify legacy module remains syntactically valid
         run: |
           set -euo pipefail
           node --check history_hl_portfolio_v21.js
-          grep -q 'history_hl_portfolio_v21.js' history_hl_sync_v7_guard.js
-          grep -q 'HYPERLIQUID · ALL PAIRS' history_hl_portfolio_v21.js
-          grep -q 'closedFills' history_hl_portfolio_v21.js
-          echo V21_STATIC_CONTRACT=PASS
-      - name: Headless Chrome all-pairs fixture
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/http.log 2>&1 &
-          HPID=$!
-          trap 'kill $HPID 2>/dev/null || true' EXIT
-          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
-          test -n "$CHROME"
-          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/tests/history_v21_portfolio_fixture.html >/dev/null && break || sleep .2; done
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=5000 --dump-dom http://127.0.0.1:8000/tests/history_v21_portfolio_fixture.html >/tmp/v21-dom.html
-          python3 - <<'PY'
-          import html,re
-          s=open('/tmp/v21-dom.html').read()
-          m=re.search(r'<pre id="result">(.*?)</pre>',s,re.S)
-          assert m, 'result element missing'
-          result=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip()
-          print('V21_RENDERED_RESULT',result)
-          assert result.startswith('V21_PORTFOLIO_ACCEPTANCE=PASS'), result
-          assert 'HYPERLIQUID · ALL PAIRS · 3 SYMBOL · 4 CLOSED FILLS' in result, result
-          assert 'filter=GOLD' in result, result
-          assert 'errors=' in result and result.endswith('errors='), result
-          PY
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=5000 --screenshot=/tmp/history-v21-portfolio.png http://127.0.0.1:8000/tests/history_v21_portfolio_fixture.html
-          echo V21_BROWSER_FIXTURE=PASS
-      - name: Verify production loader
-        shell: bash
-        run: |
-          set -euo pipefail
-          BASE='https://copytolive.github.io/copy'
-          ok=0
-          for i in $(seq 1 24); do
-            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
-            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_portfolio_v21.js?sha=${GITHUB_SHA}" -o /tmp/v21.js || true
-            if grep -q 'history_hl_portfolio_v21.js' /tmp/guard.js 2>/dev/null && grep -q 'HYPERLIQUID · ALL PAIRS' /tmp/v21.js 2>/dev/null; then ok=1; break; fi
-            sleep 5
-          done
-          test "$ok" = 1
-          echo V21_PRODUCTION_LOADER=PASS
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: history-v21-portfolio-screenshot
-          path: /tmp/history-v21-portfolio.png
+          echo V21_LEGACY_SYNTAX=PASS

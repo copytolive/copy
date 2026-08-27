@@ -42,7 +42,7 @@ function activePendingMetrics(){
     if(rwd>0)reward+=rwd;
     if(rsk>0)risk+=rsk;
   });
-  return{pnl:entries?pnl:null,entries:entries,rr:risk>1e-12?reward/risk:null,reward:reward,risk:risk};
+  return{pnl:entries?pnl:null,entries:entries,rr:risk>1e-12?reward/risk:null};
 }
 function ensureBar(){
   var filters=document.getElementById('historyTypeFilters');if(!filters)return null;
@@ -55,7 +55,9 @@ function span(label,value,color){return'<span><span style="color:var(--text-mute
 function paint(){
   var st=window.__CTL_HISTORY_STABLE__,bar=ensureBar();if(!st||st.version<10||!bar)return false;
   var mode=st.mode||window._historyTypeFilter||'all';
-  if(mode!=='pending'&&mode!=='direct'){bar.style.display='none';return true;}
+  var info=document.getElementById('tradeLogInfo');
+  if(mode!=='pending'&&mode!=='direct'){bar.style.display='none';if(info)info.style.display='';return true;}
+  if(info)info.style.display='none';
   var c=closedMetrics(Array.isArray(st.fills)?st.fills:[]),html='';
   if(mode==='direct'){
     var totalEntry=(st.fills||[]).filter(function(x){return x&&x.is_entry;}).length;

@@ -1,9 +1,10 @@
-name: History V30 Real Metrics Acceptance
+name: History V31 Real Metrics Acceptance
 on:
   push:
     branches: [main]
     paths:
       - 'history_real_metrics_v30.js'
+      - 'history_real_metrics_v31.js'
       - 'history_hl_sync_v7_guard.js'
       - 'tests/history_v30_real_metrics_fixture.html'
       - '.github/workflows/history-v30-real-metrics-acceptance.yml'
@@ -20,30 +21,33 @@ jobs:
         run: |
           set -euo pipefail
           node --check history_real_metrics_v30.js
+          node --check history_real_metrics_v31.js
           node --check history_hl_sync_v7_guard.js
-          grep -q 'real-userfills-oid-ledger+mutually-exclusive-entry-categories' history_real_metrics_v30.js
+          grep -q 'delegated-to-v31-single-summary-writer' history_real_metrics_v30.js
+          grep -q 'single-summary-writer+real-userfills-oid-ledger+exclusive-partitions' history_real_metrics_v31.js
           grep -q 'history_real_metrics_v30.js' history_hl_sync_v7_guard.js
-          grep -q 'version:30' history_hl_sync_v7_guard.js
-          echo V30_STATIC=PASS
-      - name: Browser real-ledger invariants
+          echo V31_STATIC=PASS
+      - name: Browser ledger partition and rogue-writer stress
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 8011 --bind 127.0.0.1 >/tmp/http-v30.log 2>&1 &
+          python3 -m http.server 8011 --bind 127.0.0.1 >/tmp/http-v31.log 2>&1 &
           HPID=$!
           trap 'kill $HPID 2>/dev/null || true' EXIT
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
           test -n "$CHROME"
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8011/tests/history_v30_real_metrics_fixture.html >/dev/null && break || sleep .2; done
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1400,650 --virtual-time-budget=1000 --dump-dom http://127.0.0.1:8011/tests/history_v30_real_metrics_fixture.html >/tmp/v30-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1400,650 --virtual-time-budget=2500 --dump-dom http://127.0.0.1:8011/tests/history_v30_real_metrics_fixture.html >/tmp/v31-dom.html
           python3 - <<'PY'
           import html,re
-          s=open('/tmp/v30-dom.html').read();m=re.search(r'<pre id="result"[^>]*>(.*?)</pre>',s,re.S);assert m
+          s=open('/tmp/v31-dom.html').read();m=re.search(r'<pre id="result"[^>]*>(.*?)</pre>',s,re.S);assert m
           r=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip();print(r)
-          assert r.startswith('V30_REAL_METRICS=PASS'),r
-          for x in ['PNL +$1.0000','TOTAL ENTRY 2','invariantEntries=true','invariantPnl=true']: assert x in r,r
+          assert r.startswith('V31_REAL_METRICS=PASS'),r
+          for x in ['all=PNL +$1.0000','pending=PNL +$2.0000','direct=PNL -$1.0000','invariantEntries=true','invariantPnl=true','rawPnl=1']: assert x in r,r
+          m2=re.search(r'blocked=(\d+)',r);assert m2 and int(m2.group(1))>0,r
           PY
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1400,650 --virtual-time-budget=1000 --screenshot=/tmp/history-v30-real-metrics.png http://127.0.0.1:8011/tests/history_v30_real_metrics_fixture.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1400,650 --virtual-time-budget=2500 --screenshot=/tmp/history-v31-real-metrics.png http://127.0.0.1:8011/tests/history_v30_real_metrics_fixture.html
+          echo V31_BROWSER=PASS
       - name: Verify production assets
         shell: bash
         run: |
@@ -51,14 +55,14 @@ jobs:
           BASE='https://copytolive.github.io/copy';ok=0
           for i in $(seq 1 36); do
             curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_real_metrics_v30.js?sha=${GITHUB_SHA}" -o /tmp/v30.js || true
-            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard30.js || true
-            if grep -q 'real-userfills-oid-ledger+mutually-exclusive-entry-categories' /tmp/v30.js 2>/dev/null && grep -q 'history_real_metrics_v30.js' /tmp/guard30.js 2>/dev/null && grep -q 'version:30' /tmp/guard30.js 2>/dev/null; then ok=1;break;fi
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_real_metrics_v31.js?sha=${GITHUB_SHA}" -o /tmp/v31.js || true
+            if grep -q 'delegated-to-v31-single-summary-writer' /tmp/v30.js 2>/dev/null && grep -q 'single-summary-writer+real-userfills-oid-ledger+exclusive-partitions' /tmp/v31.js 2>/dev/null; then ok=1;break;fi
             sleep 5
           done
           test "$ok" = 1
-          echo V30_PRODUCTION_ASSETS=PASS
+          echo V31_PRODUCTION_ASSETS=PASS
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: history-v30-real-metrics-proof
-          path: /tmp/history-v30-real-metrics.png
+          name: history-v31-real-metrics-proof
+          path: /tmp/history-v31-real-metrics.png

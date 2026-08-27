@@ -1,0 +1,78 @@
+name: History V20 Browser Acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'history_hl_mode_v20.js'
+      - 'history_hl_sync_v7_guard.js'
+      - 'tests/history_v20_browser_fixture.html'
+      - '.github/workflows/history-v20-browser-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check history_hl_mode_v20.js
+          grep -q 'history_hl_mode_v20.js' history_hl_sync_v7_guard.js
+          grep -q "historicalOrders" history_hl_mode_v20.js
+          grep -q "parentBracket" history_hl_mode_v20.js
+          grep -q "_hlOid" history_hl_mode_v20.js
+          echo V20_STATIC_CONTRACT=PASS
+      - name: Hyperliquid live API contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, urllib.request
+          addrs=['0xCB331197E84f135AB9Ed6FB51Cd9757c0bd29d0D','0x31ca8395cf837de08b24da3f660e77761dfb974b']
+          ok=0
+          for a in addrs:
+              req=urllib.request.Request('https://api.hyperliquid.xyz/info',data=json.dumps({'type':'historicalOrders','user':a}).encode(),headers={'Content-Type':'application/json'})
+              try:
+                  with urllib.request.urlopen(req,timeout=15) as r: d=json.load(r)
+                  print('HISTORICAL_ORDERS',a,len(d) if isinstance(d,list) else type(d).__name__)
+                  if isinstance(d,list): ok+=1
+              except Exception as e: print('HL_ERR',a,repr(e))
+          assert ok>=1
+          print('HL_LIVE_CONTRACT=PASS')
+          PY
+      - name: Headless Chrome browser fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/http.log 2>&1 &
+          HPID=$!
+          trap 'kill $HPID 2>/dev/null || true' EXIT
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/tests/history_v20_browser_fixture.html >/dev/null && break || sleep .2; done
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=5000 --dump-dom http://127.0.0.1:8000/tests/history_v20_browser_fixture.html > /tmp/v20-dom.html
+          grep -q 'V20_BROWSER_ACCEPTANCE=PASS' /tmp/v20-dom.html
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=5000 --screenshot=/tmp/history-v20-browser.png http://127.0.0.1:8000/tests/history_v20_browser_fixture.html
+          grep 'V20_BROWSER_ACCEPTANCE=PASS' /tmp/v20-dom.html | tail -1
+          echo V20_BROWSER_FIXTURE=PASS
+      - name: Verify production loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://copytolive.github.io/copy'
+          ok=0
+          for i in $(seq 1 24); do
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_mode_v20.js?sha=${GITHUB_SHA}" -o /tmp/v20.js || true
+            if grep -q 'history_hl_mode_v20.js' /tmp/guard.js 2>/dev/null && grep -q 'historicalOrders' /tmp/v20.js 2>/dev/null; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo V20_PRODUCTION_LOADER=PASS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: history-v20-browser-screenshot
+          path: /tmp/history-v20-browser.png

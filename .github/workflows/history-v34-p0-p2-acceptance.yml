@@ -1,0 +1,88 @@
+name: History V34 P0-P2 Acceptance
+on:
+  push:
+    branches: [main, feat/history-p0-p2-parity-20260827]
+    paths:
+      - 'history_hl_ledger_v32.js'
+      - 'history_real_metrics_v33.js'
+      - 'history_real_metrics_v30.js'
+      - 'tests/history_v34_p0_p2_fixture.html'
+      - '.github/workflows/history-v34-p0-p2-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  p0-p2-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static contracts
+        run: |
+          set -euo pipefail
+          node --check history_hl_ledger_v32.js
+          node --check history_real_metrics_v33.js
+          node --check history_real_metrics_v30.js
+          grep -q 'userFillsByTime' history_hl_ledger_v32.js
+          grep -q 'userFunding' history_hl_ledger_v32.js
+          grep -q '_hlFeeUsd' history_hl_ledger_v32.js
+          grep -q 'childToParent' history_real_metrics_v33.js
+          grep -q 'fee-aware' history_real_metrics_v33.js
+          grep -q 'realized average winner' history_real_metrics_v33.js
+          echo V34_STATIC=PASS
+      - name: Browser P0-P2 temporal acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/http.log 2>&1 &
+          HPID=$!
+          trap 'kill $HPID 2>/dev/null || true' EXIT
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/tests/history_v34_p0_p2_fixture.html >/dev/null && break || sleep .2; done
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,800 --virtual-time-budget=7000 --dump-dom http://127.0.0.1:8000/tests/history_v34_p0_p2_fixture.html >/tmp/v34-dom.html
+          python3 - <<'PY'
+          import html,re
+          s=open('/tmp/v34-dom.html').read()
+          m=re.search(r'<pre id="result"[^>]*>(.*?)</pre>',s,re.S)
+          assert m, 'result missing'
+          r=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip()
+          print(r)
+          assert r.startswith('V34_P0_P2=PASS'), r
+          assert 'fills=2204' in r, r
+          assert 'ALL=PNL +$0.7000' in r, r
+          assert 'PENDING=PNL +$1.8000' in r, r
+          assert 'DIRECT=PNL -$1.1000' in r, r
+          assert 'fees=0.3' in r, r
+          assert 'funding=0.2' in r, r
+          assert 'account=0.899999' in r or 'account=0.9' in r, r
+          assert 'exactChild=1' in r, r
+          assert 'unknown=0' in r, r
+          PY
+          for mode in all pending direct; do
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,800 --virtual-time-budget=7000 --screenshot="/tmp/v34-${mode}.png" "http://127.0.0.1:8000/tests/history_v34_p0_p2_fixture.html?mode=${mode}"
+          done
+          echo V34_BROWSER=PASS
+      - name: Production assets after main deploy
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://copytolive.github.io/copy'
+          ok=0
+          for i in $(seq 1 48); do
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_real_metrics_v30.js?sha=${GITHUB_SHA}" -o /tmp/v30.js || true
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_ledger_v32.js?sha=${GITHUB_SHA}" -o /tmp/v32.js || true
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_real_metrics_v33.js?sha=${GITHUB_SHA}" -o /tmp/v33.js || true
+            if grep -q 'history_hl_ledger_v32.js' /tmp/v30.js 2>/dev/null && grep -q 'userFillsByTime' /tmp/v32.js 2>/dev/null && grep -q 'exact-child-oid' /tmp/v33.js 2>/dev/null; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo V34_PRODUCTION_ASSETS=PASS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: history-v34-p0-p2-browser-screenshots
+          path: |
+            /tmp/v34-all.png
+            /tmp/v34-pending.png
+            /tmp/v34-direct.png

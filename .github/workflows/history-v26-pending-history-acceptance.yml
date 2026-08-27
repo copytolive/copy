@@ -1,0 +1,61 @@
+name: History V26 Pending History Acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'history_hl_fix_v23.js'
+      - 'history_hl_sync_v7_guard.js'
+      - 'tests/history_v26_pending_history_fixture.html'
+      - '.github/workflows/history-v26-pending-history-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static contracts
+        run: |
+          set -euo pipefail
+          node --check history_hl_fix_v23.js
+          node --check history_hl_sync_v7_guard.js
+          grep -q 'pending-history-hybrid' history_hl_fix_v23.js
+          grep -q 'pending-history-hybrid-6' history_hl_sync_v7_guard.js
+          echo V26_STATIC=PASS
+      - name: Headless Chrome historical pending stress
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/http.log 2>&1 &
+          HPID=$!
+          trap 'kill $HPID 2>/dev/null || true' EXIT
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/tests/history_v26_pending_history_fixture.html >/dev/null && break || sleep .2; done
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1600,800 --virtual-time-budget=6500 --dump-dom http://127.0.0.1:8000/tests/history_v26_pending_history_fixture.html >/tmp/v26-dom.html
+          python3 - <<'PY'
+          import html,re
+          s=open('/tmp/v26-dom.html').read();m=re.search(r'<pre id="result"[^>]*>(.*?)</pre>',s,re.S);assert m,'result missing';r=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip();print(r);assert r.startswith('V26_PENDING_HISTORY=PASS'),r;assert 'bad=0' in r,r;assert 'samples=30' in r,r;assert 'rows=2' in r,r;assert 'TOTAL ENTRY 1' in r,r;assert 'PROBABILITAS 100.00%' in r,r
+          PY
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1600,800 --virtual-time-budget=6500 --screenshot=/tmp/history-v26-pending-history.png http://127.0.0.1:8000/tests/history_v26_pending_history_fixture.html
+          echo V26_BROWSER=PASS
+      - name: Verify production loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://copytolive.github.io/copy'
+          ok=0
+          for i in $(seq 1 36); do
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_fix_v23.js?sha=${GITHUB_SHA}" -o /tmp/fix.js || true
+            if grep -q 'pending-history-hybrid-6' /tmp/guard.js 2>/dev/null && grep -q 'pending-history-hybrid' /tmp/fix.js 2>/dev/null; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo V26_PRODUCTION_LOADER=PASS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: history-v26-pending-history-screenshot
+          path: /tmp/history-v26-pending-history.png

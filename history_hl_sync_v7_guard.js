@@ -2,37 +2,38 @@
 'use strict';
 function install(){
   var ctl=window.__CTL_HISTORY_STABLE__,d=document;
-  if(!ctl||ctl.version<7||typeof ctl.setMode!=='function')return false;
-  if(window.__CTL_HISTORY_V7_GUARD__)return true;
+  if(!ctl||ctl.version<7)return false;
+  var old=window.__CTL_HISTORY_V7_GUARD__;
+  if(old&&old.observer)try{old.observer.disconnect();}catch(e){}
+  if(old&&old.timer)try{clearInterval(old.timer);}catch(e){}
   try{if(ctl.domGuard)ctl.domGuard.disconnect();}catch(e){}
-  var state={ready:true,version:1,suppress:false,queued:false,observer:null,timer:null};
-  function relevant(m){
-    var q=m&&m.target&&(m.target.nodeType===1?m.target:m.target.parentElement);
-    while(q&&q!==d.body){
-      if(q.id==='historyTableBody'||q.id==='emptyHistory'||q.id==='historyTable'||q.id==='tradeLogInfo'||q.id==='historyTypeFilters')return true;
-      q=q.parentElement;
-    }
-    return false;
+
+  function loadV8(){
+    try{
+      if(typeof window.__ctlInstallHlHistoryV8Overlay==='function'){
+        window.__ctlInstallHlHistoryV8Overlay();
+        return true;
+      }
+      if(d.getElementById('ctlHlHistoryV8OverlayScript'))return false;
+      var s=d.createElement('script');
+      s.id='ctlHlHistoryV8OverlayScript';
+      s.src='history_hl_sync_v8_overlay.js?v=20260827-1';
+      s.async=false;
+      s.onload=function(){try{if(typeof window.__ctlInstallHlHistoryV8Overlay==='function')window.__ctlInstallHlHistoryV8Overlay();}catch(e){}};
+      (d.head||d.documentElement).appendChild(s);
+      return true;
+    }catch(e){return false;}
   }
-  function repaint(){
-    if(state.suppress)return;
-    state.suppress=true;
-    try{ctl.setMode(ctl.mode||window._historyTypeFilter||'all');}catch(e){}
-    setTimeout(function(){state.suppress=false;},0);
-  }
-  try{
-    state.observer=new MutationObserver(function(muts){
-      if(state.suppress||state.queued||!muts.some(relevant))return;
-      state.queued=true;
-      requestAnimationFrame(function(){state.queued=false;repaint();});
-    });
-    state.observer.observe(d.body,{subtree:true,childList:true,characterData:true});
-  }catch(e){}
-  // Slow safety repaint covers legacy pollers that mutate style/visibility without
-  // changing text nodes. It is intentionally infrequent to avoid any visual pulse.
-  state.timer=setInterval(repaint,2500);
+
+  var state={ready:true,version:2,source:'v8-overlay-loader',timer:null};
   window.__CTL_HISTORY_V7_GUARD__=state;
-  repaint();
+  loadV8();
+  state.timer=setInterval(function(){
+    if(window.__CTL_HISTORY_V8_OVERLAY__&&window.__CTL_HISTORY_V8_OVERLAY__.ready){
+      clearInterval(state.timer);state.timer=null;return;
+    }
+    loadV8();
+  },500);
   return true;
 }
 window.__ctlInstallHlHistoryV7Guard=install;

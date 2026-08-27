@@ -18,26 +18,31 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - name: Wait for current Sequential Compounding bridge deployment
+      - name: Wait for current Sequential Compounding bridge and terminal v3 deployment
         shell: bash
         run: |
           set -euo pipefail
           ok=0
           for i in $(seq 1 36); do
             if curl -LfsS --connect-timeout 10 --max-time 20 \
-              'https://copytolive.github.io/copy/pages_root_bridge.js?parity=sequential-v3' \
+              "https://copytolive.github.io/copy/pages_root_bridge.js?parity=${GITHUB_SHA}" \
               -o /tmp/root-bridge.js \
+              && curl -LfsS --connect-timeout 10 --max-time 20 \
+              "https://copytolive.github.io/copy/renko-terminal.html?parity=${GITHUB_SHA}" \
+              -o /tmp/renko-terminal.html \
               && grep -q "source: 'sequential-compounding-live'" /tmp/root-bridge.js \
               && grep -q "visualContract: 'devlog-20260417-v3'" /tmp/root-bridge.js \
-              && grep -q "renko-terminal.html?embed=1&symbol=SOL" /tmp/root-bridge.js \
-              && grep -q "renkoSmaHistoryPanel" /tmp/root-bridge.js; then
+              && grep -q "source=sequential&v=3" /tmp/root-bridge.js \
+              && grep -q "renkoSmaHistoryPanel" /tmp/root-bridge.js \
+              && grep -q "renderer:'vanilla-canvas',version:3" /tmp/renko-terminal.html \
+              && grep -q "HYPERLIQUID DIRECT · PUBLIC MARKET DATA" /tmp/renko-terminal.html; then
               ok=1
               break
             fi
             sleep 5
           done
           test "$ok" = 1
-          echo 'SEQUENTIAL_BRIDGE_V3_DEPLOYED=PASS'
+          echo 'SEQUENTIAL_BRIDGE_AND_TERMINAL_V3_DEPLOYED=PASS'
 
       - name: Assert and capture full Sequential Compounding dashboard
         shell: bash
@@ -86,9 +91,10 @@ jobs:
           if(s.left<40 || s.left>120 || s.top!==0 || s.width<1500 || s.height<1000) throw new Error('Sequential frame geometry wrong: '+JSON.stringify({left:s.left,top:s.top,width:s.width,height:s.height}));
           if(s.loginVisible || s.walletVisible || s.ownerVisible) throw new Error('An auth/wallet overlay still blocks the dashboard');
           if(!s.header || !s.workspace || !s.renkoFrame || s.renkoReady!=='complete') throw new Error('Recovered production dashboard structure missing');
-          if(!s.renkoSrc.startsWith('renko-terminal.html?embed=1&symbol=SOL')) throw new Error('Recovered SolRenkoTerminal not mounted: '+s.renkoSrc);
+          if(!s.renkoSrc.startsWith('renko-terminal.html?embed=1&symbol=SOL')) throw new Error('Renko terminal not mounted: '+s.renkoSrc);
+          if(!s.renkoSrc.includes('&v=3')) throw new Error('Stale Renko terminal URL: '+s.renkoSrc);
           if(s.parity!=='sequential-v3') throw new Error('Screenshot parity marker missing: '+s.parity);
-          if(!s.renkoMount?.ready) throw new Error('Renko mount bridge not ready: '+JSON.stringify(s.renkoMount));
+          if(!s.renkoMount?.ready || s.renkoMount?.version!==3) throw new Error('Renko v3 mount bridge not ready: '+JSON.stringify(s.renkoMount));
           if(!s.renkoHistoryExists || !s.renkoHistoryText.includes('RENKO SMA10 · LIVE HISTORY')) throw new Error('Renko SMA10 Live History panel missing');
 
           const shellRequired=[

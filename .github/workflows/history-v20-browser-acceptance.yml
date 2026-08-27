@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'history_hl_mode_v20.js'
+      - 'history_hl_mode_v20_infer.js'
       - 'history_hl_sync_v7_guard.js'
       - 'tests/history_v20_browser_fixture.html'
       - '.github/workflows/history-v20-browser-acceptance.yml'
@@ -20,10 +21,13 @@ jobs:
         run: |
           set -euo pipefail
           node --check history_hl_mode_v20.js
+          node --check history_hl_mode_v20_infer.js
           grep -q 'history_hl_mode_v20.js' history_hl_sync_v7_guard.js
+          grep -q 'history_hl_mode_v20_infer.js' history_hl_sync_v7_guard.js
           grep -q "historicalOrders" history_hl_mode_v20.js
           grep -q "parentBracket" history_hl_mode_v20.js
           grep -q "_hlOid" history_hl_mode_v20.js
+          grep -q "30\*60\*1000" history_hl_mode_v20_infer.js
           echo V20_STATIC_CONTRACT=PASS
       - name: Hyperliquid live API contract
         shell: bash
@@ -67,7 +71,8 @@ jobs:
           for i in $(seq 1 24); do
             curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
             curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_mode_v20.js?sha=${GITHUB_SHA}" -o /tmp/v20.js || true
-            if grep -q 'history_hl_mode_v20.js' /tmp/guard.js 2>/dev/null && grep -q 'historicalOrders' /tmp/v20.js 2>/dev/null; then ok=1; break; fi
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_mode_v20_infer.js?sha=${GITHUB_SHA}" -o /tmp/infer.js || true
+            if grep -q 'history_hl_mode_v20.js' /tmp/guard.js 2>/dev/null && grep -q 'history_hl_mode_v20_infer.js' /tmp/guard.js 2>/dev/null && grep -q 'historicalOrders' /tmp/v20.js 2>/dev/null && grep -q 'parentOid' /tmp/infer.js 2>/dev/null; then ok=1; break; fi
             sleep 5
           done
           test "$ok" = 1

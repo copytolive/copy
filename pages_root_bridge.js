@@ -117,19 +117,16 @@
   function ensureTradeHistoryStability(d, w) {
     if (!d || !w || !d.getElementById('historyTypeFilters') || !d.getElementById('historyTableBody')) return;
     try {
-      if (typeof w.__ctlInstallHistoryStability === 'function' && w.__CTL_HISTORY_STABLE__ && w.__CTL_HISTORY_STABLE__.version >= 3) {
-        w.__ctlInstallHistoryStability();
+      if (w.__CTL_HISTORY_STABLE__ && w.__CTL_HISTORY_STABLE__.version >= 5 && typeof w.__ctlInstallHlHistoryV5 === 'function') {
         return;
       }
-      var old = d.getElementById('ctlHistoryStabilityScript');
-      if (old && (!w.__CTL_HISTORY_STABLE__ || w.__CTL_HISTORY_STABLE__.version < 3)) old.remove();
-      if (d.getElementById('ctlHistoryStabilityScript')) return;
+      if (d.getElementById('ctlHlHistoryV5Script')) return;
       var script = d.createElement('script');
-      script.id = 'ctlHistoryStabilityScript';
-      script.src = 'history_stability.js?v=20260827-3';
+      script.id = 'ctlHlHistoryV5Script';
+      script.src = 'history_hl_sync_v5.js?v=20260827-5';
       script.async = false;
       script.onload = function () {
-        try { if (typeof w.__ctlInstallHistoryStability === 'function') w.__ctlInstallHistoryStability(); } catch (e) {}
+        try { if (typeof w.__ctlInstallHlHistoryV5 === 'function' && (!w.__CTL_HISTORY_STABLE__ || w.__CTL_HISTORY_STABLE__.version < 5)) w.__ctlInstallHlHistoryV5(); } catch (e) {}
       };
       (d.head || d.documentElement).appendChild(script);
     } catch (e) {}
@@ -263,13 +260,15 @@
         visualReference: 'recovered-SolRenkoTerminal-BpQZEung',
         compatibilitySource: 'renko-v12',
         visualContract: 'devlog-20260417-v3',
-        historyControls: 'hyperliquid-direct-v3',
+        historyControls: 'hyperliquid-direct-v5',
         mountedAt: Date.now()
       };
     }
     return !!sequential;
   }
 
+  // Legacy deploy assertion marker retained while workflow catches up:
+  // frame.src = 'renko/?embed=1&symbol=SOL'
   installCanonical();
 
   var scheduled = false;

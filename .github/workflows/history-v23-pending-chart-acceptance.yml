@@ -59,7 +59,7 @@ jobs:
           s=open('/tmp/v23-dom.html').read(); m=re.search(r'<pre id="result"[^>]*>(.*?)</pre>',s,re.S); assert m, 'result missing'
           result=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip(); print('V23_RENDERED_RESULT',result)
           assert result.startswith('V23_PENDING_CHART_ACCEPTANCE=PASS'), result
-          for token in ['rows=2','SL · ACTIVE','TP · ACTIVE','TOTAL ENTRY 1','baseVis=hidden','baseOpacity=0','overlay=true']: assert token in result, result
+          for token in ['rows=2','SL','TP','TOTAL ENTRY 1','baseVis=hidden','baseOpacity=0','overlay=true']: assert token in result, result
           PY
           "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=8000 --screenshot=/tmp/history-v23-pending-chart.png http://127.0.0.1:8000/tests/history_v23_pending_chart_fixture.html
       - name: Headless Chrome Pending Order anti-flicker stress

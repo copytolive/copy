@@ -1,11 +1,10 @@
-name: Test Hyperliquid history v3
+name: Test Hyperliquid history v4
 on:
   workflow_dispatch:
   push:
     paths:
       - '.github/workflows/test-hyperliquid-history-v3.yml'
       - 'history_stability.js'
-      - 'pages_root_bridge.js'
 permissions:
   contents: read
 jobs:
@@ -13,22 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - name: Wait for history v3 deployment
+      - name: Wait for history v4 deployment
         shell: bash
         run: |
           set -euo pipefail
           ok=0
           for i in $(seq 1 48); do
-            if curl -LfsS 'https://copytolive.github.io/copy/history_stability.js?v=20260827-3' -o /tmp/history.js \
-              && grep -q 'version: 3' /tmp/history.js \
-              && grep -q "source: 'hyperliquid-direct'" /tmp/history.js \
-              && curl -LfsS 'https://copytolive.github.io/copy/pages_root_bridge.js?v=20260827-3' -o /tmp/bridge.js \
-              && grep -q "historyControls: 'hyperliquid-direct-v3'" /tmp/bridge.js; then ok=1; break; fi
+            if curl -LfsS 'https://copytolive.github.io/copy/history_stability.js?v=20260827-4' -o /tmp/history.js \
+              && grep -q 'version:4' /tmp/history.js \
+              && grep -q "source:'hyperliquid-userfills+engine-pending'" /tmp/history.js; then ok=1; break; fi
             sleep 5
           done
           test "$ok" = 1
-          echo 'HISTORY_V3_DEPLOYED=PASS'
-      - name: Browser acceptance for direct entry and pending open orders
+          echo 'HISTORY_V4_DEPLOYED=PASS'
+      - name: Browser acceptance direct PNL and pending reconciliation
         shell: bash
         run: |
           set -euo pipefail
@@ -41,12 +38,13 @@ jobs:
           import fs from 'node:fs';
           const ROOT='https://copytolive.github.io/copy/';
           const pages=JSON.parse(fs.readFileSync('/tmp/pages.json','utf8'));const target=pages.find(x=>x.type==='page');const ws=new WebSocket(target.webSocketDebuggerUrl);let seq=0;const pending=new Map();const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);}};await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});await send('Runtime.enable');await send('Page.enable');await send('Page.navigate',{url:ROOT});await new Promise(r=>setTimeout(r,1800));await send('Runtime.evaluate',{expression:`localStorage.setItem('ot_backtest_view_mode','live-trading');location.reload();true`,returnByValue:true});await new Promise(r=>setTimeout(r,18000));
-          const install=`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot'),w=f.contentWindow,d=f.contentDocument;const master='0x1111111111111111111111111111111111111111',sub='0x2222222222222222222222222222222222222222';w._hlAccountWallet=master;w._userWallet=master;const nativeFetch=w.fetch.bind(w);w.fetch=async function(url,opts){if(String(url)==='https://api.hyperliquid.xyz/info'){const b=JSON.parse(opts?.body||'{}');if(b.type==='userFills')return new Response(JSON.stringify([{closedPnl:'0.0',coin:'ATOM',dir:'Open Short',oid:1,px:'1.48',side:'A',startPosition:'0',sz:'9.43',time:1787800000000,fee:'0.01',tid:11},{closedPnl:'0.25',coin:'ATOM',dir:'Close Short',oid:2,px:'1.45',side:'B',startPosition:'-9.43',sz:'9.43',time:1787800060000,fee:'0.01',tid:12}]),{status:200,headers:{'Content-Type':'application/json'}});if(b.type==='subAccounts')return new Response(JSON.stringify([{name:'Trading',subAccountUser:sub,master:master}]),{status:200,headers:{'Content-Type':'application/json'}});if(b.type==='frontendOpenOrders'){const rows=(b.user===sub&&b.dex==='xyz')?[{coin:'xyz:GOLD',isTrigger:true,limitPx:'0',oid:991,orderType:'Stop Market',origSz:'0.02',reduceOnly:false,side:'B',sz:'0.02',timestamp:1787800100000,triggerCondition:'Price above',triggerPx:'4300'}]:[];return new Response(JSON.stringify(rows),{status:200,headers:{'Content-Type':'application/json'}});} }return nativeFetch(url,opts);};if(w.__CTL_HISTORY_STABLE__?.timer)clearInterval(w.__CTL_HISTORY_STABLE__.timer);delete w.__CTL_HISTORY_STABLE__;const old=d.getElementById('ctlHistoryStabilityScript');if(old)old.remove();const s=d.createElement('script');s.src='history_stability.js?v=20260827-3-test';d.head.appendChild(s);return true})()`;await send('Runtime.evaluate',{expression:install,returnByValue:true});await new Promise(r=>setTimeout(r,6000));
-          async function state(){const x=await send('Runtime.evaluate',{expression:`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot'),w=f.contentWindow,d=f.contentDocument;const rows=[...d.querySelectorAll('#historyTableBody tr')].map(r=>[...r.children].map(c=>c.textContent.trim()));return JSON.stringify({v:w.__CTL_HISTORY_STABLE__?.version,source:w.__CTL_HISTORY_STABLE__?.source,mode:w._historyTypeFilter,info:d.getElementById('tradeLogInfo')?.textContent||'',rows})})()`,returnByValue:true});return JSON.parse(x.result.value)}
+          const install=`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot'),w=f.contentWindow,d=f.contentDocument;const master='0x1111111111111111111111111111111111111111';w._hlAccountWallet=master;w._userWallet=master;w._allPending=[{order_id:991,created_at:'2026-08-27T03:08:20Z',symbol:'GOLD/USD',direction:'LONG',side:'BUY',lot:.02,trigger_price:4300}];const nativeFetch=w.fetch.bind(w);w.fetch=async function(url,opts){if(String(url)==='https://api.hyperliquid.xyz/info'){const b=JSON.parse(opts?.body||'{}');if(b.type==='userFills')return new Response(JSON.stringify([{closedPnl:'0.0',coin:'ATOM',dir:'Open Short',oid:1,px:'1.48',side:'A',startPosition:'0',sz:'9.43',time:1787800000000,fee:'0.01',tid:11},{closedPnl:'0.25',coin:'ATOM',dir:'Close Short',oid:2,px:'1.45',side:'B',startPosition:'-9.43',sz:'9.43',time:1787800060000,fee:'0.01',tid:12}]),{status:200,headers:{'Content-Type':'application/json'}});if(b.type==='frontendOpenOrders'){const rows=(b.user===master&&b.dex==='xyz')?[{coin:'xyz:GOLD',isTrigger:true,limitPx:'0',oid:991,orderType:'Stop Market',origSz:'0.02',reduceOnly:false,side:'B',sz:'0.02',timestamp:1787800100000,triggerCondition:'Price above',triggerPx:'4300'}]:[];return new Response(JSON.stringify(rows),{status:200,headers:{'Content-Type':'application/json'}});} }return nativeFetch(url,opts);};if(w.__CTL_HISTORY_STABLE__?.timer)clearInterval(w.__CTL_HISTORY_STABLE__.timer);delete w.__CTL_HISTORY_STABLE__;delete w.__ctlInstallHistoryStability;const old=d.getElementById('ctlHistoryStabilityScript');if(old)old.remove();const s=d.createElement('script');s.src='history_stability.js?v=20260827-4-test';d.head.appendChild(s);return true})()`;await send('Runtime.evaluate',{expression:install,returnByValue:true});await new Promise(r=>setTimeout(r,6000));
+          async function state(){const x=await send('Runtime.evaluate',{expression:`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot'),w=f.contentWindow,d=f.contentDocument;const rows=[...d.querySelectorAll('#historyTableBody tr')].map(r=>[...r.children].map(c=>c.textContent.trim()));return JSON.stringify({v:w.__CTL_HISTORY_STABLE__?.version,source:w.__CTL_HISTORY_STABLE__?.source,mode:w._historyTypeFilter,info:d.getElementById('tradeLogInfo')?.textContent||'',engine:w.__CTL_HISTORY_STABLE__?.enginePending?.length||0,venue:w.__CTL_HISTORY_STABLE__?.venueOpen?.length||0,matched:w.__CTL_HISTORY_STABLE__?.pendingMatched||0,rows})})()`,returnByValue:true});return JSON.parse(x.result.value)}
           async function click(mode){await send('Runtime.evaluate',{expression:`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot'),d=f.contentDocument;d.querySelector('[data-history-type="${mode}"]').click();return true})()`,returnByValue:true});await new Promise(r=>setTimeout(r,500));return state();}
-          let s=await click('direct');console.log('DIRECT',s);if(s.v!==3||s.source!=='hyperliquid-direct'||s.rows.length!==1||!s.info.includes('1 entry dari 2 fills'))throw new Error('direct sync failed '+JSON.stringify(s));if(s.rows[0][7]!=='-')throw new Error('entry PNL must be dash, got '+s.rows[0][7]);
-          s=await click('pending');console.log('PENDING',s);if(s.rows.length!==1||!s.info.includes('1 open')||!s.rows[0][2].includes('GOLD'))throw new Error('pending HL openOrders failed '+JSON.stringify(s));
+          let s=await click('direct');console.log('DIRECT',s);if(s.v!==4||s.source!=='hyperliquid-userfills+engine-pending'||s.rows.length!==1||!s.info.includes('1 entry dari 2 fills'))throw new Error('direct sync failed '+JSON.stringify(s));if(s.rows[0][7]!=='-')throw new Error('entry PNL must be dash, got '+s.rows[0][7]);
+          s=await click('pending');console.log('PENDING_MATCHED',s);if(s.rows.length!==1||s.engine!==1||s.venue!==1||s.matched!==1||!s.info.includes('Engine 1 · HL open 1 · matched 1')||!s.rows[0][4].includes('PENDING'))throw new Error('pending reconcile failed '+JSON.stringify(s));
+          await send('Runtime.evaluate',{expression:`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot'),w=f.contentWindow;w._allPending=[];w.__CTL_HISTORY_STABLE__.enginePending=[];w.__CTL_HISTORY_STABLE__.enginePendingSeenAt=0;w.__CTL_HISTORY_STABLE__.setMode('pending');return true})()`,returnByValue:true});await new Promise(r=>setTimeout(r,500));s=await state();console.log('PENDING_VENUE_FALLBACK',s);if(s.rows.length!==1||s.engine!==0||s.venue!==1||!s.info.includes('Engine 0 · HL open 1'))throw new Error('venue fallback failed '+JSON.stringify(s));
           s=await click('all');console.log('ALL',s);if(s.rows.length!==2||!s.info.includes('2 fills'))throw new Error('all fills failed '+JSON.stringify(s));
-          console.log('HYPERLIQUID_HISTORY_V3_ACCEPTANCE=PASS');ws.close();
+          console.log('HYPERLIQUID_HISTORY_V4_ACCEPTANCE=PASS');ws.close();
           NODE
           node /tmp/test.mjs

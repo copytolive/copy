@@ -1,0 +1,75 @@
+name: History V22 UI Arbiter Acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'history_hl_ui_arbiter_v22.js'
+      - 'history_hl_sync_v7_guard.js'
+      - 'tests/history_v22_ui_arbiter_fixture.html'
+      - '.github/workflows/history-v22-ui-arbiter-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static single-writer contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check history_hl_ui_arbiter_v22.js
+          grep -q 'history_hl_ui_arbiter_v22.js' history_hl_sync_v7_guard.js
+          grep -q 'single-writer-hyperliquid-ui-v22' history_hl_sync_v7_guard.js
+          grep -q 'HL_PORTFOLIO+USERFILLS' history_hl_ui_arbiter_v22.js
+          grep -q 'ctlEquityChartV22' history_hl_ui_arbiter_v22.js
+          echo V22_STATIC_CONTRACT=PASS
+      - name: Headless Chrome competing-writer stress test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/http.log 2>&1 &
+          HPID=$!
+          trap 'kill $HPID 2>/dev/null || true' EXIT
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/tests/history_v22_ui_arbiter_fixture.html >/dev/null && break || sleep .2; done
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=7000 --dump-dom http://127.0.0.1:8000/tests/history_v22_ui_arbiter_fixture.html >/tmp/v22-dom.html
+          python3 - <<'PY'
+          import html,re
+          s=open('/tmp/v22-dom.html').read()
+          m=re.search(r'<pre id="result"[^>]*>(.*?)</pre>',s,re.S)
+          assert m, 'result element missing'
+          result=html.unescape(re.sub(r'<[^>]*>','',m.group(1))).strip()
+          print('V22_RENDERED_RESULT',result)
+          assert result.startswith('V22_UI_ARBITER_ACCEPTANCE=PASS'), result
+          assert 'bad=0' in result, result
+          assert 'samples=30' in result, result
+          assert 'net=+$1.3912' in result, result
+          assert 'growth=+10.38%' in result, result
+          assert 'capital=$14.79' in result, result
+          assert 'source=HL_PORTFOLIO+USERFILLS' in result, result
+          assert 'wallet=LIVE' in result, result
+          PY
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=1700,900 --virtual-time-budget=7000 --screenshot=/tmp/history-v22-ui-arbiter.png http://127.0.0.1:8000/tests/history_v22_ui_arbiter_fixture.html
+          echo V22_BROWSER_STRESS=PASS
+      - name: Verify production loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://copytolive.github.io/copy'
+          ok=0
+          for i in $(seq 1 36); do
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_ui_arbiter_v22.js?sha=${GITHUB_SHA}" -o /tmp/v22.js || true
+            if grep -q 'history_hl_ui_arbiter_v22.js' /tmp/guard.js 2>/dev/null && grep -q 'HL_PORTFOLIO+USERFILLS' /tmp/v22.js 2>/dev/null; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo V22_PRODUCTION_LOADER=PASS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: history-v22-ui-arbiter-screenshot
+          path: /tmp/history-v22-ui-arbiter.png

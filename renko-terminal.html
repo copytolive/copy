@@ -9,6 +9,7 @@
     html,body,#root{margin:0;width:100%;height:100%;min-height:100%;overflow:hidden;background:#060d18}
     body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     *{box-sizing:border-box}
+    #ctlMountError{padding:18px;color:#fecaca;background:#331018;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
   </style>
 </head>
 <body>
@@ -62,7 +63,7 @@
       if(cached && Date.now()-cached.at<90000) return cached.rows;
       if(['SOL','BTC','ETH'].indexOf(symbol)>=0){
         try{
-          var s=await nativeFetch('renko/hl-bootstrap-'+symbol+'.json?terminal=1',{cache:'no-store'});
+          var s=await nativeFetch('renko/hl-bootstrap-'+symbol+'.json?terminal=2',{cache:'no-store'});
           if(s.ok){
             var sr=await s.json();
             if(Array.isArray(sr)&&sr.length>60){ rawCache.set(symbol,{at:Date.now(),rows:sr}); return sr; }
@@ -75,7 +76,7 @@
       rawCache.set(symbol,{at:Date.now(),rows:rows});
       return rows;
     }
-    function buildRenko(rows,symbol){
+    function buildRenko(rows){
       var closes=(rows||[]).map(function(r){return {t:n(r.t||r.time),c:n(r.c||r.close)};}).filter(function(r){return r.t>0&&r.c>0;});
       if(!closes.length) return {candles:[],brick:0};
       var lastPrice=closes[closes.length-1].c;
@@ -114,7 +115,7 @@
       var key=symbol+':'+smaPeriod;
       var c=renkoCache.get(key);
       if(c && Date.now()-c.at<30000) return c.data;
-      var raw=await rawCandles(symbol), rr=buildRenko(raw,symbol), candles=rr.candles;
+      var raw=await rawCandles(symbol), rr=buildRenko(raw), candles=rr.candles;
       var last=candles[candles.length-1]||null, sv=sma(candles,smaPeriod), trend=!last?'WAIT':last.close>=sv?'UPTREND':'DOWNTREND';
       var firstRaw=raw[0]||{}, lastRaw=raw[raw.length-1]||{};
       var oos=symbol==='SOL'?{wr:65.84,pf:10.38,trades:2670,maxDD:0.0426,expectancy:0}:{};
@@ -124,7 +125,7 @@
         trend:trend,sma8:sv,sma21:sv,source:'Hyperliquid direct · public market data',timeframe:'1m',
         recordedTickCount:0,recordedTickStart:0,brickProfiles:{locked:{brickPct:rr.lastPrice?rr.brick/rr.lastPrice*100:0}},
         brickProfile:'locked',recommendedProfile:'locked',marketRegime:trend,efficiencyRatio:0,
-        recommendationDate:'',recommendationMethod:'Recovered OOS lock + live Hyperliquid candles',brickLocked:true,smaLocked:true,
+        recommendationDate:'',recommendationMethod:'Recovered OOS reference + live Hyperliquid candles',brickLocked:true,smaLocked:true,
         lockedSmaPeriod:smaPeriod,lockedSma:sv,lockedProfile:{brickPct:rr.lastPrice?rr.brick/rr.lastPrice*100:0,smaPeriod:smaPeriod,oos:oos}
       };
       renkoCache.set(key,{at:Date.now(),data:data}); return data;
@@ -155,8 +156,7 @@
         if(rel==='/indicator'){
           var body={}; try{body=JSON.parse((init&&init.body)||'{}');}catch(e){}
           var candles=Array.isArray(body.candles)?body.candles:[];
-          var vals=calcRSI(candles,14);
-          return response({outputs:{value:vals}});
+          return response({outputs:{value:calcRSI(candles,14)}});
         }
         if(rel.indexOf('/renko/')===0){
           var symbol=decodeURIComponent(rel.slice('/renko/'.length)).toUpperCase();
@@ -189,15 +189,36 @@
     }
     DirectEventSource.prototype.close=function(){this._closed=true;this.readyState=2;clearInterval(this._timer);};
     window.EventSource=DirectEventSource;
-    window.__CTL_RENKO_TERMINAL_SHIM__={ready:true,initialSymbol:initialSymbol,source:'Hyperliquid direct'};
+    window.__CTL_RENKO_TERMINAL_SHIM__={ready:true,initialSymbol:initialSymbol,source:'Hyperliquid direct',version:2};
   })();
   </script>
   <script type="module">
-    import { b as ReactDOMClient } from './assets/js/vendor-react-CkHKClcf.js';
-    import { j as JSX } from './assets/js/dashboard-CZI4vaVV.js';
-    import RenkoTerminal from './assets/js/SolRenkoTerminal-BpQZEung.js';
     const root=document.getElementById('root');
-    ReactDOMClient.createRoot(root).render(JSX.jsx(RenkoTerminal,{}));
+    const fail=(err)=>{
+      console.error('[CopyToLive Renko mount]',err);
+      root.innerHTML='<div id="ctlMountError">RENKO TERMINAL MOUNT ERROR\n'+String(err&&err.stack||err&&err.message||err)+'</div>';
+    };
+    try {
+      // SolRenkoTerminal was recovered from a production split bundle and carries
+      // its own React facade through dashboard-CZI4vaVV.js. ReactDOM lives in a
+      // second recovered split. Bridge both facades to ONE dispatcher before the
+      // terminal module evaluates, otherwise hooks render a blank iframe.
+      const vendor=await import('./assets/js/vendor-react-CkHKClcf.js');
+      const dashboard=await import('./assets/js/dashboard-CZI4vaVV.js');
+      const vendorReact=vendor.r;
+      const dashboardReact=dashboard.r;
+      const key='__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE';
+      if(vendorReact && dashboardReact && vendorReact[key]) {
+        try { dashboardReact[key]=vendorReact[key]; } catch (_) {
+          try { Object.assign(dashboardReact[key],vendorReact[key]); } catch(__) {}
+        }
+      }
+      const mod=await import('./assets/js/SolRenkoTerminal-BpQZEung.js');
+      const RenkoTerminal=mod.default;
+      if(typeof RenkoTerminal!=='function') throw new Error('Recovered Renko component export missing');
+      vendor.b.createRoot(root).render(vendor.j.jsx(RenkoTerminal,{}));
+      window.__CTL_RENKO_TERMINAL_MOUNT__={ready:true,dispatcherShared:dashboardReact&&vendorReact&&dashboardReact[key]===vendorReact[key],version:2};
+    } catch(err) { fail(err); }
   </script>
 </body>
 </html>

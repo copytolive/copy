@@ -6,7 +6,6 @@
   var IS_PAGES = location.hostname === 'copytolive.github.io' && location.pathname.indexOf(ROOT_PATH) === 0;
   if (!IS_PAGES) return;
 
-  // One public address only. Internal recovered surfaces remain iframe-only.
   if (window.top === window.self && location.pathname !== ROOT_PATH) {
     location.replace(ROOT_PATH);
     return;
@@ -15,9 +14,7 @@
 
   function pinRootUrl() {
     try {
-      if (location.pathname === ROOT_PATH && (location.search || location.hash)) {
-        history.replaceState(history.state, '', ROOT_PATH);
-      }
+      if (location.pathname === ROOT_PATH && (location.search || location.hash)) history.replaceState(history.state, '', ROOT_PATH);
     } catch (e) {}
   }
 
@@ -41,10 +38,6 @@
     return null;
   }
 
-  // Premium activation intentionally stores "live-trading". The old bridge only
-  // accepted "charting", so the exact recovered Sequential dashboard was hidden
-  // immediately after Premium activation. Both names represent the same trading
-  // surface on public Pages.
   function currentViewIsCharting() {
     try {
       var mode = String(localStorage.getItem('ot_backtest_view_mode') || '').toLowerCase();
@@ -61,9 +54,7 @@
     if (preferred) {
       try {
         var pr = preferred.getBoundingClientRect();
-        if (pr.left <= 2 && pr.width >= 40 && pr.width <= 120 && pr.height >= innerHeight * 0.55) {
-          return Math.round(pr.right);
-        }
+        if (pr.left <= 2 && pr.width >= 40 && pr.width <= 120 && pr.height >= innerHeight * 0.55) return Math.round(pr.right);
       } catch (e) {}
     }
     var nodes = document.querySelectorAll('nav,aside,body > div,body > main');
@@ -71,9 +62,7 @@
     for (var i = 0; i < nodes.length; i++) {
       try {
         var r = nodes[i].getBoundingClientRect();
-        if (r.left <= 2 && r.top <= 120 && r.width >= 44 && r.width <= 100 && r.height >= innerHeight * 0.65) {
-          best = Math.max(best, Math.round(r.right));
-        }
+        if (r.left <= 2 && r.top <= 120 && r.width >= 44 && r.width <= 100 && r.height >= innerHeight * 0.65) best = Math.max(best, Math.round(r.right));
       } catch (e) {}
     }
     return best;
@@ -119,8 +108,6 @@
       '</div>';
     summaryBoxes.parentElement.insertBefore(panel, summaryBoxes);
 
-    // The recovered compounding runtime already contains the authoritative
-    // renderer/session logic; only its DOM panel was lost during static recovery.
     try {
       if (w && typeof w._renderRenkoSmaHistoryFromLive === 'function') w._renderRenkoSmaHistoryFromLive();
       if (w && typeof w._refreshAndRenderRenkoSmaHistory === 'function') w._refreshAndRenderRenkoSmaHistory();
@@ -145,12 +132,9 @@
       d.body.style.margin = '0';
       d.body.setAttribute('data-ctl-root-embedded', '1');
 
-      // Screenshot/devlog parity: use the recovered production SolRenkoTerminal
-      // (Crypto/Non-Crypto, Quick Entry, OOS Lock, Data Renko, Indicators) inside
-      // the original Sequential Compounding page instead of the legacy V12 canvas.
       var renko = d.getElementById('renkoMainFrame');
       if (renko) {
-        var wanted = 'renko-terminal.html?embed=1&symbol=SOL&smaPeriod=10&sma=10&source=sequential&v=2';
+        var wanted = 'renko-terminal.html?embed=1&symbol=SOL&smaPeriod=10&sma=10&source=sequential&v=3';
         if (renko.getAttribute('src') !== wanted) renko.setAttribute('src', wanted);
         renko.setAttribute('title', 'CopyToLive Renko SMA10 Terminal');
         renko.style.setProperty('display', 'block', 'important');
@@ -236,16 +220,14 @@
         host.style.cssText = 'position:relative;display:block;overflow:hidden;padding:0;min-height:0;background:#131722;text-align:initial;';
         host.innerHTML = '';
 
-        // Compatibility/first-screen history probe used by existing CI. It stays
-        // hidden; the user-facing chart is the production-style terminal above.
-        var frame = document.createElement('iframe');
-        frame.src = 'renko/?embed=1&symbol=SOL';
-        frame.title = 'CopyToLive Charting';
-        frame.loading = 'eager';
-        frame.referrerPolicy = 'strict-origin-when-cross-origin';
-        frame.setAttribute('allow', 'clipboard-read; clipboard-write');
-        frame.style.cssText = 'position:absolute;width:1px;height:1px;min-height:1px;border:0;opacity:0;pointer-events:none;background:#131722;';
-        host.appendChild(frame);
+        var compat = document.createElement('iframe');
+        compat.src = 'renko/?embed=1&symbol=SOL';
+        compat.title = 'CopyToLive Charting';
+        compat.loading = 'eager';
+        compat.referrerPolicy = 'strict-origin-when-cross-origin';
+        compat.setAttribute('allow', 'clipboard-read; clipboard-write');
+        compat.style.cssText = 'position:absolute;width:1px;height:1px;min-height:1px;border:0;opacity:0;pointer-events:none;background:#131722;';
+        host.appendChild(compat);
       }
     }
 
@@ -255,7 +237,8 @@
         mounted: true,
         rootOnly: true,
         source: 'sequential-compounding-live',
-        renkoSurface: 'SolRenkoTerminal-BpQZEung',
+        renkoSurface: 'renko-terminal-v3',
+        visualReference: 'recovered-SolRenkoTerminal-BpQZEung',
         compatibilitySource: 'renko-v12',
         visualContract: 'devlog-20260417-v3',
         mountedAt: Date.now()

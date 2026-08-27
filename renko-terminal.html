@@ -6,219 +6,104 @@
   <meta name="color-scheme" content="dark" />
   <title>CopyToLive Renko SMA10</title>
   <style>
-    html,body,#root{margin:0;width:100%;height:100%;min-height:100%;overflow:hidden;background:#060d18}
-    body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    *{box-sizing:border-box}
-    #ctlMountError{padding:18px;color:#fecaca;background:#331018;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
+    :root{--bg:#060d18;--panel:#0a1525;--panel2:#0c1c2d;--line:#1c3047;--line2:#24415d;--text:#e8f0f8;--muted:#6f849b;--cyan:#29d3ff;--teal:#2dd4bf;--red:#fb7185;--gold:#fbbf24}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    button,select,input{font:inherit}.shell{width:100%;height:100%;display:flex;background:#060d18}.side{width:260px;min-width:260px;height:100%;overflow:auto;border-right:1px solid #172a40;background:linear-gradient(180deg,#0a1525,#08111e);scrollbar-width:thin;padding:10px}.chart{flex:1;min-width:0;position:relative;background:#07111f;overflow:hidden}
+    .card{border:1px solid var(--line2);border-radius:12px;background:linear-gradient(145deg,#0d1b2d,#09202a);padding:10px;margin-bottom:10px}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:3px;border:1px solid #1d344b;border-radius:9px;background:#071422;margin-bottom:8px}.tab{height:27px;border:0;border-radius:7px;background:transparent;color:#75889e;font-size:8px;font-weight:950;letter-spacing:.08em}.tab.active{background:#123d57;color:#7dd3fc}.tab.non.active{background:#443714;color:#fcd34d}
+    .quick-head{display:flex;justify-content:space-between;align-items:center;margin:7px 0 6px;color:#8aa0b7;font-size:8px;font-weight:950;letter-spacing:.1em}.quick-head b{color:#5eead4;font-size:8px}.quick{display:grid;grid-template-columns:1.05fr repeat(5,1fr);gap:4px}.chip{height:25px;border:1px solid #213952;border-radius:7px;background:#0a1828;color:#76e4f7;font-size:7px;font-weight:950;cursor:pointer}.chip.gold{color:#fbbf24}.chip.active{border-color:#22d3ee;background:rgba(34,211,238,.14);box-shadow:0 0 14px rgba(34,211,238,.12)}.chip.gold.active{border-color:#fbbf24;background:rgba(251,191,36,.14)}
+    select,input{width:100%;height:33px;border:1px solid #23324a;border-radius:9px;background:#091727;color:#dce8f5;padding:0 9px;font-size:10px;font-weight:800;outline:none}.pair-row{margin-top:8px}.lockline{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:9px}.lock{color:#5eead4;font-size:8px;font-weight:950}.trend{padding:3px 7px;border:1px solid rgba(45,212,191,.35);border-radius:999px;color:#5eead4;background:rgba(45,212,191,.08);font-size:7px;font-weight:950}.live-row{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8px;margin-top:10px}.live-state{color:#2dd4bf;font-size:7px;font-weight:900}.history{margin-top:3px;color:#70869d;font-size:7px}.price{font:900 18px/1 'JetBrains Mono',ui-monospace,monospace}
+    .title{font-size:10px;font-weight:900}.sub{margin-top:2px;color:#6f88a1;font-size:7px}.badge{padding:3px 6px;border-radius:999px;background:#10283a;border:1px solid #28536a;color:#76d7ed;font-size:7px;font-weight:950}.flex{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px 8px;margin-top:12px}.lab{display:block;color:#577089;font-size:7px}.val{color:#bed0e0;font-size:8px;font-weight:800}.val.teal{color:#6ee7d8}.load{height:25px;border:1px solid #2b5068;border-radius:7px;background:#103044;color:#80d9f7;font-size:7px;font-weight:950}.rule{height:1px;background:#1d3448;margin:10px 0 8px}.oos-head{display:flex;justify-content:space-between;color:#6b8198;font-size:7px;font-weight:850}.wr{color:#5eead4;font-size:10px}.oos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:7px}.oos-grid .lab{font-size:6px}.oos-grid .val{font-size:8px}.dd{color:#fb7185!important}.prog{height:3px;margin-top:10px;border-radius:3px;background:#13253a;overflow:hidden}.prog span{display:block;width:58%;height:100%;background:linear-gradient(90deg,#0ea5e9,#2dd4bf)}
+    .ind-head{display:flex;justify-content:space-between;align-items:center;color:#8195ad;font-size:8px;font-weight:900;letter-spacing:.14em;margin:4px 2px 8px}.count{padding:2px 6px;border-radius:999px;background:#10243a;color:#68c5ee;font-size:7px;letter-spacing:0}.search{margin-bottom:7px}.add{width:100%;height:32px;border:0;border-radius:8px;background:linear-gradient(135deg,#0ea5e9,#22c1dc);color:#04131c;font-size:8px;font-weight:950;margin-top:7px;cursor:pointer}.indicator-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.indicator-pill{border:1px solid #33405d;border-radius:6px;background:#121d31;color:#c4b5fd;padding:4px 6px;font-size:8px}
+    canvas{position:absolute;inset:0;width:100%;height:100%;display:block}.overlay-top{position:absolute;z-index:5;top:12px;left:14px;display:flex;gap:7px;pointer-events:none}.tag{padding:6px 9px;border-radius:7px;background:rgba(9,18,32,.91);border:1px solid #1c2d45;font-size:10px;font-weight:800}.tag.locked{border-color:#1c4d45;color:#5eead4}.axis-badge{position:absolute;right:14px;z-index:6;padding:4px 7px;border-radius:2px;font:800 10px/1 'JetBrains Mono',monospace;color:#04131c}.axis-live{top:58px;background:#2dd4bf}.axis-sma{top:91px;background:#38bdf8}.axis-price{top:75px;background:#38bdf8}.activate{position:absolute;inset:0;z-index:10;border:0;background:rgba(4,10,19,.05);display:grid;place-items:center;color:#dce8f5;cursor:pointer}.activate span{padding:10px 14px;border:1px solid #31506d;border-radius:9px;background:rgba(7,17,31,.93);box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:10px;font-weight:900}.loading{position:absolute;z-index:9;top:12px;right:72px;padding:4px 8px;border:1px solid #1d4d45;border-radius:999px;background:rgba(8,24,28,.9);color:#5eead4;font-size:9px;font-weight:800}.error{position:absolute;z-index:20;top:14px;left:50%;transform:translateX(-50%);padding:8px 12px;border-radius:9px;background:#5f1821;color:#fecaca;font-size:10px;max-width:70%;display:none}.pair-mini{position:absolute;right:10px;bottom:8px;color:#5f738c;font:700 8px 'JetBrains Mono',monospace}
+    @media(max-width:780px){.side{width:230px;min-width:230px}.quick{grid-template-columns:repeat(3,1fr)}.chart{min-width:460px}}
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script>
-  (function(){
-    'use strict';
-    var nativeFetch = window.fetch.bind(window);
-    var HL_INFO = 'https://api.hyperliquid.xyz/info';
-    var API_PREFIX = '/api/charting/hyperliquid';
-    var rawCache = new Map();
-    var renkoCache = new Map();
-    var query = new URLSearchParams(location.search);
-    var initialSymbol = String(query.get('symbol') || 'SOL').toUpperCase().replace('/USD','').replace('/USDC','').replace('/USDT','');
+<div class="shell">
+  <aside class="side">
+    <div class="card">
+      <div class="tabs"><button class="tab active" id="cryptoTab">CRYPTO 141</button><button class="tab non" id="nonTab">NON-CRYPTO 22</button></div>
+      <div class="quick-head"><span>QUICK ENTRY</span><b>RENKO SMA</b></div>
+      <div class="quick" id="quickButtons">
+        <button class="chip gold" data-symbol="GOLD">GOLD</button><button class="chip" data-symbol="ETC">ETC</button><button class="chip" data-symbol="UNI">UNI</button><button class="chip" data-symbol="AVAX">AVAX</button><button class="chip" data-symbol="XLM">XLM</button><button class="chip" data-symbol="DOT">DOT</button>
+      </div>
+      <div class="pair-row"><select id="pairSelect"><option value="SOL">SOL/USDC · OOS 65.8%</option><option>BTC</option><option>ETH</option><option>ETC</option><option>UNI</option><option>AVAX</option><option>XLM</option><option>DOT</option><option value="GOLD">GOLD/USD</option><option value="SP500">SP500/USD</option><option value="SMALL2000">SMALL2000/USD</option><option value="MAG7">MAG7/USD</option></select></div>
+      <div class="lockline"><span class="lock" id="lockText">🔒 — · SMA10</span><span class="trend" id="trendBadge">MEMUAT</span></div>
+      <div class="live-row"><div><div class="live-state" id="liveState">● CONNECTING</div><div class="history" id="historyText">History 0 / 0</div></div><strong class="price" id="priceText">—</strong></div>
+    </div>
 
-    var universe = [
-      {symbol:'SOL',coin:'SOL',label:'SOL/USDC',category:'crypto',market:'futures',backtest:{winRate:65.84}},
-      {symbol:'BTC',coin:'BTC',label:'BTC/USDC',category:'crypto',market:'futures'},
-      {symbol:'ETH',coin:'ETH',label:'ETH/USDC',category:'crypto',market:'futures'},
-      {symbol:'ETC',coin:'ETC',label:'ETC/USDC',category:'crypto',market:'futures'},
-      {symbol:'UNI',coin:'UNI',label:'UNI/USDC',category:'crypto',market:'futures'},
-      {symbol:'AVAX',coin:'AVAX',label:'AVAX/USDC',category:'crypto',market:'futures'},
-      {symbol:'XLM',coin:'XLM',label:'XLM/USDC',category:'crypto',market:'futures'},
-      {symbol:'DOT',coin:'DOT',label:'DOT/USDC',category:'crypto',market:'futures'},
-      {symbol:'GOLD',coin:'GOLD',label:'GOLD/USD',category:'commodity',market:'futures'},
-      {symbol:'SP500',coin:'SP500',label:'SP500/USD',category:'index',market:'futures'},
-      {symbol:'SMALL2000',coin:'SMALL2000',label:'SMALL2000/USD',category:'index',market:'futures'},
-      {symbol:'MAG7',coin:'MAG7',label:'MAG7/USD',category:'index',market:'futures'}
-    ];
+    <div class="card">
+      <div class="flex"><div><div class="title">DATA RENKO</div><div class="sub">Crypto perpetual · parameter terkunci</div></div><span class="badge">OOS LOCK</span></div>
+      <div class="metrics"><div><span class="lab">COVERAGE</span><span class="val" id="coverage">—</span></div><div><span class="lab">OHLCV</span><span class="val" id="ohlcv">—</span></div><div><span class="lab">TICKS</span><span class="val teal">0</span></div><button class="load">+25K</button></div>
+      <div class="rule"></div>
+      <div class="oos-head"><span>BACKTEST OOS 30%</span><strong class="wr">65.84% WR</strong></div>
+      <div class="oos-grid"><div><span class="lab">PF</span><strong class="val">10.38</strong></div><div><span class="lab">TRADES</span><strong class="val">2,670</strong></div><div><span class="lab">MAX DD</span><strong class="val dd">4.26%</strong></div></div>
+      <div class="prog"><span></span></div>
+    </div>
 
-    function response(data,status){
-      return new Response(JSON.stringify(data),{status:status||200,headers:{'content-type':'application/json','cache-control':'no-store'}});
-    }
-    function n(v,f){ var x=Number(v); return Number.isFinite(x)?x:(f==null?0:f); }
-    function mapCoin(symbol){
-      symbol=String(symbol||'').toUpperCase();
-      if(symbol==='GOLD') return 'xyz:GOLD';
-      if(symbol==='SP500') return 'xyz:SP500';
-      if(symbol==='SMALL2000') return 'km:SMALL2000';
-      if(symbol==='MAG7') return 'vntl:MAG7';
-      return symbol;
-    }
-    async function hl(payload){
-      var r=await nativeFetch(HL_INFO,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),cache:'no-store'});
-      if(!r.ok) throw new Error('Hyperliquid HTTP '+r.status);
-      return r.json();
-    }
-    async function rawCandles(symbol){
-      symbol=String(symbol||'SOL').toUpperCase();
-      var cached=rawCache.get(symbol);
-      if(cached && Date.now()-cached.at<90000) return cached.rows;
-      if(['SOL','BTC','ETH'].indexOf(symbol)>=0){
-        try{
-          var s=await nativeFetch('renko/hl-bootstrap-'+symbol+'.json?terminal=2',{cache:'no-store'});
-          if(s.ok){
-            var sr=await s.json();
-            if(Array.isArray(sr)&&sr.length>60){ rawCache.set(symbol,{at:Date.now(),rows:sr}); return sr; }
-          }
-        }catch(e){}
-      }
-      var end=Date.now(), start=end-36*60*60*1000;
-      var rows=await hl({type:'candleSnapshot',req:{coin:mapCoin(symbol),interval:'1m',startTime:start,endTime:end}});
-      if(!Array.isArray(rows)) rows=[];
-      rawCache.set(symbol,{at:Date.now(),rows:rows});
-      return rows;
-    }
-    function buildRenko(rows){
-      var closes=(rows||[]).map(function(r){return {t:n(r.t||r.time),c:n(r.c||r.close)};}).filter(function(r){return r.t>0&&r.c>0;});
-      if(!closes.length) return {candles:[],brick:0};
-      var lastPrice=closes[closes.length-1].c;
-      var brick=Math.max(lastPrice*0.002165, Math.pow(10,Math.floor(Math.log10(lastPrice||1))-5));
-      var digits=lastPrice>=1000?2:lastPrice>=10?5:lastPrice>=1?5:7;
-      brick=Number(brick.toFixed(digits));
-      if(!(brick>0)) brick=lastPrice*.002;
-      var out=[], anchor=closes[0].c, lastTime=Math.floor(closes[0].t/1000), lastDir=0;
-      function add(open,close,t,dir){
-        var tt=Math.max(lastTime+1,Math.floor(t/1000)); lastTime=tt;
-        out.push({time:tt,open:open,close:close,high:Math.max(open,close),low:Math.min(open,close),direction:dir});
-      }
-      for(var i=1;i<closes.length;i++){
-        var px=closes[i].c, guard=0;
-        while(px>=anchor+brick && guard++<80){ var next=anchor+brick; add(anchor,next,closes[i].t,1); anchor=next; lastDir=1; }
-        guard=0;
-        while(px<=anchor-brick && guard++<80){ var next2=anchor-brick; add(anchor,next2,closes[i].t,-1); anchor=next2; lastDir=-1; }
-      }
-      if(out.length<40){
-        brick=Math.max(lastPrice*0.001,brick*.5); out=[]; anchor=closes[0].c; lastTime=Math.floor(closes[0].t/1000);
-        for(var j=1;j<closes.length;j++){
-          var p=closes[j].c,g=0;
-          while(p>=anchor+brick&&g++<80){var q=anchor+brick;add(anchor,q,closes[j].t,1);anchor=q;lastDir=1;}
-          g=0;while(p<=anchor-brick&&g++<80){var q2=anchor-brick;add(anchor,q2,closes[j].t,-1);anchor=q2;lastDir=-1;}
-        }
-      }
-      return {candles:out.slice(-6000),brick:brick,lastDir:lastDir,lastPrice:lastPrice};
-    }
-    function sma(rows,period){
-      period=Math.max(2,Number(period)||10); var sum=0,res=[];
-      for(var i=0;i<rows.length;i++){sum+=n(rows[i].close);if(i>=period)sum-=n(rows[i-period].close);if(i>=period-1)res.push(sum/period);}
-      return res.length?res[res.length-1]:0;
-    }
-    async function renkoPayload(symbol,smaPeriod){
-      symbol=String(symbol||'SOL').toUpperCase();
-      var key=symbol+':'+smaPeriod;
-      var c=renkoCache.get(key);
-      if(c && Date.now()-c.at<30000) return c.data;
-      var raw=await rawCandles(symbol), rr=buildRenko(raw), candles=rr.candles;
-      var last=candles[candles.length-1]||null, sv=sma(candles,smaPeriod), trend=!last?'WAIT':last.close>=sv?'UPTREND':'DOWNTREND';
-      var firstRaw=raw[0]||{}, lastRaw=raw[raw.length-1]||{};
-      var oos=symbol==='SOL'?{wr:65.84,pf:10.38,trades:2670,maxDD:0.0426,expectancy:0}:{};
-      var data={
-        symbol:symbol,count:candles.length,candles:candles,brickSize:rr.brick,inputBars:raw.length,
-        historyStart:Math.floor(n(firstRaw.t||firstRaw.time)/1000),historyEnd:Math.floor(n(lastRaw.t||lastRaw.time)/1000),
-        trend:trend,sma8:sv,sma21:sv,source:'Hyperliquid direct · public market data',timeframe:'1m',
-        recordedTickCount:0,recordedTickStart:0,brickProfiles:{locked:{brickPct:rr.lastPrice?rr.brick/rr.lastPrice*100:0}},
-        brickProfile:'locked',recommendedProfile:'locked',marketRegime:trend,efficiencyRatio:0,
-        recommendationDate:'',recommendationMethod:'Recovered OOS reference + live Hyperliquid candles',brickLocked:true,smaLocked:true,
-        lockedSmaPeriod:smaPeriod,lockedSma:sv,lockedProfile:{brickPct:rr.lastPrice?rr.brick/rr.lastPrice*100:0,smaPeriod:smaPeriod,oos:oos}
-      };
-      renkoCache.set(key,{at:Date.now(),data:data}); return data;
-    }
-    function calcRSI(candles,period){
-      period=period||14; var out=new Array(candles.length).fill(null),gain=0,loss=0;
-      for(var i=1;i<candles.length;i++){
-        var d=n(candles[i].close)-n(candles[i-1].close),g=Math.max(0,d),l=Math.max(0,-d);
-        if(i<=period){gain+=g;loss+=l;if(i===period){gain/=period;loss/=period;out[i]=loss===0?100:100-(100/(1+gain/loss));}}
-        else{gain=(gain*(period-1)+g)/period;loss=(loss*(period-1)+l)/period;out[i]=loss===0?100:100-(100/(1+gain/loss));}
-      }
-      return out;
-    }
+    <div style="padding:10px 2px 0">
+      <div class="ind-head"><span>INDIKATOR</span><span class="count">162</span></div>
+      <input class="search" id="indicatorSearch" placeholder="Cari indikator..." />
+      <select id="indicatorSelect"><option>RSI</option><option>SMA</option><option>EMA</option><option>MACD</option><option>ATR</option></select>
+      <button class="add" id="addIndicator">+ PASANG</button>
+      <div class="indicator-pills" id="indicatorPills"></div>
+    </div>
+  </aside>
 
-    window.fetch=async function(input,init){
-      var raw=typeof input==='string'?input:(input&&input.url)||'';
-      var url;
-      try{url=new URL(raw,location.href);}catch(e){return nativeFetch(input,init);}
-      if(url.pathname.indexOf(API_PREFIX)!==0) return nativeFetch(input,init);
-      var rel=url.pathname.slice(API_PREFIX.length);
-      try{
-        if(rel==='/renko-universe') return response({pairs:universe});
-        if(rel==='/indicator-catalog') return response({groups:[
-          {name:'Momentum Indicators',count:1,indicators:['RSI']},
-          {name:'Overlap Studies',count:2,indicators:['SMA','EMA']},
-          {name:'Price Transform',count:1,indicators:['HL2']}
-        ]});
-        if(rel==='/indicator'){
-          var body={}; try{body=JSON.parse((init&&init.body)||'{}');}catch(e){}
-          var candles=Array.isArray(body.candles)?body.candles:[];
-          return response({outputs:{value:calcRSI(candles,14)}});
-        }
-        if(rel.indexOf('/renko/')===0){
-          var symbol=decodeURIComponent(rel.slice('/renko/'.length)).toUpperCase();
-          var sp=Math.max(2,Number(url.searchParams.get('smaPeriod')||url.searchParams.get('sma')||10));
-          return response(await renkoPayload(symbol,sp));
-        }
-      }catch(err){ return response({error:String(err&&err.message||err)},503); }
-      return nativeFetch(input,init);
-    };
-
-    function DirectEventSource(url){
-      this.url=url; this.readyState=0; this.onmessage=null; this.onerror=null; this._closed=false; this._seq=0;
-      var self=this, symbol='SOL';
-      try{var u=new URL(url,location.href);symbol=decodeURIComponent(u.pathname.split('/').pop()||'SOL').toUpperCase();}catch(e){}
-      async function emit(){
-        if(self._closed)return;
-        try{
-          var price=0;
-          if(symbol.indexOf(':')<0 && ['GOLD','SP500','SMALL2000','MAG7'].indexOf(symbol)<0){
-            var mids=await hl({type:'allMids'}); price=n(mids&&mids[symbol]);
-          }
-          if(!(price>0)){
-            var rows=await rawCandles(symbol), last=rows[rows.length-1]||{}; price=n(last.c||last.close);
-          }
-          self.readyState=1;
-          if(price>0 && typeof self.onmessage==='function') self.onmessage({data:JSON.stringify({price:price,updatedAt:Date.now(),sequence:++self._seq})});
-        }catch(err){ if(typeof self.onerror==='function') self.onerror(err); }
-      }
-      this._timer=setInterval(emit,3000); setTimeout(emit,350);
-    }
-    DirectEventSource.prototype.close=function(){this._closed=true;this.readyState=2;clearInterval(this._timer);};
-    window.EventSource=DirectEventSource;
-    window.__CTL_RENKO_TERMINAL_SHIM__={ready:true,initialSymbol:initialSymbol,source:'Hyperliquid direct',version:2};
-  })();
-  </script>
-  <script type="module">
-    const root=document.getElementById('root');
-    const fail=(err)=>{
-      console.error('[CopyToLive Renko mount]',err);
-      root.innerHTML='<div id="ctlMountError">RENKO TERMINAL MOUNT ERROR\n'+String(err&&err.stack||err&&err.message||err)+'</div>';
-    };
-    try {
-      // SolRenkoTerminal was recovered from a production split bundle and carries
-      // its own React facade through dashboard-CZI4vaVV.js. ReactDOM lives in a
-      // second recovered split. Bridge both facades to ONE dispatcher before the
-      // terminal module evaluates, otherwise hooks render a blank iframe.
-      const vendor=await import('./assets/js/vendor-react-CkHKClcf.js');
-      const dashboard=await import('./assets/js/dashboard-CZI4vaVV.js');
-      const vendorReact=vendor.r;
-      const dashboardReact=dashboard.r;
-      const key='__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE';
-      if(vendorReact && dashboardReact && vendorReact[key]) {
-        try { dashboardReact[key]=vendorReact[key]; } catch (_) {
-          try { Object.assign(dashboardReact[key],vendorReact[key]); } catch(__) {}
-        }
-      }
-      const mod=await import('./assets/js/SolRenkoTerminal-BpQZEung.js');
-      const RenkoTerminal=mod.default;
-      if(typeof RenkoTerminal!=='function') throw new Error('Recovered Renko component export missing');
-      vendor.b.createRoot(root).render(vendor.j.jsx(RenkoTerminal,{}));
-      window.__CTL_RENKO_TERMINAL_MOUNT__={ready:true,dispatcherShared:dashboardReact&&vendorReact&&dashboardReact[key]===vendorReact[key],version:2};
-    } catch(err) { fail(err); }
-  </script>
+  <main class="chart" id="chartHost">
+    <canvas id="renkoCanvas"></canvas>
+    <div class="overlay-top"><span class="tag" id="chartLabel">SOL/USDC · RENKO —</span><span class="tag locked">🔒 SMA10 · entry lock</span></div>
+    <div class="loading" id="loading">loading SOL…</div>
+    <div class="error" id="error"></div>
+    <div class="axis-badge axis-live">LIVE</div><div class="axis-badge axis-price" id="axisPrice">—</div><div class="axis-badge axis-sma" id="axisSma">SMA10 —</div>
+    <button class="activate" id="activate"><span>🔒 Klik untuk aktifkan chart</span></button>
+    <div class="pair-mini" id="sourceNote">HYPERLIQUID DIRECT · PUBLIC MARKET DATA</div>
+  </main>
+</div>
+<script>
+(function(){
+  'use strict';
+  var HL='https://api.hyperliquid.xyz/info', smaPeriod=10, state={symbol:'SOL',rows:[],bricks:[],sma:[],price:0,brick:0,active:false,mode:'crypto'};
+  var q=new URLSearchParams(location.search);state.symbol=String(q.get('symbol')||'SOL').toUpperCase();
+  var canvas=document.getElementById('renkoCanvas'),ctx=canvas.getContext('2d'),host=document.getElementById('chartHost');
+  var $=function(id){return document.getElementById(id)};
+  function n(v,f){var x=Number(v);return Number.isFinite(x)?x:(f==null?0:f)}
+  function coin(s){if(s==='GOLD')return'xyz:GOLD';if(s==='SP500')return'xyz:SP500';if(s==='SMALL2000')return'km:SMALL2000';if(s==='MAG7')return'vntl:MAG7';return s}
+  function label(s){return ['GOLD','SP500','SMALL2000','MAG7'].indexOf(s)>=0?s+'/USD':s+'/USDC'}
+  function post(payload){return fetch(HL,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('Hyperliquid HTTP '+r.status);return r.json()})}
+  function fmt(v){if(!(v>0))return'—';return v>=1000?v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:3}):v.toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:5})}
+  function build(rows){
+    var c=rows.map(function(r){return{t:n(r.t||r.time),c:n(r.c||r.close)}}).filter(function(r){return r.t&&r.c>0});if(!c.length)return[];
+    var last=c[c.length-1].c,brick=Math.max(last*.002165,Math.pow(10,Math.floor(Math.log10(last||1))-5)),digits=last>=1000?2:last>=10?5:last>=1?5:7;brick=Number(brick.toFixed(digits));if(!(brick>0))brick=last*.002;
+    var out=[],anchor=c[0].c,lastT=Math.floor(c[0].t/1000);function add(o,cl,t,d){var tt=Math.max(lastT+1,Math.floor(t/1000));lastT=tt;out.push({time:tt,open:o,close:cl,high:Math.max(o,cl),low:Math.min(o,cl),direction:d})}
+    for(var i=1;i<c.length;i++){var p=c[i].c,g=0;while(p>=anchor+brick&&g++<90){var u=anchor+brick;add(anchor,u,c[i].t,1);anchor=u}g=0;while(p<=anchor-brick&&g++<90){var d=anchor-brick;add(anchor,d,c[i].t,-1);anchor=d}}
+    if(out.length<55){brick*=.5;out=[];anchor=c[0].c;lastT=Math.floor(c[0].t/1000);for(var j=1;j<c.length;j++){var p2=c[j].c,g2=0;while(p2>=anchor+brick&&g2++<90){var u2=anchor+brick;add(anchor,u2,c[j].t,1);anchor=u2}g2=0;while(p2<=anchor-brick&&g2++<90){var d2=anchor-brick;add(anchor,d2,c[j].t,-1);anchor=d2}}}
+    state.brick=brick;return out.slice(-650)
+  }
+  function calcSma(bricks){var arr=[],sum=0;for(var i=0;i<bricks.length;i++){sum+=bricks[i].close;if(i>=smaPeriod)sum-=bricks[i-smaPeriod].close;arr.push(i>=smaPeriod-1?sum/smaPeriod:null)}return arr}
+  function resize(){var r=host.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.max(1,Math.floor(r.width*dpr));canvas.height=Math.max(1,Math.floor(r.height*dpr));canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
+  function draw(){
+    var W=host.clientWidth,H=host.clientHeight;ctx.clearRect(0,0,W,H);ctx.fillStyle='#07111f';ctx.fillRect(0,0,W,H);
+    var lm=10,rm=74,tm=42,bm=28,cw=Math.max(100,W-lm-rm),ch=Math.max(100,H-tm-bm);
+    ctx.strokeStyle='rgba(148,163,184,.085)';ctx.lineWidth=1;for(var x=lm;x<=lm+cw;x+=Math.max(80,cw/10)){ctx.beginPath();ctx.moveTo(x,tm);ctx.lineTo(x,tm+ch);ctx.stroke()}for(var y=tm;y<=tm+ch;y+=Math.max(60,ch/8)){ctx.beginPath();ctx.moveTo(lm,y);ctx.lineTo(lm+cw,y);ctx.stroke()}
+    if(!state.bricks.length){ctx.fillStyle='#70849b';ctx.font='12px Inter,sans-serif';ctx.textAlign='center';ctx.fillText('Memuat history Renko Hyperliquid…',lm+cw/2,tm+ch/2);return}
+    var maxBars=Math.max(45,Math.min(170,Math.floor(cw/8))),b=state.bricks.slice(-maxBars),s=state.sma.slice(-maxBars),vals=[];b.forEach(function(v){vals.push(v.high,v.low)});s.forEach(function(v){if(v)vals.push(v)});if(state.price>0)vals.push(state.price);var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),pad=(max-min)*.08||1;min-=pad;max+=pad;var py=function(v){return tm+(max-v)/(max-min)*ch},bw=Math.max(3,Math.min(8,cw/(b.length+7))),gap=Math.max(1,bw*.22),start=lm+Math.max(0,cw-b.length*(bw+gap)-18);
+    b.forEach(function(v,i){var x=start+i*(bw+gap),yo=py(v.open),yc=py(v.close),top=Math.min(yo,yc),h=Math.max(3,Math.abs(yc-yo));ctx.fillStyle=v.close>=v.open?'#20b7aa':'#f24667';ctx.fillRect(x,top,bw,h)});
+    ctx.beginPath();var begun=false;s.forEach(function(v,i){if(!v)return;var x=start+i*(bw+gap)+bw/2,y=py(v);if(!begun){ctx.moveTo(x,y);begun=true}else ctx.lineTo(x,y)});ctx.strokeStyle='#39bdf2';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='#8495aa';ctx.font='11px JetBrains Mono,monospace';ctx.textAlign='left';for(var k=0;k<=6;k++){var v=max-(max-min)*k/6,y=tm+ch*k/6;ctx.fillText(fmt(v),lm+cw+10,y+4)}
+    if(state.price>0){ctx.setLineDash([5,4]);ctx.strokeStyle='#2dd4bf';ctx.beginPath();ctx.moveTo(lm,py(state.price));ctx.lineTo(lm+cw,py(state.price));ctx.stroke();ctx.setLineDash([])}
+  }
+  async function load(symbol){
+    state.symbol=symbol;$('loading').style.display='block';$('loading').textContent='loading '+symbol+'…';$('error').style.display='none';$('pairSelect').value=symbol;$('chartLabel').textContent=label(symbol)+' · RENKO —';$('liveState').textContent='● CONNECTING';
+    document.querySelectorAll('.chip').forEach(function(b){b.classList.toggle('active',b.dataset.symbol===symbol)});
+    try{var end=Date.now(),start=end-36*60*60*1000,rows=await post({type:'candleSnapshot',req:{coin:coin(symbol),interval:'1m',startTime:start,endTime:end}});if(!Array.isArray(rows)||rows.length<20)throw new Error('History '+symbol+' belum tersedia');state.rows=rows;state.bricks=build(rows);state.sma=calcSma(state.bricks);var last=state.bricks[state.bricks.length-1];state.price=n((rows[rows.length-1]||{}).c,last&&last.close);var sv=state.sma[state.sma.length-1]||0,trend=state.price>=sv?'BUY · di atas SMA':'SELL · di bawah SMA';$('lockText').textContent='🔒 '+state.brick.toFixed(state.price>=1000?2:5)+' · SMA10';$('trendBadge').textContent=trend;$('trendBadge').style.color=state.price>=sv?'#5eead4':'#fb7185';$('priceText').textContent=fmt(state.price);$('historyText').textContent='History '+state.bricks.length+' / '+state.bricks.length;$('chartLabel').textContent=label(symbol)+' · RENKO '+state.brick.toFixed(state.price>=1000?2:5);$('axisPrice').textContent=fmt(state.price);$('axisSma').textContent='SMA10 '+fmt(sv);$('liveState').textContent='● LIVE';var first=rows[0]||{};$('coverage').textContent=new Date(n(first.t)).toLocaleDateString('en-US',{month:'short',year:'numeric'})+'–NOW';$('ohlcv').textContent=rows.length.toLocaleString()+' · 1M';draw()}catch(e){$('error').textContent=e.message;$('error').style.display='block';state.bricks=[];draw()}finally{$('loading').style.display='none'}
+  }
+  async function pollPrice(){try{var mids=await post({type:'allMids'}),p=n(mids&&mids[coin(state.symbol)])||n(mids&&mids[state.symbol]);if(p>0){state.price=p;$('priceText').textContent=fmt(p);$('axisPrice').textContent=fmt(p);var sv=state.sma[state.sma.length-1]||0;$('axisSma').textContent='SMA10 '+fmt(sv);$('liveState').textContent='● LIVE';draw()}}catch(e){}}
+  $('pairSelect').addEventListener('change',function(){load(this.value)});document.querySelectorAll('.chip').forEach(function(b){b.addEventListener('click',function(){load(this.dataset.symbol)})});$('activate').addEventListener('click',function(){state.active=true;this.style.display='none'});$('addIndicator').addEventListener('click',function(){var v=$('indicatorSelect').value;if(document.querySelector('[data-ind="'+v+'"]'))return;var p=document.createElement('span');p.className='indicator-pill';p.dataset.ind=v;p.textContent=v+' ×';p.onclick=function(){p.remove()};$('indicatorPills').appendChild(p)});
+  $('cryptoTab').onclick=function(){this.classList.add('active');$('nonTab').classList.remove('active');state.mode='crypto'};$('nonTab').onclick=function(){this.classList.add('active');$('cryptoTab').classList.remove('active');state.mode='noncrypto'};
+  new ResizeObserver(resize).observe(host);window.addEventListener('resize',resize);resize();load(state.symbol);setInterval(pollPrice,3000);
+  window.__CTL_RENKO_TERMINAL_SHIM__={ready:true,source:'Hyperliquid direct public market data',version:3};window.__CTL_RENKO_TERMINAL_MOUNT__={ready:true,renderer:'vanilla-canvas',version:3};
+})();
+</script>
 </body>
 </html>

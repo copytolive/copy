@@ -1,0 +1,34 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>History V20 Browser Acceptance</title><style>
+:root{--border:#1e3a5f;--text-muted:#60758c;--green:#00e676;--red:#ff5252;--gold:#ffd740;--accent:#00d4ff}body{margin:0;background:#0a0e17;color:#fff;font-family:Arial,sans-serif;padding:24px}.panel{background:#101b2a;border:1px solid #1e3a5f;border-radius:14px;padding:18px}.history-type-filter{padding:10px 16px;margin-right:8px;background:#0a101c;color:#9aa9bb;border:1px solid #334155;border-radius:9px}.history-type-filter.active{color:#00d4ff;border-color:#00d4ff}table{width:100%;border-collapse:collapse;margin-top:14px}th,td{padding:10px;border-bottom:1px solid #1c3048;text-align:left}.side-long{color:#00e676}.side-short{color:#ff5252}#result{margin-top:16px;color:#00e676;font-weight:700}</style></head>
+<body><div class="panel"><h2>Detailed Trade Log · V20 Browser Fixture</h2><div id="tradeLogInfo"></div><div id="historyTypeFilters"><button class="history-type-filter" data-history-type="all">ALL</button><button class="history-type-filter active" data-history-type="pending">PENDING ORDER</button><button class="history-type-filter" data-history-type="direct">LANGSUNG ENTRY</button></div><table id="historyTable"><thead><tr><th>TIME</th><th>DEAL</th><th>SYMBOL</th><th>TYPE</th><th>DIRECTION</th><th>VOLUME</th><th>PRICE</th><th>PROFIT</th><th>SOURCE</th></tr></thead><tbody id="historyTableBody"></tbody></table><div id="emptyHistory" style="display:none"><div class="text"></div><div class="sub"></div></div><div id="loadMoreDealsWrap" style="display:none"><button id="loadMoreDealsBtn"></button></div><pre id="result">WAITING</pre></div>
+<script>
+const A='0x1111111111111111111111111111111111111111';
+const fills=[
+{trade_id:'e1',timestamp:'2026-08-27T01:00:00Z',symbol:'ATOM/USD',type:'BUY',side:'BUY',direction:'Open Long',volume:10,price:1.5,pnl:null,is_entry:true,_hlAccount:A,_hlOid:1001,_hlDir:'Open Long'},
+{trade_id:'x1',timestamp:'2026-08-27T01:10:00Z',symbol:'ATOM/USD',type:'SELL',side:'SELL',direction:'Close Long',volume:10,price:2.0,pnl:5,is_entry:false,_hlAccount:A,_hlOid:2001,_hlDir:'Close Long'},
+{trade_id:'e2',timestamp:'2026-08-27T02:00:00Z',symbol:'GOLD/USD',type:'SELL',side:'SELL',direction:'Open Short',volume:1,price:4500,pnl:null,is_entry:true,_hlAccount:A,_hlOid:1003,_hlDir:'Open Short'},
+{trade_id:'x2',timestamp:'2026-08-27T02:10:00Z',symbol:'GOLD/USD',type:'BUY',side:'BUY',direction:'Close Short',volume:1,price:4503,pnl:-3,is_entry:false,_hlAccount:A,_hlOid:2004,_hlDir:'Close Short'},
+{trade_id:'e3',timestamp:'2026-08-27T03:00:00Z',symbol:'ADA/USD',type:'BUY',side:'BUY',direction:'Open Long',volume:20,price:0.5,pnl:null,is_entry:true,_hlAccount:A,_hlOid:3001,_hlDir:'Open Long'},
+{trade_id:'x3',timestamp:'2026-08-27T03:10:00Z',symbol:'ADA/USD',type:'SELL',side:'SELL',direction:'Close Long',volume:20,price:0.4,pnl:-2,is_entry:false,_hlAccount:A,_hlOid:3002,_hlDir:'Close Long'},
+{trade_id:'e4',timestamp:'2026-08-27T04:00:00Z',symbol:'BTC/USD',type:'BUY',side:'BUY',direction:'Open Long',volume:0.01,price:100000,pnl:null,is_entry:true,_hlAccount:A,_hlOid:4001,_hlDir:'Open Long'},
+{trade_id:'x4',timestamp:'2026-08-27T04:10:00Z',symbol:'BTC/USD',type:'SELL',side:'SELL',direction:'Close Long',volume:0.01,price:100400,pnl:4,is_entry:false,_hlAccount:A,_hlOid:4002,_hlDir:'Close Long'}
+];
+const hist=[
+{order:{coin:'ATOM',side:'B',limitPx:'1.5',sz:'10',oid:1001,timestamp:Date.parse('2026-08-27T01:00:00Z'),orderType:'Limit',reduceOnly:false,isTrigger:false,triggerPx:'0',children:[{coin:'ATOM',side:'A',sz:'10',oid:2001,orderType:'Take Profit Market',reduceOnly:true,isTrigger:true,triggerPx:'2.0',children:[]},{coin:'ATOM',side:'A',sz:'10',oid:2002,orderType:'Stop Market',reduceOnly:true,isTrigger:true,triggerPx:'1.2',children:[]}]},status:'filled',statusTimestamp:Date.parse('2026-08-27T01:00:00Z')},
+{order:{coin:'ATOM',side:'A',sz:'10',oid:2001,orderType:'Take Profit Market',reduceOnly:true,isTrigger:true,triggerPx:'2.0',children:[]},status:'filled',statusTimestamp:Date.parse('2026-08-27T01:10:00Z')},
+{order:{coin:'ATOM',side:'A',sz:'10',oid:2002,orderType:'Stop Market',reduceOnly:true,isTrigger:true,triggerPx:'1.2',children:[]},status:'canceled',statusTimestamp:Date.parse('2026-08-27T01:10:01Z')},
+{order:{coin:'GOLD',side:'A',limitPx:'4500',sz:'1',oid:1003,timestamp:Date.parse('2026-08-27T02:00:00Z'),orderType:'Limit',reduceOnly:false,isTrigger:false,triggerPx:'0',children:[{coin:'GOLD',side:'B',sz:'1',oid:2003,orderType:'Take Profit Market',reduceOnly:true,isTrigger:true,triggerPx:'4490',children:[]},{coin:'GOLD',side:'B',sz:'1',oid:2004,orderType:'Stop Market',reduceOnly:true,isTrigger:true,triggerPx:'4503',children:[]}]},status:'filled',statusTimestamp:Date.parse('2026-08-27T02:00:00Z')},
+{order:{coin:'GOLD',side:'B',sz:'1',oid:2003,orderType:'Take Profit Market',reduceOnly:true,isTrigger:true,triggerPx:'4490',children:[]},status:'canceled',statusTimestamp:Date.parse('2026-08-27T02:10:01Z')},
+{order:{coin:'GOLD',side:'B',sz:'1',oid:2004,orderType:'Stop Market',reduceOnly:true,isTrigger:true,triggerPx:'4503',children:[]},status:'filled',statusTimestamp:Date.parse('2026-08-27T02:10:00Z')}
+];
+window._userWallet=A;window.__CTL_HISTORY_STABLE__={version:10,mode:'pending',fills:fills,timer:null,observer:null,render:function(){},poll:async function(){return true;}};
+const nativeFetch=window.fetch.bind(window);window.fetch=async function(url,opt){if(String(url).includes('api.hyperliquid.xyz/info')){let body={};try{body=JSON.parse(opt.body||'{}')}catch(e){}if(body.type==='historicalOrders')return new Response(JSON.stringify(hist),{status:200,headers:{'Content-Type':'application/json'}});}return nativeFetch(url,opt);};
+</script><script src="../history_hl_mode_v20.js"></script><script>
+setTimeout(function(){
+ const st=window.__CTL_HISTORY_STABLE__,v=window.__CTL_HISTORY_MODE_V20__,pendingRows=document.querySelectorAll('#historyTableBody tr').length,summary=(document.getElementById('ctlHistoryPnlSummaryV11')||{}).innerText||'';
+ const pOk=st.mode==='pending'&&pendingRows===4&&summary.includes('TOTAL ENTRY 2')&&summary.includes('PROBABILITAS 50.00%')&&summary.includes('RISK/REWARD 1.67');
+ st.setMode('direct');
+ setTimeout(function(){const directRows=document.querySelectorAll('#historyTableBody tr').length,ds=(document.getElementById('ctlHistoryPnlSummaryV11')||{}).innerText||'';const dOk=directRows===2&&ds.includes('TOTAL ENTRY 2')&&ds.includes('PROBABILITAS 50.00%')&&ds.includes('RISK/REWARD 2.00');document.getElementById('result').textContent=(pOk&&dOk?'V20_BROWSER_ACCEPTANCE=PASS':'V20_BROWSER_ACCEPTANCE=FAIL')+' | pendingRows='+pendingRows+' | directRows='+directRows+' | pendingSummary='+summary.replace(/\s+/g,' ')+' | directSummary='+ds.replace(/\s+/g,' ');st.setMode('pending');},400);
+},1500);
+</script></body></html>

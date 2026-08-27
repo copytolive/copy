@@ -31,10 +31,10 @@ function install(){
     if(!(window.__CTL_HISTORY_STABLE__&&window.__CTL_HISTORY_STABLE__.version>=10))return false;
     if(window.__CTL_HL_SUMMARY_V15__&&window.__CTL_HL_SUMMARY_V15__.ready)return true;
     if(typeof window.__ctlInstallHlSummaryV15==='function'){try{window.__ctlInstallHlSummaryV15();}catch(e){}return !!(window.__CTL_HL_SUMMARY_V15__&&window.__CTL_HL_SUMMARY_V15__.ready);}
-    inject('ctlHlSummaryV15Script','history_hl_summary_v15.js?v=20260827-2',function(){try{if(typeof window.__ctlInstallHlSummaryV15==='function')window.__ctlInstallHlSummaryV15();}catch(e){}});
+    inject('ctlHlSummaryV15Script','history_hl_summary_v15.js?v=20260827-3',function(){try{if(typeof window.__ctlInstallHlSummaryV15==='function')window.__ctlInstallHlSummaryV15();}catch(e){}});
     return false;
   }
-  var state={ready:true,version:15,source:'persistent-v10+pending-v13+bridge-v14+summary-v15',timer:null};
+  var state={ready:true,version:15,source:'persistent-v10+pending-v13+bridge-v14+summary-v15-live',timer:null};
   window.__CTL_HISTORY_V7_GUARD__=state;
   loadV10();loadV13();loadV14();loadV15();
   state.timer=setInterval(function(){var a=loadV10(),b=loadV13(),c=loadV14(),d15=loadV15();if(a&&b&&c&&d15){clearInterval(state.timer);state.timer=null;}},500);

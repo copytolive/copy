@@ -114,6 +114,25 @@
     } catch (e) {}
   }
 
+  function ensureTradeHistoryStability(d, w) {
+    if (!d || !w || !d.getElementById('historyTypeFilters') || !d.getElementById('historyTableBody')) return;
+    try {
+      if (typeof w.__ctlInstallHistoryStability === 'function') {
+        w.__ctlInstallHistoryStability();
+        return;
+      }
+      if (d.getElementById('ctlHistoryStabilityScript')) return;
+      var script = d.createElement('script');
+      script.id = 'ctlHistoryStabilityScript';
+      script.src = 'history_stability.js?v=20260827-2';
+      script.async = false;
+      script.onload = function () {
+        try { if (typeof w.__ctlInstallHistoryStability === 'function') w.__ctlInstallHistoryStability(); } catch (e) {}
+      };
+      (d.head || d.documentElement).appendChild(script);
+    } catch (e) {}
+  }
+
   function alignRecoveredDashboard(frame) {
     try {
       var d = frame.contentDocument;
@@ -149,6 +168,7 @@
       }
 
       ensureRenkoHistoryPanel(d, w);
+      ensureTradeHistoryStability(d, w);
 
       var workspace = d.getElementById('tradingWorkspace');
       if (workspace) workspace.setAttribute('data-ctl-screenshot-parity', 'sequential-v3');
@@ -241,6 +261,7 @@
         visualReference: 'recovered-SolRenkoTerminal-BpQZEung',
         compatibilitySource: 'renko-v12',
         visualContract: 'devlog-20260417-v3',
+        historyControls: 'stable-v2',
         mountedAt: Date.now()
       };
     }

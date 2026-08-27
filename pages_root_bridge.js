@@ -92,9 +92,45 @@
     frame.style.maxWidth = 'none';
   }
 
+  function ensureRenkoHistoryPanel(d, w) {
+    if (!d || d.getElementById('renkoSmaHistoryPanel')) return;
+    var summaryBoxes = d.getElementById('perfSummaryBoxes');
+    if (!summaryBoxes || !summaryBoxes.parentElement) return;
+
+    var panel = d.createElement('div');
+    panel.id = 'renkoSmaHistoryPanel';
+    panel.setAttribute('data-ctl-restored', 'devlog-screenshot');
+    panel.style.cssText = 'margin:0 0 16px;border:1px solid rgba(0,212,255,.32);border-radius:11px;overflow:hidden;background:linear-gradient(180deg,rgba(0,212,255,.055),rgba(4,15,28,.35));';
+    panel.innerHTML = ''+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid rgba(0,212,255,.22);background:rgba(0,212,255,.055);">'+
+        '<div style="font:900 11px JetBrains Mono,monospace;color:#29d3ff;letter-spacing:.02em;">🧱 RENKO SMA10 · LIVE HISTORY</div>'+
+        '<div id="renkoSmaHistorySummary" style="font:800 9px JetBrains Mono,monospace;color:#00e7a0;white-space:nowrap;">0 history 0 live 0 mismatch 0 loss +$0.0000</div>'+
+      '</div>'+
+      '<div style="max-height:315px;overflow:auto;scrollbar-width:thin;">'+
+        '<div id="renkoSmaHistoryEmpty" class="empty-state" style="display:block;padding:28px 16px;text-align:center;">'+
+          '<div class="icon" style="font-size:22px;">🧱</div><div class="text" style="font-size:11px;color:#a9bbc9;">Belum ada RENKO SMA10 history</div>'+
+          '<div class="sub" style="font-size:9px;color:#617487;margin-top:5px;">START / FLIP / CLOSE akan tampil dari sesi Renko live.</div>'+
+        '</div>'+
+        '<table class="positions-table" id="renkoSmaHistoryTable" style="display:none;width:100%;min-width:1040px;border-collapse:collapse;">'+
+          '<thead style="position:sticky;top:0;z-index:2;background:#0c192b;"><tr>'+ 
+            '<th>PAIR</th><th>SOP</th><th>POSISI</th><th>ENTRY</th><th>RENKO / SMA</th><th>DIFF</th><th>FLOATING</th><th>DIAGNOSA</th><th>AKSI</th>'+ 
+          '</tr></thead><tbody id="renkoSmaHistoryRows"></tbody>'+ 
+        '</table>'+ 
+      '</div>';
+    summaryBoxes.parentElement.insertBefore(panel, summaryBoxes);
+
+    // The recovered compounding runtime already contains the authoritative
+    // renderer/session logic; only its DOM panel was lost during static recovery.
+    try {
+      if (w && typeof w._renderRenkoSmaHistoryFromLive === 'function') w._renderRenkoSmaHistoryFromLive();
+      if (w && typeof w._refreshAndRenderRenkoSmaHistory === 'function') w._refreshAndRenderRenkoSmaHistory();
+    } catch (e) {}
+  }
+
   function alignRecoveredDashboard(frame) {
     try {
       var d = frame.contentDocument;
+      var w = frame.contentWindow;
       if (!d) return;
 
       ['loginOverlay', 'walletConnectOverlay'].forEach(function (id) {
@@ -114,7 +150,7 @@
       // the original Sequential Compounding page instead of the legacy V12 canvas.
       var renko = d.getElementById('renkoMainFrame');
       if (renko) {
-        var wanted = 'renko-terminal.html?embed=1&symbol=SOL&smaPeriod=10&sma=10&source=sequential';
+        var wanted = 'renko-terminal.html?embed=1&symbol=SOL&smaPeriod=10&sma=10&source=sequential&v=2';
         if (renko.getAttribute('src') !== wanted) renko.setAttribute('src', wanted);
         renko.setAttribute('title', 'CopyToLive Renko SMA10 Terminal');
         renko.style.setProperty('display', 'block', 'important');
@@ -127,8 +163,11 @@
         wrap.style.setProperty('min-height', '620px', 'important');
         wrap.style.setProperty('height', 'min(860px,82vh)', 'important');
       }
+
+      ensureRenkoHistoryPanel(d, w);
+
       var workspace = d.getElementById('tradingWorkspace');
-      if (workspace) workspace.setAttribute('data-ctl-screenshot-parity', 'sequential-v2');
+      if (workspace) workspace.setAttribute('data-ctl-screenshot-parity', 'sequential-v3');
     } catch (e) {}
   }
 
@@ -138,7 +177,7 @@
 
     var frame = document.createElement('iframe');
     frame.id = 'ctlSequentialCompoundingRoot';
-    frame.src = 'compounding_live.html?embed=1&root=1&visual=devlog-20260417';
+    frame.src = 'compounding_live.html?embed=1&root=1&visual=devlog-20260417-v3';
     frame.title = 'CopyToLive Sequential Compounding';
     frame.loading = 'eager';
     frame.referrerPolicy = 'strict-origin-when-cross-origin';
@@ -218,6 +257,7 @@
         source: 'sequential-compounding-live',
         renkoSurface: 'SolRenkoTerminal-BpQZEung',
         compatibilitySource: 'renko-v12',
+        visualContract: 'devlog-20260417-v3',
         mountedAt: Date.now()
       };
     }

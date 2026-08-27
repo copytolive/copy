@@ -1,10 +1,10 @@
-name: History V18 Acceptance
+name: History V19 Acceptance
 on:
   push:
     branches: [main]
     paths:
-      - 'history_hl_pending_v18.js'
-      - 'history_hl_summary_v18.js'
+      - 'history_hl_pending_v19.js'
+      - 'history_hl_summary_v19.js'
       - 'history_hl_market_only_v18.js'
       - 'history_hl_sync_v7_guard.js'
       - 'tests/history_v18_acceptance.mjs'
@@ -17,18 +17,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate v18 JavaScript and real-market contracts
+      - name: Validate v19 JavaScript and real-market pending contracts
         run: node tests/history_v18_acceptance.mjs
-      - name: Verify production serves v18 loader
+      - name: Verify production serves v19 loader
         shell: bash
         run: |
           set -euo pipefail
           BASE='https://copytolive.github.io/copy'
           ok=0
-          for i in $(seq 1 20); do
+          for i in $(seq 1 24); do
             curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
-            if grep -q 'history_hl_pending_v18.js' /tmp/guard.js 2>/dev/null && grep -q 'history_hl_summary_v18.js' /tmp/guard.js 2>/dev/null && grep -q 'history_hl_market_only_v18.js' /tmp/guard.js 2>/dev/null; then ok=1; break; fi
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_pending_v19.js?sha=${GITHUB_SHA}" -o /tmp/pending.js || true
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_summary_v19.js?sha=${GITHUB_SHA}" -o /tmp/summary.js || true
+            if grep -q 'history_hl_pending_v19.js' /tmp/guard.js 2>/dev/null \
+              && grep -q 'history_hl_summary_v19.js' /tmp/guard.js 2>/dev/null \
+              && grep -q 'window._hlRealPending' /tmp/pending.js 2>/dev/null \
+              && grep -q '__CTL_HL_PENDING_REAL_V19__' /tmp/summary.js 2>/dev/null; then ok=1; break; fi
             sleep 5
           done
           test "$ok" = 1
-          echo HISTORY_V18_PRODUCTION_LOADER=PASS
+          echo HISTORY_V19_PRODUCTION_LOADER=PASS

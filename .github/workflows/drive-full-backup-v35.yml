@@ -1,0 +1,58 @@
+name: Drive Full Backup V35
+
+on:
+  push:
+    branches:
+      - backup/drive-v35-20260827
+
+permissions:
+  contents: read
+
+jobs:
+  full-backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout complete repository history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build source, history, refs and integrity manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p backup
+          git rev-parse HEAD > backup/HEAD.txt
+          git status --porcelain=v1 > backup/git-status.txt
+          git show-ref > backup/git-refs.txt
+          git log --all --oneline --decorate > backup/git-log-all.txt
+          git ls-files > backup/repository-files.txt
+          FILE_COUNT="$(git ls-files | wc -l | tr -d ' ')"
+          COMMIT_COUNT="$(git rev-list --all --count)"
+          REF_COUNT="$(git show-ref | wc -l | tr -d ' ')"
+          {
+            echo "repository=copytolive/copy"
+            echo "backup_branch=backup/drive-v35-20260827"
+            echo "v35_production_head=d60f909958675b0c11c84e60e0da973e4b5c563f"
+            echo "artifact_head=$(git rev-parse HEAD)"
+            echo "tracked_file_count=${FILE_COUNT}"
+            echo "commit_count=${COMMIT_COUNT}"
+            echo "ref_count=${REF_COUNT}"
+            echo "created_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > backup/MANIFEST.txt
+          git bundle create backup/copytolive-copy-full-history.bundle --all
+          zip -q -r backup/copytolive-copy-source-tree.zip . \
+            -x '.git/*' 'backup/*'
+          (
+            cd backup
+            sha256sum HEAD.txt git-status.txt git-refs.txt git-log-all.txt repository-files.txt MANIFEST.txt copytolive-copy-full-history.bundle copytolive-copy-source-tree.zip > SHA256SUMS.txt
+          )
+
+      - name: Upload complete backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: copytolive-copy-v35-full-backup
+          path: backup/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 90

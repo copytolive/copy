@@ -1,0 +1,2 @@
+Trigger exact V35 backup after manifest hardening.
+Production HEAD: d60f909958675b0c11c84e60e0da973e4b5c563f

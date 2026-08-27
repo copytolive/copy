@@ -25,18 +25,19 @@ jobs:
           ok=0
           for i in $(seq 1 36); do
             if curl -LfsS --connect-timeout 10 --max-time 20 \
-              'https://copytolive.github.io/copy/pages_root_bridge.js?parity=sequential' \
+              'https://copytolive.github.io/copy/pages_root_bridge.js?parity=sequential-v3' \
               -o /tmp/root-bridge.js \
               && grep -q "source: 'sequential-compounding-live'" /tmp/root-bridge.js \
-              && grep -q "compounding_live.html?embed=1&root=1" /tmp/root-bridge.js \
-              && grep -q "renko-terminal.html?embed=1&symbol=SOL" /tmp/root-bridge.js; then
+              && grep -q "visualContract: 'devlog-20260417-v3'" /tmp/root-bridge.js \
+              && grep -q "renko-terminal.html?embed=1&symbol=SOL" /tmp/root-bridge.js \
+              && grep -q "renkoSmaHistoryPanel" /tmp/root-bridge.js; then
               ok=1
               break
             fi
             sleep 5
           done
           test "$ok" = 1
-          echo 'SEQUENTIAL_BRIDGE_DEPLOYED=PASS'
+          echo 'SEQUENTIAL_BRIDGE_V3_DEPLOYED=PASS'
 
       - name: Assert and capture full Sequential Compounding dashboard
         shell: bash
@@ -69,14 +70,16 @@ jobs:
           await send('Page.navigate',{url:ROOT});
           await new Promise(r=>setTimeout(r,2500));
           await send('Runtime.evaluate',{expression:`localStorage.setItem('ot_backtest_view_mode','live-trading'); location.reload(); true`,returnByValue:true});
-          await new Promise(r=>setTimeout(r,20000));
+          await new Promise(r=>setTimeout(r,22000));
 
-          const expr=`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot');const d=f?.contentDocument;const r=f?.getBoundingClientRect();const text=d?.body?.innerText||'';const rf=d?.querySelector('.workspace-renko iframe');const rd=rf?.contentDocument;const renkoText=rd?.body?.innerText||'';const hist=d?.querySelector('.workspace-renko-history');const visible=id=>{const e=d?.getElementById(id);if(!e)return false;const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>0};return JSON.stringify({href:location.href,frame:!!f,src:f?.getAttribute('src')||'',frameReady:d?.readyState||'',left:r?.left||0,top:r?.top||0,width:r?.width||0,height:r?.height||0,loginVisible:visible('loginOverlay'),walletVisible:visible('walletConnectOverlay'),ownerVisible:visible('pagesHlOwnerOverlay'),title:d?.title||'',text:text.slice(0,100000),renkoText:renkoText.slice(0,50000),header:!!d?.querySelector('.header'),workspace:!!d?.querySelector('.trading-workspace'),renkoFrame:!!rf,renkoSrc:rf?.getAttribute('src')||'',renkoReady:rd?.readyState||'',renkoHistoryExists:!!hist,renkoHistoryText:hist?.innerText||'',parity:d?.getElementById('tradingWorkspace')?.getAttribute('data-ctl-screenshot-parity')||''});})()`;
+          const expr=`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot');const d=f?.contentDocument;const r=f?.getBoundingClientRect();const text=d?.body?.innerText||'';const rf=d?.querySelector('.workspace-renko iframe');const rd=rf?.contentDocument;const rw=rf?.contentWindow;const renkoText=rd?.body?.innerText||'';const hist=d?.getElementById('renkoSmaHistoryPanel');const visible=id=>{const e=d?.getElementById(id);if(!e)return false;const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>0};return JSON.stringify({href:location.href,frame:!!f,src:f?.getAttribute('src')||'',frameReady:d?.readyState||'',left:r?.left||0,top:r?.top||0,width:r?.width||0,height:r?.height||0,loginVisible:visible('loginOverlay'),walletVisible:visible('walletConnectOverlay'),ownerVisible:visible('pagesHlOwnerOverlay'),title:d?.title||'',text:text.slice(0,100000),renkoText:renkoText.slice(0,50000),header:!!d?.querySelector('.header'),workspace:!!d?.querySelector('.trading-workspace'),renkoFrame:!!rf,renkoSrc:rf?.getAttribute('src')||'',renkoReady:rd?.readyState||'',renkoMount:rw?.__CTL_RENKO_TERMINAL_MOUNT__||null,renkoHistoryExists:!!hist,renkoHistoryText:hist?.innerText||'',parity:d?.getElementById('tradingWorkspace')?.getAttribute('data-ctl-screenshot-parity')||''});})()`;
           const x=await send('Runtime.evaluate',{expression:expr,returnByValue:true});
           const s=JSON.parse(x.result.value);
           const diagnostic={state:{...s,text:s.text.slice(0,12000),renkoText:s.renkoText.slice(0,12000)},exceptions};
           fs.writeFileSync('sequential-diagnostics.json',JSON.stringify(diagnostic,null,2));
           console.log('SEQUENTIAL_ROOT_STATE',{...s,text:`${s.text.length} chars`,renkoText:`${s.renkoText.length} chars`});
+          console.log('RENKO_MOUNT_STATE',s.renkoMount);
+          console.log('BROWSER_EXCEPTIONS',exceptions.map(e=>e.exception?.description||e.text||'exception').slice(0,8));
           if(s.href!==ROOT) throw new Error('Address bar escaped root: '+s.href);
           if(!s.frame || !s.src.startsWith('compounding_live.html?embed=1&root=1')) throw new Error('Sequential frame missing/wrong: '+s.src);
           if(s.frameReady!=='complete') throw new Error('Sequential frame not complete: '+s.frameReady);
@@ -84,17 +87,20 @@ jobs:
           if(s.loginVisible || s.walletVisible || s.ownerVisible) throw new Error('An auth/wallet overlay still blocks the dashboard');
           if(!s.header || !s.workspace || !s.renkoFrame || s.renkoReady!=='complete') throw new Error('Recovered production dashboard structure missing');
           if(!s.renkoSrc.startsWith('renko-terminal.html?embed=1&symbol=SOL')) throw new Error('Recovered SolRenkoTerminal not mounted: '+s.renkoSrc);
-          if(s.parity!=='sequential-v2') throw new Error('Screenshot parity marker missing: '+s.parity);
+          if(s.parity!=='sequential-v3') throw new Error('Screenshot parity marker missing: '+s.parity);
+          if(!s.renkoMount?.ready) throw new Error('Renko mount bridge not ready: '+JSON.stringify(s.renkoMount));
+          if(!s.renkoHistoryExists || !s.renkoHistoryText.includes('RENKO SMA10 · LIVE HISTORY')) throw new Error('Renko SMA10 Live History panel missing');
 
           const shellRequired=[
             'Sequential Compounding','Pending Orders','Open Positions & Floating P&L','GOLD',
-            'Live Performance & Trade History','MONITOR RR LIVE','TOTAL NET PROFIT','GROWTH',
-            'MAX DRAWDOWN','TOTAL TRADES','Grafik Pertumbuhan Equity','Detailed Trade Log',
-            'Monthly Performance','PERINGATAN RISIKO'
+            'Live Performance & Trade History','MONITOR RR LIVE','RENKO SMA10 · LIVE HISTORY',
+            'TOTAL NET PROFIT','GROWTH','MAX DRAWDOWN','TOTAL TRADES',
+            'Grafik Pertumbuhan Equity','Detailed Trade Log','Monthly Performance','PERINGATAN RISIKO'
           ];
           for(const marker of shellRequired){if(!s.text.includes(marker)) throw new Error('Missing screenshot shell marker: '+marker);}
           const renkoRequired=['CRYPTO','NON-CRYPTO','QUICK ENTRY','DATA RENKO','INDIKATOR','SMA10','OOS LOCK'];
           for(const marker of renkoRequired){if(!s.renkoText.includes(marker)) throw new Error('Missing screenshot Renko marker: '+marker);}
+          if(s.renkoText.includes('RENKO TERMINAL MOUNT ERROR')) throw new Error(s.renkoText);
           if(s.text.includes('Charting sedang dalam pemeliharaan') || s.renkoText.includes('Charting sedang dalam pemeliharaan')) throw new Error('Maintenance placeholder leaked');
 
           const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false,fromSurface:true});

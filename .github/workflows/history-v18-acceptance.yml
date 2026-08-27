@@ -1,0 +1,34 @@
+name: History V18 Acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'history_hl_pending_v18.js'
+      - 'history_hl_summary_v18.js'
+      - 'history_hl_market_only_v18.js'
+      - 'history_hl_sync_v7_guard.js'
+      - 'tests/history_v18_acceptance.mjs'
+      - '.github/workflows/history-v18-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate v18 JavaScript and real-market contracts
+        run: node tests/history_v18_acceptance.mjs
+      - name: Verify production serves v18 loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://copytolive.github.io/copy'
+          ok=0
+          for i in $(seq 1 20); do
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE/history_hl_sync_v7_guard.js?sha=${GITHUB_SHA}" -o /tmp/guard.js || true
+            if grep -q 'history_hl_pending_v18.js' /tmp/guard.js 2>/dev/null && grep -q 'history_hl_summary_v18.js' /tmp/guard.js 2>/dev/null && grep -q 'history_hl_market_only_v18.js' /tmp/guard.js 2>/dev/null; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo HISTORY_V18_PRODUCTION_LOADER=PASS

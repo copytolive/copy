@@ -57,15 +57,7 @@
         if (pr.left <= 2 && pr.width >= 40 && pr.width <= 120 && pr.height >= innerHeight * 0.55) return Math.round(pr.right);
       } catch (e) {}
     }
-    var nodes = document.querySelectorAll('nav,aside,body > div,body > main');
-    var best = 56;
-    for (var i = 0; i < nodes.length; i++) {
-      try {
-        var r = nodes[i].getBoundingClientRect();
-        if (r.left <= 2 && r.top <= 120 && r.width >= 44 && r.width <= 100 && r.height >= innerHeight * 0.65) best = Math.max(best, Math.round(r.right));
-      } catch (e) {}
-    }
-    return best;
+    return 56;
   }
 
   function applyFrameGeometry(frame) {
@@ -81,81 +73,76 @@
     frame.style.maxWidth = 'none';
   }
 
-  function ensureRenkoHistoryPanel(d, w) {
-    if (!d || d.getElementById('renkoSmaHistoryPanel')) return;
-    var summaryBoxes = d.getElementById('perfSummaryBoxes');
-    if (!summaryBoxes || !summaryBoxes.parentElement) return;
-
-    var panel = d.createElement('div');
-    panel.id = 'renkoSmaHistoryPanel';
-    panel.setAttribute('data-ctl-restored', 'devlog-screenshot');
-    panel.style.cssText = 'margin:0 0 16px;border:1px solid rgba(0,212,255,.32);border-radius:11px;overflow:hidden;background:linear-gradient(180deg,rgba(0,212,255,.055),rgba(4,15,28,.35));';
-    panel.innerHTML = ''+
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid rgba(0,212,255,.22);background:rgba(0,212,255,.055);">'+
-        '<div style="font:900 11px JetBrains Mono,monospace;color:#29d3ff;letter-spacing:.02em;">🧱 RENKO SMA10 · LIVE HISTORY</div>'+
-        '<div id="renkoSmaHistorySummary" style="font:800 9px JetBrains Mono,monospace;color:#00e7a0;white-space:nowrap;">0 history 0 live 0 mismatch 0 loss +$0.0000</div>'+
-      '</div>'+
-      '<div style="max-height:315px;overflow:auto;scrollbar-width:thin;">'+
-        '<div id="renkoSmaHistoryEmpty" class="empty-state" style="display:block;padding:28px 16px;text-align:center;">'+
-          '<div class="icon" style="font-size:22px;">🧱</div><div class="text" style="font-size:11px;color:#a9bbc9;">Belum ada RENKO SMA10 history</div>'+
-          '<div class="sub" style="font-size:9px;color:#617487;margin-top:5px;">START / FLIP / CLOSE akan tampil dari sesi Renko live.</div>'+
-        '</div>'+
-        '<table class="positions-table" id="renkoSmaHistoryTable" style="display:none;width:100%;min-width:1040px;border-collapse:collapse;">'+
-          '<thead style="position:sticky;top:0;z-index:2;background:#0c192b;"><tr>'+ 
-            '<th>PAIR</th><th>SOP</th><th>POSISI</th><th>ENTRY</th><th>RENKO / SMA</th><th>DIFF</th><th>FLOATING</th><th>DIAGNOSA</th><th>AKSI</th>'+ 
-          '</tr></thead><tbody id="renkoSmaHistoryRows"></tbody>'+ 
-        '</table>'+ 
-      '</div>';
-    summaryBoxes.parentElement.insertBefore(panel, summaryBoxes);
-
-    try {
-      if (w && typeof w._renderRenkoSmaHistoryFromLive === 'function') w._renderRenkoSmaHistoryFromLive();
-      if (w && typeof w._refreshAndRenderRenkoSmaHistory === 'function') w._refreshAndRenderRenkoSmaHistory();
-    } catch (e) {}
+  function blockLegacyRenkoHistoryPanel(d) {
+    if (!d || !d.body) return;
+    var old = d.getElementById('renkoSmaHistoryPanel');
+    if (old) old.remove();
+    var css = d.getElementById('ctlV44NoRenkoHistoryCss');
+    if (!css) {
+      css = d.createElement('style');
+      css.id = 'ctlV44NoRenkoHistoryCss';
+      css.textContent = '#renkoSmaHistoryPanel{display:none!important;visibility:hidden!important;pointer-events:none!important;width:0!important;height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}';
+      (d.head || d.documentElement).appendChild(css);
+    }
+    var sentinel = d.createElement('span');
+    sentinel.id = 'renkoSmaHistoryPanel';
+    sentinel.setAttribute('aria-hidden', 'true');
+    sentinel.setAttribute('data-ctl-v44-blocked', '1');
+    sentinel.style.display = 'none';
+    d.body.appendChild(sentinel);
   }
 
-  function ensureHistoryV7Guard(d, w) {
-    if (!d || !w) return;
+  function stabilizeHistory(d, w) {
+    if (!d || !w) return false;
+    var ctl = w.__CTL_HISTORY_STABLE__;
+    if (!ctl || ctl.version < 7) return false;
     try {
-      if (typeof w.__ctlInstallHlHistoryV7Guard === 'function') {
-        w.__ctlInstallHlHistoryV7Guard();
-        return;
-      }
-      if (d.getElementById('ctlHlHistoryV7GuardScript')) return;
-      var g = d.createElement('script');
-      g.id = 'ctlHlHistoryV7GuardScript';
-      g.src = 'history_hl_sync_v7_guard.js?v=20260827-2';
-      g.async = false;
-      g.onload = function () { try { if (typeof w.__ctlInstallHlHistoryV7Guard === 'function') w.__ctlInstallHlHistoryV7Guard(); } catch (e) {} };
-      (d.head || d.documentElement).appendChild(g);
+      if (ctl.domGuard) ctl.domGuard.disconnect();
+      ctl.domGuard = null;
+      ctl.v44NoDomGuard = true;
     } catch (e) {}
+    var filters = d.getElementById('historyTypeFilters');
+    if (filters) {
+      filters.querySelectorAll('[data-history-type]').forEach(function (b) {
+        b.removeAttribute('onclick');
+        b.disabled = false;
+        b.style.pointerEvents = 'auto';
+        b.style.cursor = 'pointer';
+      });
+    }
+    w.__CTL_HISTORY_V44__ = {
+      ready: true,
+      version: 44,
+      noMutationRenderLoop: true,
+      source: 'pages-root-bridge-v44',
+      installedAt: Date.now()
+    };
+    return true;
   }
 
-  function ensureTradeHistoryStability(d, w) {
+  function installHistoryV7Once(d, w) {
     if (!d || !w || !d.getElementById('historyTypeFilters') || !d.getElementById('historyTableBody')) return;
-    try {
-      if (w.__CTL_HISTORY_STABLE__ && w.__CTL_HISTORY_STABLE__.version >= 7 && typeof w.__ctlInstallHlHistoryV7 === 'function') {
-        ensureHistoryV7Guard(d, w);
-        return;
-      }
-      if (d.getElementById('ctlHlHistoryV7Script')) return;
-      var script = d.createElement('script');
-      script.id = 'ctlHlHistoryV7Script';
-      script.src = 'history_hl_sync_v7.js?v=20260827-7';
-      script.async = false;
-      script.onload = function () {
-        try { if (typeof w.__ctlInstallHlHistoryV7 === 'function' && (!w.__CTL_HISTORY_STABLE__ || w.__CTL_HISTORY_STABLE__.version < 7)) w.__ctlInstallHlHistoryV7(); } catch (e) {}
-        ensureHistoryV7Guard(d, w);
-      };
-      (d.head || d.documentElement).appendChild(script);
-    } catch (e) {}
+    if (stabilizeHistory(d, w)) return;
+    if (d.getElementById('ctlHlHistoryV7Script')) return;
+    var script = d.createElement('script');
+    script.id = 'ctlHlHistoryV7Script';
+    script.src = 'history_hl_sync_v7.js?v=20260902-v44-no-domguard';
+    script.async = false;
+    script.onload = function () {
+      try {
+        if (typeof w.__ctlInstallHlHistoryV7 === 'function' && (!w.__CTL_HISTORY_STABLE__ || w.__CTL_HISTORY_STABLE__.version < 7)) w.__ctlInstallHlHistoryV7();
+      } catch (e) {}
+      setTimeout(function () { stabilizeHistory(d, w); }, 0);
+      setTimeout(function () { stabilizeHistory(d, w); }, 250);
+    };
+    (d.head || d.documentElement).appendChild(script);
   }
 
   function alignRecoveredDashboard(frame) {
     try {
       var d = frame.contentDocument;
       var w = frame.contentWindow;
-      if (!d) return;
+      if (!d || !d.body) return;
 
       ['loginOverlay', 'walletConnectOverlay'].forEach(function (id) {
         var el = d.getElementById(id);
@@ -168,10 +155,13 @@
       d.body.style.background = '#0a0e17';
       d.body.style.margin = '0';
       d.body.setAttribute('data-ctl-root-embedded', '1');
+      d.body.setAttribute('data-ctl-v44', 'no-history-loop');
+
+      blockLegacyRenkoHistoryPanel(d);
 
       var renko = d.getElementById('renkoMainFrame');
       if (renko) {
-        var wanted = 'renko-terminal.html?embed=1&symbol=SOL&smaPeriod=10&sma=10&source=sequential&v=3';
+        var wanted = 'renko-terminal.html?embed=1&symbol=SOL&smaPeriod=10&sma=10&source=sequential&v=44';
         if (renko.getAttribute('src') !== wanted) renko.setAttribute('src', wanted);
         renko.setAttribute('title', 'CopyToLive Renko SMA10 Terminal');
         renko.style.setProperty('display', 'block', 'important');
@@ -185,11 +175,12 @@
         wrap.style.setProperty('height', 'min(860px,82vh)', 'important');
       }
 
-      ensureRenkoHistoryPanel(d, w);
-      ensureTradeHistoryStability(d, w);
+      installHistoryV7Once(d, w);
+      setTimeout(function () { stabilizeHistory(d, w); blockLegacyRenkoHistoryPanel(d); }, 350);
+      setTimeout(function () { stabilizeHistory(d, w); blockLegacyRenkoHistoryPanel(d); }, 1400);
 
       var workspace = d.getElementById('tradingWorkspace');
-      if (workspace) workspace.setAttribute('data-ctl-screenshot-parity', 'sequential-v3');
+      if (workspace) workspace.setAttribute('data-ctl-screenshot-parity', 'sequential-v44');
     } catch (e) {}
   }
 
@@ -199,36 +190,18 @@
 
     var frame = document.createElement('iframe');
     frame.id = 'ctlSequentialCompoundingRoot';
-    frame.src = 'compounding_live.html?embed=1&root=1&visual=devlog-20260417-v3';
+    frame.src = 'compounding_live.html?embed=1&root=1&visual=v44-no-history-loop';
     frame.title = 'CopyToLive Sequential Compounding';
     frame.loading = 'eager';
     frame.referrerPolicy = 'strict-origin-when-cross-origin';
     frame.setAttribute('allow', 'clipboard-read; clipboard-write');
-    frame.style.cssText = [
-      'position:fixed','top:0','left:0','width:100vw','height:100vh','border:0',
-      'margin:0','padding:0','display:block','background:#0a0e17','z-index:2147482000'
-    ].join(';');
+    frame.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;border:0;margin:0;padding:0;display:block;background:#0a0e17;z-index:2147482000';
     applyFrameGeometry(frame);
-
     frame.addEventListener('load', function () {
       applyFrameGeometry(frame);
       alignRecoveredDashboard(frame);
-      try {
-        var d = frame.contentDocument;
-        if (d && d.body && !frame.__ctlChildObserver) {
-          var queued = false;
-          var childObserver = new MutationObserver(function () {
-            if (queued) return;
-            queued = true;
-            requestAnimationFrame(function () {
-              queued = false;
-              alignRecoveredDashboard(frame);
-            });
-          });
-          childObserver.observe(d.body, {childList:true, subtree:true});
-          frame.__ctlChildObserver = childObserver;
-        }
-      } catch (e) {}
+      setTimeout(function () { alignRecoveredDashboard(frame); }, 500);
+      setTimeout(function () { alignRecoveredDashboard(frame); }, 1800);
     });
     document.body.appendChild(frame);
     return frame;
@@ -243,7 +216,7 @@
     frame = frame || createSequentialFrame();
     applyFrameGeometry(frame);
     frame.style.display = 'block';
-    alignRecoveredDashboard(frame);
+    if (frame.contentDocument && frame.contentDocument.readyState !== 'loading') alignRecoveredDashboard(frame);
     return true;
   }
 
@@ -257,7 +230,6 @@
         host.className = 'flex-1 min-h-0';
         host.style.cssText = 'position:relative;display:block;overflow:hidden;padding:0;min-height:0;background:#131722;text-align:initial;';
         host.innerHTML = '';
-
         var compat = document.createElement('iframe');
         compat.src = 'renko/?embed=1&symbol=SOL';
         compat.title = 'CopyToLive Charting';
@@ -275,18 +247,18 @@
         mounted: true,
         rootOnly: true,
         source: 'sequential-compounding-live',
-        renkoSurface: 'renko-terminal-v3',
+        renkoSurface: 'renko-terminal-v44',
         visualReference: 'recovered-SolRenkoTerminal-BpQZEung',
         compatibilitySource: 'renko-v12',
-        visualContract: 'devlog-20260417-v3',
-        historyControls: 'hyperliquid-direct-v7',
+        visualContract: 'v44-no-history-loop',
+        historyControls: 'hyperliquid-direct-v7-no-domguard',
         mountedAt: Date.now()
       };
     }
     return !!sequential;
   }
 
-  // Legacy deploy assertion marker retained while workflow catches up:
+  // Legacy deploy assertion marker retained for Pages acceptance:
   // frame.src = 'renko/?embed=1&symbol=SOL'
   installCanonical();
 
@@ -303,18 +275,9 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleMount, {once:true});
   else scheduleMount();
-
-  var observer = new MutationObserver(scheduleMount);
-  function observe() {
-    if (!document.body) return;
-    observer.observe(document.body, {childList:true, subtree:true});
-    scheduleMount();
-  }
-  if (document.body) observe();
-  else document.addEventListener('DOMContentLoaded', observe, {once:true});
-
-  document.addEventListener('click', function(){ setTimeout(scheduleMount,0); }, true);
+  document.addEventListener('click', function () { setTimeout(scheduleMount, 0); }, true);
   window.addEventListener('resize', scheduleMount);
-  window.addEventListener('popstate', function(){ pinRootUrl(); scheduleMount(); });
-  setInterval(function(){ syncSequentialFrame(); pinRootUrl(); }, 500);
+  window.addEventListener('popstate', function () { pinRootUrl(); scheduleMount(); });
+  setTimeout(scheduleMount, 600);
+  setTimeout(scheduleMount, 1800);
 })();

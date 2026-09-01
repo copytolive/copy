@@ -1,0 +1,102 @@
+name: V45 CopyToLive Main Domain Acceptance
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-v45:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Wait for V45 production asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in $(seq 1 36); do
+            if curl -LfsS --connect-timeout 8 --max-time 25 "https://copytolive.com/compounding_live.html?accept=${GITHUB_SHA}-${i}" -o /tmp/compounding.html \
+              && grep -q 'ctlNativeFilterV45' /tmp/compounding.html \
+              && grep -q '20260902-v45-main-domain-final' /tmp/compounding.html \
+              && curl -LfsS --connect-timeout 8 --max-time 25 "https://copytolive.com/assets/history/history_filter_native_v43.js?v=20260902-v45-main-domain-final&accept=${i}" -o /tmp/v45.js \
+              && grep -q '__CTL_NATIVE_FILTER_V45__' /tmp/v45.js \
+              && grep -q 'copytolive-main-domain-v45' /tmp/v45.js; then
+              ok=1
+              break
+            fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo V45_PRODUCTION_ASSET=PASS
+
+      - name: Trusted click acceptance on copytolive.com
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu \
+            --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 about:blank \
+            >/tmp/v45-chrome.out 2>/tmp/v45-chrome.err &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:9222/json/list >/tmp/v45-pages.json && break
+            sleep .5
+          done
+          cat >/tmp/v45-live.mjs <<'NODE'
+          import fs from 'node:fs';
+          const URL='https://copytolive.com/compounding_live.html?v=20260902-v45-main-domain-final&allowIframe=1&source=hub';
+          const WALLET='0x31ca8395cf837de08b24da3f660e77761dfb974b';
+          const pages=JSON.parse(fs.readFileSync('/tmp/v45-pages.json','utf8'));
+          const target=pages.find(x=>x.type==='page');
+          if(!target?.webSocketDebuggerUrl) throw Error('No CDP page');
+          const ws=new WebSocket(target.webSocketDebuggerUrl);
+          let seq=0; const pending=new Map();
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result);}};
+          await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
+          await send('Runtime.enable'); await send('Page.enable');
+          await send('Page.navigate',{url:URL});
+          await new Promise(r=>setTimeout(r,7000));
+          async function evalv(expression){const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});return r.result.value;}
+          await evalv(`(()=>{const wallet='${WALLET}';const o=document.getElementById('loginOverlay');if(o){o.style.display='none';o.style.pointerEvents='none';}const w=document.getElementById('walletConnectOverlay');if(w){w.style.pointerEvents='none';}window._hlAccountWallet=wallet;window._hlActiveWallet=wallet;window._hlSelectedWallet=wallet;window._userWallet=wallet;try{localStorage.setItem('ctl_hl_proven_accounts_v10',JSON.stringify({accounts:[wallet]}));}catch(e){}try{window.__ctlInstallRealFiltersV36&&window.__ctlInstallRealFiltersV36();}catch(e){}try{window.__CTL_NATIVE_FILTER_V45__?.sweep?.();}catch(e){}const v=window.__CTL_REAL_FILTERS_V36__;if(v&&typeof v.refresh==='function')Promise.resolve(v.refresh('v45-prod-live')).catch(()=>{});window.__v45hb=0;clearInterval(window.__v45hbTimer);window.__v45hbTimer=setInterval(()=>window.__v45hb++,50);return true;})()`);
+          for(let i=0;i<90;i++){
+            const ready=await evalv(`!!(window.__CTL_NATIVE_FILTER_V45__?.ready&&window.__CTL_REAL_FILTERS_V36__?.ready&&document.getElementById('historyTypeFilters'))`);
+            if(ready)break;
+            if(i===89)throw Error('V45 production runtime not ready');
+            await new Promise(r=>setTimeout(r,1000));
+          }
+          const modes=['pending','direct','all','pending','direct','all'];
+          for(const mode of modes){
+            const pos=JSON.parse(await evalv(`(()=>{const b=document.querySelector('#historyTypeFilters [data-history-type="${mode}"]');if(!b)return JSON.stringify(null);b.scrollIntoView({block:'center'});const r=b.getBoundingClientRect(),el=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return JSON.stringify({x:r.left+r.width/2,y:r.top+r.height/2,top:!!el&&(el===b||b.contains(el)),hb:window.__v45hb||0});})()`));
+            if(!pos||!pos.top)throw Error('button not topmost '+mode);
+            await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:pos.x,y:pos.y});
+            await send('Input.dispatchMouseEvent',{type:'mousePressed',x:pos.x,y:pos.y,button:'left',clickCount:1});
+            await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:pos.x,y:pos.y,button:'left',clickCount:1});
+            await new Promise(r=>setTimeout(r,900));
+            const after=JSON.parse(await evalv(`(()=>{const st=window.__CTL_HISTORY_STABLE__,v=window.__CTL_REAL_FILTERS_V36__,n=window.__CTL_NATIVE_FILTER_V45__,b=document.querySelector('#historyTypeFilters [data-history-type="${mode}"]');return JSON.stringify({controllerMode:(st&&st.mode)||((v&&v.mode)||''),nativeMode:n?.mode||'',active:!!b?.classList.contains('active'),aria:b?.getAttribute('aria-pressed')||'',hb:window.__v45hb||0,trusted:n?.trustedClicks||0});})()`));
+            if(after.controllerMode!==mode||after.nativeMode!==mode||!after.active||after.aria!=='true')throw Error('mode failed '+mode+' '+JSON.stringify(after));
+            if(after.hb-pos.hb<8)throw Error('event loop stalled '+mode+' delta='+(after.hb-pos.hb));
+          }
+          await evalv(`(()=>{try{window.__CTL_NATIVE_FILTER_V45__?.sweep?.();}catch(e){}return true;})()`);
+          await new Promise(r=>setTimeout(r,1000));
+          const state=JSON.parse(await evalv(`(()=>{clearInterval(window.__v45hbTimer);function bad(doc){if(!doc)return false;const id=doc.getElementById('renkoSmaHistoryPanel');if(id&&getComputedStyle(id).display!=='none'&&id.getBoundingClientRect().height>0)return true;return Array.from(doc.querySelectorAll('div,section,article,header,h1,h2,h3,h4,span')).some(el=>{const t=String(el.textContent||'').replace(/\\s+/g,' ').toUpperCase();return t.includes('TOTAL HISTORY')&&t.includes('RENKO')&&t.includes('GOLD')&&getComputedStyle(el).display!=='none'&&el.getBoundingClientRect().height>0;});}let nested=false;try{nested=bad(document.getElementById('renkoMainFrame')?.contentDocument);}catch(e){}const v=window.__CTL_REAL_FILTERS_V36__,n=window.__CTL_NATIVE_FILTER_V45__;return JSON.stringify({version:n?.version||0,trusted:n?.trustedClicks||0,status:String(document.getElementById('tradeLogInfo')?.textContent||''),panelOuter:bad(document),panelNested:nested,ownerLock:!!v?.ownerLock,accounts:(v?.accounts||[]).length,lastSync:v?.lastSync||0,apiSuccess:v?.apiSuccess||0});})()`));
+          console.log('V45_PROD_FINAL',state);
+          if(state.version<45)throw Error('wrong runtime version');
+          if(state.trusted<6)throw Error('trusted clicks '+state.trusted);
+          if(state.panelOuter||state.panelNested)throw Error('legacy Renko total history visible');
+          if(!/^REAL HYPERLIQUID\b/i.test(state.status))throw Error('bad status '+state.status);
+          if(!state.ownerLock||state.accounts<1||state.lastSync<=0||state.apiSuccess<=0)throw Error('real controller not healthy '+JSON.stringify(state));
+          console.log('V45_COPYTOLIVE_COM_TRUSTED_CLICKS=6');
+          console.log('V45_COPYTOLIVE_COM_EVENT_LOOP=PASS');
+          console.log('V45_COPYTOLIVE_COM_PANEL_REMOVED=PASS');
+          console.log('V45_COPYTOLIVE_COM_FILTERS=PASS');
+          console.log('V45_COPYTOLIVE_COM_REAL_HYPERLIQUID=PASS');
+          ws.close();
+          NODE
+          node /tmp/v45-live.mjs

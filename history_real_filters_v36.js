@@ -389,7 +389,12 @@ function install(){
     state.refreshReason=reason||state.refreshReason||'event';
     if(state.refreshQueued)return;
     state.refreshQueued=true;
-    setTimeout(function(){state.refreshQueued=false;refresh(state.refreshReason);},delay==null?250:delay);
+    setTimeout(function(){
+      state.refreshQueued=false;
+      var why=state.refreshReason||'event';
+      state.refreshReason='';
+      refresh(why);
+    },delay==null?250:delay);
   }
 
   function connectWs(accounts){
@@ -450,6 +455,14 @@ function install(){
 
       fills=mergeFills(fills);
       opens=dedupeOpen(opens);
+      if(m&&m.meta){
+        metaParts.push({
+          byOid:Object.assign({},m.meta.byOid||{}),
+          parentBracket:Object.assign({},m.meta.parentBracket||{}),
+          childToParent:Object.assign({},m.meta.childToParent||{}),
+          triggers:Array.isArray(m.meta.triggers)?m.meta.triggers.slice():[]
+        });
+      }
       var meta=mergeMeta(metaParts);
 
       if(fills.length){
@@ -498,8 +511,10 @@ function install(){
       return false;
     }finally{
       state.refreshBusy=false;
-      if(state.refreshReason&&state.refreshReason!==reason){
-        var q=state.refreshReason;state.refreshReason='';scheduleRefresh(q,250);
+      if(state.refreshReason){
+        var q=state.refreshReason;
+        state.refreshReason='';
+        scheduleRefresh(q,250);
       }
     }
   }

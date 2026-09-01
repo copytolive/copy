@@ -1,0 +1,95 @@
+name: V44 Live History Acceptance
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-v44:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Wait for V44 Pages bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://copytolive.github.io/copy/pages_root_bridge.js'
+          ok=0
+          for i in $(seq 1 36); do
+            if curl -LfsS --connect-timeout 8 --max-time 20 "$URL?accept=${GITHUB_SHA}-${i}" -o /tmp/bridge.js \
+              && grep -q 'data-ctl-v44' /tmp/bridge.js \
+              && grep -q 'noMutationRenderLoop' /tmp/bridge.js \
+              && ! grep -q 'childObserver.observe' /tmp/bridge.js; then
+              ok=1; break
+            fi
+            sleep 5
+          done
+          test "$ok" = 1
+          echo V44_PUBLIC_BRIDGE=PASS
+
+      - name: Browser trusted-click acceptance on real Pages root
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu \
+            --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 about:blank \
+            >/tmp/v44-chrome.out 2>/tmp/v44-chrome.err &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:9222/json/list >/tmp/v44-pages.json && break
+            sleep .5
+          done
+          cat >/tmp/v44-live.mjs <<'NODE'
+          import fs from 'node:fs';
+          const ROOT='https://copytolive.github.io/copy/';
+          const pages=JSON.parse(fs.readFileSync('/tmp/v44-pages.json','utf8'));
+          const target=pages.find(x=>x.type==='page');
+          if(!target?.webSocketDebuggerUrl) throw Error('No CDP page');
+          const ws=new WebSocket(target.webSocketDebuggerUrl);
+          let seq=0; const pending=new Map();
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result);}};
+          await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
+          await send('Runtime.enable'); await send('Page.enable');
+          await send('Page.navigate',{url:ROOT});
+          await new Promise(r=>setTimeout(r,2500));
+          await send('Runtime.evaluate',{expression:`localStorage.setItem('ot_backtest_view_mode','charting');location.reload();true`,returnByValue:true});
+          await new Promise(r=>setTimeout(r,8500));
+
+          async function evalv(expression){const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});return r.result.value;}
+          let state=JSON.parse(await evalv(`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot'),d=f?.contentDocument,w=f?.contentWindow,p=d?.getElementById('renkoSmaHistoryPanel'),s=w?.__CTL_HISTORY_STABLE__;if(w){w.__v44hb=0;clearInterval(w.__v44hbTimer);w.__v44hbTimer=setInterval(()=>w.__v44hb++,50);}return JSON.stringify({frame:!!f,ready:d?.readyState||'',v44:!!w?.__CTL_HISTORY_V44__?.noMutationRenderLoop,domGuard:!!s?.domGuard,panel:!!p,panelVisible:!!p&&getComputedStyle(p).display!=='none'&&p.getBoundingClientRect().height>0,blocked:p?.getAttribute('data-ctl-v44-blocked')||'',mode:s?.mode||''});})()`));
+          console.log('V44_INITIAL',state);
+          if(!state.frame||state.ready!=='complete'||!state.v44) throw Error('V44 sequential frame not ready');
+          if(state.domGuard) throw Error('Legacy V7 domGuard still active');
+          if(state.panelVisible) throw Error('TOTAL HISTORY RENKO panel still visible');
+
+          const modes=['pending','direct','all','pending','direct','all'];
+          for(const mode of modes){
+            const pos=JSON.parse(await evalv(`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot'),d=f?.contentDocument,b=d?.querySelector('#historyTypeFilters [data-history-type="${mode}"]');if(!f||!b)return JSON.stringify(null);b.scrollIntoView({block:'center'});const fr=f.getBoundingClientRect(),r=b.getBoundingClientRect();return JSON.stringify({x:fr.left+r.left+r.width/2,y:fr.top+r.top+r.height/2,hb:f.contentWindow.__v44hb||0});})()`));
+            if(!pos) throw Error('button missing '+mode);
+            await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:pos.x,y:pos.y});
+            await send('Input.dispatchMouseEvent',{type:'mousePressed',x:pos.x,y:pos.y,button:'left',clickCount:1});
+            await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:pos.x,y:pos.y,button:'left',clickCount:1});
+            await new Promise(r=>setTimeout(r,900));
+            const after=JSON.parse(await evalv(`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot'),d=f?.contentDocument,w=f?.contentWindow,b=d?.querySelector('#historyTypeFilters [data-history-type="${mode}"]'),p=d?.getElementById('renkoSmaHistoryPanel');return JSON.stringify({mode:w?.__CTL_HISTORY_STABLE__?.mode||'',active:!!b?.classList.contains('active'),aria:b?.getAttribute('aria-pressed')||'',hb:w?.__v44hb||0,domGuard:!!w?.__CTL_HISTORY_STABLE__?.domGuard,panelVisible:!!p&&getComputedStyle(p).display!=='none'&&p.getBoundingClientRect().height>0});})()`));
+            console.log('V44_CLICK',mode,after);
+            if(after.mode!==mode||!after.active||after.aria!=='true') throw Error('mode failed '+mode);
+            if(after.hb-pos.hb<8) throw Error('event loop stalled '+mode+' delta='+(after.hb-pos.hb));
+            if(after.domGuard) throw Error('domGuard returned after '+mode);
+            if(after.panelVisible) throw Error('panel returned after '+mode);
+          }
+          state=JSON.parse(await evalv(`(()=>{const f=document.getElementById('ctlSequentialCompoundingRoot'),w=f?.contentWindow,d=f?.contentDocument;clearInterval(w?.__v44hbTimer);const txt=d?.body?.innerText||'';return JSON.stringify({mode:w?.__CTL_HISTORY_STABLE__?.mode||'',status:d?.getElementById('tradeLogInfo')?.textContent||'',panelText:txt.includes('TOTAL HISTORY · RENKO + GOLD'),v44:w?.__CTL_HISTORY_V44__||null});})()`));
+          console.log('V44_FINAL',state);
+          if(state.mode!=='all') throw Error('final mode not all');
+          if(state.panelText) throw Error('legacy panel text still visible');
+          console.log('V44_LIVE_ROOT_TRUSTED_CLICKS=6');
+          console.log('V44_LIVE_ROOT_EVENT_LOOP=PASS');
+          console.log('V44_LIVE_ROOT_PANEL_REMOVED=PASS');
+          console.log('V44_LIVE_ROOT_FILTERS=PASS');
+          ws.close();
+          NODE
+          node /tmp/v44-live.mjs

@@ -188,7 +188,7 @@ jobs:
           echo DEPLOY_CLEANUP=PASS
 
       - name: Rollback on failure
-        if: failure() && steps.activate.outputs.activated == 'true'
+        if: failure() && steps.gate.outputs.enabled == 'true' && steps.prep.outputs.backup != ''
         shell: bash
         run: |
           set -euo pipefail

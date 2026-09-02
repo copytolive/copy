@@ -1,0 +1,202 @@
+name: Deploy CopyToLive VPS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'compounding_live.html'
+      - 'assets/**'
+      - '.github/workflows/deploy-copytolive-vps.yml'
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DEPLOY_COPYTOLIVE_PRODUCTION'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: copytolive-vps-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SSH_HOST: ${{ secrets.COPYTOLIVE_SSH_HOST }}
+      SSH_USER: ${{ secrets.COPYTOLIVE_SSH_USER }}
+      SSH_KEY: ${{ secrets.COPYTOLIVE_SSH_KEY }}
+      SSH_PORT_SECRET: ${{ secrets.COPYTOLIVE_SSH_PORT }}
+      WEB_ROOT: /var/www/copytolive
+      BASE_URL: https://copytolive.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Gate deploy
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "${{ inputs.confirm }}" != "DEPLOY_COPYTOLIVE_PRODUCTION" ]; then
+            echo 'Manual confirmation rejected'
+            exit 1
+          fi
+          PORT="${SSH_PORT_SECRET:-22}"
+          echo "port=$PORT" >> "$GITHUB_OUTPUT"
+          if [ -n "${SSH_HOST:-}" ] && [ -n "${SSH_USER:-}" ] && [ -n "${SSH_KEY:-}" ]; then
+            echo 'enabled=true' >> "$GITHUB_OUTPUT"
+            echo 'DEPLOY_GATE=READY'
+          else
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+            echo 'DEPLOY_GATE=SKIP_MISSING_SECRETS'
+          fi
+
+      - name: Validate package
+        if: steps.gate.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s compounding_live.html
+          test -d assets
+          test "$(find assets -type f | wc -l | tr -d ' ')" -gt 10
+          echo DEPLOY_PACKAGE=PASS
+
+      - name: Load SSH key
+        if: steps.gate.outputs.enabled == 'true'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.COPYTOLIVE_SSH_KEY }}
+
+      - name: Trust VPS host
+        if: steps.gate.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.ssh"
+          ssh-keyscan -p "${{ steps.gate.outputs.port }}" -H "$SSH_HOST" >> "$HOME/.ssh/known_hosts"
+
+      - name: Verify VPS target
+        if: steps.gate.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -p "${{ steps.gate.outputs.port }}" -o BatchMode=yes "$SSH_USER@$SSH_HOST" \
+            "test -d '$WEB_ROOT' && test -w '$WEB_ROOT' && echo VPS_TARGET=PASS"
+
+      - name: Backup and stage
+        if: steps.gate.outputs.enabled == 'true'
+        id: prep
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+          SHORT="${GITHUB_SHA::12}"
+          BACKUP="/var/backups/copytolive/${STAMP}-${SHORT}"
+          STAGING="$WEB_ROOT/.release-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          PORT="${{ steps.gate.outputs.port }}"
+          ssh -p "$PORT" "$SSH_USER@$SSH_HOST" "set -e; mkdir -p '$BACKUP' '$STAGING'; \
+            [ ! -f '$WEB_ROOT/index.html' ] || cp -a '$WEB_ROOT/index.html' '$BACKUP/index.html'; \
+            [ ! -f '$WEB_ROOT/compounding_live.html' ] || cp -a '$WEB_ROOT/compounding_live.html' '$BACKUP/compounding_live.html'; \
+            [ ! -d '$WEB_ROOT/assets' ] || cp -a '$WEB_ROOT/assets' '$BACKUP/assets'; \
+            echo BACKUP_READY=PASS"
+          echo "backup=$BACKUP" >> "$GITHUB_OUTPUT"
+          echo "staging=$STAGING" >> "$GITHUB_OUTPUT"
+
+      - name: Upload staged release
+        if: steps.gate.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          PORT="${{ steps.gate.outputs.port }}"
+          STAGING="${{ steps.prep.outputs.staging }}"
+          scp -P "$PORT" index.html "$SSH_USER@$SSH_HOST:$STAGING/index.html"
+          scp -P "$PORT" compounding_live.html "$SSH_USER@$SSH_HOST:$STAGING/compounding_live.html"
+          scp -P "$PORT" -r assets "$SSH_USER@$SSH_HOST:$STAGING/"
+          echo STAGING_UPLOAD=PASS
+
+      - name: Activate release
+        if: steps.gate.outputs.enabled == 'true'
+        id: activate
+        shell: bash
+        run: |
+          set -euo pipefail
+          PORT="${{ steps.gate.outputs.port }}"
+          STAGING="${{ steps.prep.outputs.staging }}"
+          ssh -p "$PORT" "$SSH_USER@$SSH_HOST" "set -e; \
+            test -s '$STAGING/index.html'; test -s '$STAGING/compounding_live.html'; test -d '$STAGING/assets'; \
+            cp -a '$STAGING/index.html' '$WEB_ROOT/index.html.new'; \
+            cp -a '$STAGING/compounding_live.html' '$WEB_ROOT/compounding_live.html.new'; \
+            rm -rf '$WEB_ROOT/assets.new'; cp -a '$STAGING/assets' '$WEB_ROOT/assets.new'; \
+            mv -f '$WEB_ROOT/index.html.new' '$WEB_ROOT/index.html'; \
+            mv -f '$WEB_ROOT/compounding_live.html.new' '$WEB_ROOT/compounding_live.html'; \
+            rm -rf '$WEB_ROOT/assets.previous'; \
+            [ ! -d '$WEB_ROOT/assets' ] || mv '$WEB_ROOT/assets' '$WEB_ROOT/assets.previous'; \
+            mv '$WEB_ROOT/assets.new' '$WEB_ROOT/assets'; \
+            echo '$GITHUB_SHA' > '$WEB_ROOT/.deploy-sha'; echo ACTIVATE_RELEASE=PASS"
+          echo 'activated=true' >> "$GITHUB_OUTPUT"
+
+      - name: Verify production
+        if: steps.gate.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECT_INDEX="$(sha256sum index.html | awk '{print $1}')"
+          EXPECT_LIVE="$(sha256sum compounding_live.html | awk '{print $1}')"
+          ok=0
+          for i in $(seq 1 12); do
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE_URL/index.html?deploy=$GITHUB_SHA-$i" -o /tmp/index.html || true
+            curl -LfsS --connect-timeout 10 --max-time 30 "$BASE_URL/compounding_live.html?deploy=$GITHUB_SHA-$i" -o /tmp/live.html || true
+            GOT_INDEX="$(sha256sum /tmp/index.html 2>/dev/null | awk '{print $1}' || true)"
+            GOT_LIVE="$(sha256sum /tmp/live.html 2>/dev/null | awk '{print $1}' || true)"
+            if [ "$EXPECT_INDEX" = "$GOT_INDEX" ] && [ "$EXPECT_LIVE" = "$GOT_LIVE" ]; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = 1
+          grep -q 'historyTypeFilters' /tmp/live.html
+          grep -q 'tradeLogInfo' /tmp/live.html
+          echo PRODUCTION_CHECKSUM=PASS
+          echo PRODUCTION_HTTP=PASS
+
+      - name: Browser smoke
+        if: steps.gate.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --virtual-time-budget=10000 \
+            --dump-dom "$BASE_URL/compounding_live.html?browser=$GITHUB_SHA" > /tmp/rendered.html
+          grep -q 'historyTypeFilters' /tmp/rendered.html
+          grep -q 'tradeLogInfo' /tmp/rendered.html
+          if grep -Eqi 'TOTAL HISTORY.*RENKO.*GOLD' /tmp/rendered.html; then exit 1; fi
+          echo PRODUCTION_BROWSER_SMOKE=PASS
+
+      - name: Cleanup success
+        if: success() && steps.gate.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          PORT="${{ steps.gate.outputs.port }}"
+          STAGING="${{ steps.prep.outputs.staging }}"
+          ssh -p "$PORT" "$SSH_USER@$SSH_HOST" "rm -rf '$STAGING' '$WEB_ROOT/assets.previous'"
+          echo DEPLOY_CLEANUP=PASS
+
+      - name: Rollback on failure
+        if: failure() && steps.activate.outputs.activated == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          PORT="${{ steps.gate.outputs.port }}"
+          BACKUP="${{ steps.prep.outputs.backup }}"
+          STAGING="${{ steps.prep.outputs.staging }}"
+          ssh -p "$PORT" "$SSH_USER@$SSH_HOST" "set -e; \
+            [ ! -f '$BACKUP/index.html' ] || cp -a '$BACKUP/index.html' '$WEB_ROOT/index.html'; \
+            [ ! -f '$BACKUP/compounding_live.html' ] || cp -a '$BACKUP/compounding_live.html' '$WEB_ROOT/compounding_live.html'; \
+            if [ -d '$BACKUP/assets' ]; then rm -rf '$WEB_ROOT/assets'; cp -a '$BACKUP/assets' '$WEB_ROOT/assets'; fi; \
+            rm -rf '$STAGING' '$WEB_ROOT/assets.previous'; echo ROLLBACK=PASS"

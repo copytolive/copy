@@ -1,0 +1,22 @@
+{
+  "id": "ai4-20260903-1140-fundamental-full-public-pass",
+  "requestedBy": "user",
+  "captureDelayMs": 0,
+  "desktop": {
+    "width": 1440,
+    "height": 900
+  },
+  "mobile": {
+    "width": 390,
+    "height": 844
+  },
+  "requirements": [
+    "all 11 tabs",
+    "search",
+    "screener default",
+    "filtered screener",
+    "watchlist",
+    "no double filter",
+    "no overlap"
+  ]
+}

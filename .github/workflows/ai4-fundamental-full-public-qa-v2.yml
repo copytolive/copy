@@ -1,0 +1,345 @@
+name: AI4 Fundamental Full Public QA V2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai4-fundamental-fullqa-public-requests/**"
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      SSH_HOST: ${{ secrets.COPYTOLIVE_SSH_HOST }}
+      SSH_USER: ${{ secrets.COPYTOLIVE_SSH_USER }}
+      SSH_KEY: ${{ secrets.COPYTOLIVE_SSH_KEY }}
+      SSH_PORT_SECRET: ${{ secrets.COPYTOLIVE_SSH_PORT }}
+      WEB_ROOT: /var/www/copytolive
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai4-fundamental-fullqa-public-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "resp=ai4-fundamental-fullqa-public-responses/$ID.json" >> "$GITHUB_OUTPUT"
+          echo "port=${SSH_PORT_SECRET:-22}" >> "$GITHUB_OUTPUT"
+
+      - name: Load SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.COPYTOLIVE_SSH_KEY }}
+
+      - name: Trust VPS host
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.ssh"
+          ssh-keyscan -p "${{ steps.req.outputs.port }}" -H "$SSH_HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null
+
+      - name: Guarded production patch - remove double Screener filter
+        env:
+          ID: ${{ steps.req.outputs.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PORT="${{ steps.req.outputs.port }}"
+          EXPECTED="dc478ea19688b23cc8168385194fc14e7ca3d972f1ffef193a3c4d1cb4182d01"
+          ssh -p "$PORT" "$SSH_USER@$SSH_HOST" "EXPECTED='$EXPECTED' ID='$ID' WEB_ROOT='$WEB_ROOT' python3 -" <<'PY'
+          import hashlib, os, pathlib, shutil, subprocess, sys
+          p=pathlib.Path(os.environ["WEB_ROOT"])/"fundamental.html"
+          raw=p.read_bytes()
+          current=hashlib.sha256(raw).hexdigest()
+          text=raw.decode("utf-8")
+          old=""" '<div class="screenerFilters">'+['All','Value','Quality','Growth','Dividend','Compounder','Low Debt','Complete Data'].map(x=>'<button class="preset '+(state.screenPreset===x?'active':'')+'" data-preset="'+x+'">'+x+'</button>').join('')+
+ '<span class="pill ok">Numeric filters: '+(state.screenNumeric.maxPE==null?'P/E Any':'P/E ≤ '+esc(state.screenNumeric.maxPE))+' · '+(state.screenNumeric.minROE==null?'ROE Any':'ROE ≥ '+esc(state.screenNumeric.minROE)+'%')+' · '+(state.screenNumeric.maxDE==null?'D/E Any':'D/E ≤ '+esc(state.screenNumeric.maxDE))+' · '+(state.screenNumeric.minGrowth==null?'Growth Any':'Growth ≥ '+esc(state.screenNumeric.minGrowth)+'%')+'</span></div>'+
+"""
+          new=""" '<div class="sourcebar"><span class="pill ok">Active filters: '+(state.screenNumeric.maxPE==null?'P/E Any':'P/E ≤ '+esc(state.screenNumeric.maxPE))+' · '+(state.screenNumeric.minROE==null?'ROE Any':'ROE ≥ '+esc(state.screenNumeric.minROE)+'%')+' · '+(state.screenNumeric.maxDE==null?'D/E Any':'D/E ≤ '+esc(state.screenNumeric.maxDE))+' · '+(state.screenNumeric.minGrowth==null?'Growth Any':'Growth ≥ '+esc(state.screenNumeric.minGrowth)+'%')+'</span></div>'+
+"""
+          bind=" document.querySelectorAll('[data-preset]').forEach(btn=>btn.onclick=()=>{state.screenPreset=btn.dataset.preset;renderScreener()});\n"
+          expected=os.environ["EXPECTED"]
+          already=("data-preset=" not in text and '<div class="screenerFilters">' not in text and 'Active filters:' in text)
+          if current != expected and not already:
+              print(f"CHECKSUM_MISMATCH current={current} expected={expected}", file=sys.stderr)
+              raise SystemExit(20)
+          if already:
+              print(f"PATCH_ALREADY_PRESENT sha256={current}")
+              raise SystemExit(0)
+          if text.count(old)!=1:
+              print("PATCH_ANCHOR_COUNT", text.count(old), file=sys.stderr)
+              raise SystemExit(21)
+          text=text.replace(old,new,1)
+          text=text.replace(bind,"",1)
+          if text.count('id="fundSearchBar"')!=1 or text.count('id="fundSearchBtn"')!=1:
+              print("TOP_FILTER_DUPLICATE_AFTER_PATCH", file=sys.stderr)
+              raise SystemExit(22)
+          backup=pathlib.Path("/var/backups/copytolive-control")/os.environ["ID"]/"web"
+          backup.mkdir(parents=True,exist_ok=True)
+          shutil.copy2(p,backup/"fundamental.html")
+          try:
+              attrs=subprocess.check_output(["lsattr",str(p)],text=True).split()[0]
+          except Exception:
+              attrs=""
+          immutable="i" in attrs
+          if immutable:
+              subprocess.run(["chattr","-i",str(p)],check=True)
+          p.write_text(text,encoding="utf-8")
+          if immutable:
+              subprocess.run(["chattr","+i",str(p)],check=True)
+          final=hashlib.sha256(p.read_bytes()).hexdigest()
+          print(f"PATCH_PASS old_sha={current} new_sha={final} backup={backup/'fundamental.html'} immutable_restored={immutable}")
+          PY
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install chromium --with-deps >/dev/null
+
+      - name: Browser validate and capture all features at 0ms artificial delay
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          RESP: ${{ steps.req.outputs.resp }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "publicqa/$ID" ai4-fundamental-fullqa-public-responses
+          cat > .ai4-fullqa-v2.mjs <<'JS'
+          import fs from 'fs';
+          import { chromium } from 'playwright';
+
+          const id=process.env.ID;
+          const dir=`publicqa/${id}`;
+          const respPath=process.env.RESP;
+          const ROOT='https://copytolive.com/';
+          const tabs=['Overview','Valuation','Growth','Profitability','Financials','Health','Ownership','Insiders','Filings','Estimates','Compare'];
+          const report={
+            id, acceptance:'FAIL', ok:false,
+            captureDelayMs:0,
+            publicGallery:`https://copytolive.com/assets/qa/fundamental/${id}/index.html`,
+            devices:{}, screenshots:[]
+          };
+          const browser=await chromium.launch({headless:true});
+
+          async function clickRootFundamental(page){
+            const loc=page.getByText('Fundamental',{exact:true});
+            for(let i=0;i<await loc.count();i++){
+              const x=loc.nth(i);
+              if(await x.isVisible()){
+                const r=await x.boundingBox();
+                if(r && r.y<260){await x.click({timeout:15000});return;}
+              }
+            }
+            throw new Error('visible root Fundamental control not found');
+          }
+          async function openFundamental(page){
+            const r=await page.goto(ROOT+`?fullqa=${encodeURIComponent(id)}`,{waitUntil:'domcontentloaded',timeout:60000});
+            if(r?.status()!==200) throw new Error('root HTTP '+r?.status());
+            await clickRootFundamental(page);
+            await page.waitForSelector('#ai4-fundamental-root-view iframe',{timeout:30000});
+            const frame=page.frameLocator('#ai4-fundamental-root-view iframe');
+            await frame.locator('.symbol').waitFor({state:'visible',timeout:60000});
+            return frame;
+          }
+          async function shot(page,device,feature){
+            const file=`${device}-${feature}.png`;
+            await page.screenshot({path:`${dir}/${file}`,fullPage:true});
+            report.screenshots.push({device,feature,file,captureDelayMs:0,url:`https://copytolive.com/assets/qa/fundamental/${id}/${file}`});
+          }
+          async function geometry(frame){
+            return frame.locator('header').evaluate(h=>{
+              const r=s=>h.querySelector(s)?.getBoundingClientRect();
+              const nav=r('.mainNavRow'), filt=r('.fundSearchScroll'), tools=r('.top');
+              const pairs=[[nav,filt],[filt,tools],[nav,tools]];
+              const overlaps=pairs.map(([a,b])=>{
+                if(!a||!b)return false;
+                const ix=Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left));
+                const iy=Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+                return ix>2&&iy>2;
+              });
+              return {
+                nav:nav&&{top:nav.top,bottom:nav.bottom,height:nav.height},
+                filter:filt&&{top:filt.top,bottom:filt.bottom,height:filt.height},
+                tools:tools&&{top:tools.top,bottom:tools.bottom,height:tools.height},
+                overlap:overlaps.some(Boolean)
+              };
+            });
+          }
+          async function run(device,viewport){
+            const ctx=await browser.newContext({viewport});
+            const page=await ctx.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+            page.on('console',m=>{if(m.type()==='error'&&!/favicon|429|Failed to load resource/i.test(m.text()))errors.push('console: '+m.text())});
+            const rec={viewport,ok:false};
+            try{
+              let frame=await openFundamental(page);
+              rec.rootUrl=page.url()==='https://copytolive.com/';
+              rec.symbol=(await frame.locator('.symbol').first().innerText()).trim();
+              rec.nav=await frame.locator('[data-main-nav]').allInnerTexts();
+              rec.topFilterBars=await frame.locator('#fundSearchBar').count();
+              rec.topSearchButtons=await frame.locator('#fundSearchBtn').count();
+              rec.topFilterFields=await frame.locator('#topMaxPE,#topMinROE,#topMaxDE,#topMinGrowth').count();
+              rec.filterLabels=await frame.locator('.fundFilterLabel').allInnerTexts();
+              rec.geometry=await geometry(frame);
+              rec.rootOverflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+8);
+              rec.frameOverflow=await frame.locator('html').evaluate(el=>el.scrollWidth>el.clientWidth+8);
+
+              await frame.locator('#search').fill('MSFT');
+              await frame.locator('#results.show').waitFor({state:'visible',timeout:30000});
+              rec.searchResults=await frame.locator('#results .result').count();
+              await shot(page,device,'00-search-results');
+              await frame.locator('#search').fill('');
+              await frame.locator('#results').evaluate(el=>el.classList.remove('show'));
+
+              const add=frame.locator('#watchBtn');
+              if(await add.count()) await add.click();
+
+              for(let i=0;i<tabs.length;i++){
+                const t=tabs[i];
+                const btn=frame.locator('.tab').filter({hasText:t}).first();
+                await btn.click();
+                await frame.locator('.tab.active').filter({hasText:t}).waitFor({state:'visible',timeout:15000});
+                if(t==='Compare'){
+                  const input=frame.locator('#compareInput');
+                  if(await input.count()){
+                    await input.fill('AAPL,MSFT');
+                    await frame.locator('#compareBtn').click();
+                    await frame.locator('#compareResult').waitFor({state:'visible',timeout:60000});
+                  }
+                }
+                await shot(page,device,`${String(i+1).padStart(2,'0')}-${t.toLowerCase()}`);
+              }
+
+              await frame.getByRole('button',{name:'Screener',exact:true}).click();
+              await frame.locator('#screenBody').waitFor({state:'attached',timeout:90000});
+              rec.secondaryPresetControls=await frame.locator('[data-preset],.screenerFilters .preset').count();
+              rec.secondaryFilterRows=await frame.locator('.screenerFilters').count();
+              rec.defaultRows=await frame.locator('#screenBody tr').count();
+              rec.activeFilterSummary=(await frame.locator('.sourcebar .pill').last().innerText()).replace(/\s+/g,' ').trim();
+              await shot(page,device,'12-screener-default');
+
+              await frame.locator('#topMaxPE').selectOption('50');
+              await frame.locator('#topMinROE').selectOption('5');
+              await frame.locator('#topMaxDE').selectOption('');
+              await frame.locator('#topMinGrowth').selectOption('');
+              await frame.locator('#fundSearchBtn').click();
+              await frame.locator('#screenBody').waitFor({state:'attached',timeout:90000});
+              rec.filteredRows=await frame.locator('#screenBody tr').count();
+              rec.filteredSummary=(await frame.locator('.sourcebar .pill').last().innerText()).replace(/\s+/g,' ').trim();
+              await shot(page,device,'13-screener-filtered-pe50-roe5');
+
+              await frame.getByRole('button',{name:'Watchlist',exact:true}).click();
+              await frame.getByText('WATCHLIST',{exact:true}).waitFor({state:'visible',timeout:15000});
+              rec.watchlistHasAAPL=(await frame.getByText('AAPL',{exact:true}).count())>0;
+              await shot(page,device,'14-watchlist');
+
+              rec.errors=errors;
+              rec.ok=
+                rec.rootUrl &&
+                rec.symbol==='AAPL' &&
+                rec.nav.length===6 &&
+                ['Home','Fundamental','Signal Scan','Crypto','Hyperliquid','Renko'].every(x=>rec.nav.includes(x)) &&
+                rec.topFilterBars===1 &&
+                rec.topSearchButtons===1 &&
+                rec.topFilterFields===4 &&
+                ['P/E','ROE','Debt / Equity','Revenue Growth'].every(x=>rec.filterLabels.includes(x)) &&
+                rec.secondaryPresetControls===0 &&
+                rec.secondaryFilterRows===0 &&
+                rec.defaultRows===247 &&
+                rec.filteredRows===47 &&
+                rec.activeFilterSummary.includes('P/E Any') &&
+                rec.filteredSummary.includes('P/E ≤ 50') &&
+                rec.filteredSummary.includes('ROE ≥ 5%') &&
+                rec.searchResults>0 &&
+                rec.watchlistHasAAPL &&
+                !rec.geometry.overlap &&
+                !rec.rootOverflow &&
+                (device==='desktop'||!rec.frameOverflow) &&
+                !errors.some(x=>x.startsWith('pageerror:'));
+            }catch(e){
+              rec.error=e.stack||e.message;
+              rec.errors=errors;
+            }
+            report.devices[device]=rec;
+            await ctx.close();
+          }
+
+          await run('desktop',{width:1440,height:900});
+          await run('mobile',{width:390,height:844});
+          await browser.close();
+
+          report.screenshotCount=report.screenshots.length;
+          report.expectedScreenshotCount=30;
+          report.ok=report.devices.desktop?.ok===true&&report.devices.mobile?.ok===true&&report.screenshotCount===30;
+          report.acceptance=report.ok?'PASS':'FAIL';
+
+          const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+          const items=report.screenshots.map(s=>`<article><h3>${esc(s.device.toUpperCase())} · ${esc(s.feature)}</h3><a href="${esc(s.url)}"><img src="${esc(s.url)}" loading="lazy" alt="${esc(s.device+' '+s.feature)}"></a></article>`).join('');
+          const html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fundamental QA ${esc(id)}</title><style>body{margin:0;padding:20px;background:#070b0e;color:#e8edf0;font:14px Arial,sans-serif}h1{color:#f0b90b}.meta{border:1px solid #293138;border-radius:12px;padding:12px;margin-bottom:18px}.grid{display:grid;grid-template-columns:1fr;gap:18px}article{background:#0d1216;border:1px solid #20282e;border-radius:12px;padding:10px}h3{margin:0 0 10px}img{display:block;width:100%;height:auto;border:1px solid #20282e;border-radius:8px}@media(min-width:1200px){.grid{grid-template-columns:1fr 1fr}}</style></head><body><h1>CopyToLive Fundamental Full QA</h1><div class="meta">Acceptance: <b>${report.acceptance}</b> · Desktop + Mobile · 0ms artificial screenshot delay · ${report.screenshotCount}/30 screenshots</div><div class="grid">${items}</div></body></html>`;
+          fs.writeFileSync(`${dir}/index.html`,html);
+          fs.writeFileSync(`${dir}/report.json`,JSON.stringify(report,null,2));
+          fs.writeFileSync(respPath,JSON.stringify(report,null,2));
+          if(!report.ok) process.exit(3);
+          JS
+          node ./.ai4-fullqa-v2.mjs
+
+      - name: Upload QA gallery to public CopyToLive
+        if: always()
+        env:
+          ID: ${{ steps.req.outputs.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d "publicqa/$ID"
+          PORT="${{ steps.req.outputs.port }}"
+          DEST="$WEB_ROOT/assets/qa/fundamental/$ID"
+          ssh -p "$PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$DEST'"
+          scp -q -P "$PORT" -r "publicqa/$ID/." "$SSH_USER@$SSH_HOST:$DEST/"
+          ssh -p "$PORT" "$SSH_USER@$SSH_HOST" "test -s '$DEST/index.html' && test -s '$DEST/report.json' && echo PUBLIC_QA_UPLOAD=PASS"
+
+      - name: Upload GitHub artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai4-fundamental-fullqa-${{ steps.req.outputs.id }}
+          path: publicqa/${{ steps.req.outputs.id }}/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Commit response
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESP="${{ steps.req.outputs.resp }}"
+          test -s "$RESP"
+          git config user.name "AI4 Fundamental Full QA"
+          git config user.email "ai4-fundamental-fullqa@local.invalid"
+          git add "$RESP"
+          git commit -m "ai4 full Fundamental public QA: ${{ steps.req.outputs.id }}" || true
+          for n in 1 2 3 4 5 6 7 8; do
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; sleep "$n"; continue; }
+            git push origin HEAD:main && exit 0
+            sleep "$n"
+          done
+          exit 1
+
+      - name: Enforce PASS
+        if: always()
+        shell: bash
+        run: |
+          python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); raise SystemExit(0 if d.get("acceptance")=="PASS" else 1)' "${{ steps.req.outputs.resp }}"

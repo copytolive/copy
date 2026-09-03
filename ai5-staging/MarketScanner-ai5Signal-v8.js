@@ -40,7 +40,7 @@ function StaticChart({pair,bars,height=220}){
 }
 
 function SelectCell({label,value,onChange,options}){
-  return J.jsxs("label",{className:"min-w-0 px-5 py-3 flex flex-col justify-center border-r border-[#2B3139]",children:[
+  return J.jsxs("label",{className:"min-w-0 px-4 py-3 flex flex-col justify-center border-r border-[#2B3139]",style:{flex:"1 1 150px",minWidth:"135px"},children:[
     J.jsx("span",{className:"text-[12px] font-extrabold text-[#EAECEF]",children:label}),
     J.jsx("select",{value,onChange:e=>onChange(e.target.value),className:"mt-0.5 w-full bg-transparent border-0 outline-none text-[13px] text-[#848E9C] cursor-pointer",children:options.map(o=>J.jsx("option",{value:o.value??o,children:o.label??o},o.value??o))})
   ]});
@@ -87,7 +87,7 @@ function MarketScanner(){
   const [rr,setRr]=React.useState("1:2");
   const [mode,setMode]=React.useState(()=>{try{return localStorage.getItem("ot_scan_sensitivity")||"strict"}catch{return "strict"}});
   const [search,setSearch]=React.useState("");
-  const [showPerps,setShowPerps]=React.useState(80);
+  const [showPerps,setShowPerps]=React.useState(40);
   const [prefilterState,setPrefilterState]=React.useState({status:"idle",key:"",candidates:[],results:[],errors:[],scan:null,message:""});
   const [deepState,setDeepState]=React.useState({status:"idle",signals:[],errors:[],bars:{},scan:null,message:""});
   const [lastRun,setLastRun]=React.useState(null);
@@ -216,19 +216,19 @@ function MarketScanner(){
     return Array.from(map.values());
   },[deepState]);
 
-  const filterBar=J.jsxs("div",{"data-ai5-filterbar":"1",style:{width:"calc(100% - 32px)",maxWidth:"1170px",minHeight:"64px",margin:"12px auto",display:"grid",gridTemplateColumns:"1.15fr 1fr 1fr 1fr 150px",background:"#1E2329",border:"1px solid #2B3139",borderRadius:"34px",overflow:"hidden",boxSizing:"border-box",color:"#EAECEF"},children:[
-    J.jsxs("div",{className:"min-w-0 px-5 py-3 flex flex-col justify-center border-r border-[#2B3139]",children:[
+  const filterBar=J.jsxs("div",{"data-ai5-filterbar":"1",style:{width:"calc(100% - 24px)",maxWidth:"1170px",minHeight:"64px",margin:"12px auto",display:"flex",flexWrap:"wrap",background:"#1E2329",border:"1px solid #2B3139",borderRadius:"24px",overflow:"hidden",boxSizing:"border-box",color:"#EAECEF"},children:[
+    J.jsxs("div",{className:"min-w-0 px-4 py-3 flex flex-col justify-center border-r border-[#2B3139]",style:{flex:"1 1 170px",minWidth:"150px"},children:[
       J.jsx("span",{className:"text-[12px] font-extrabold",children:"Instruments"}),
       J.jsx("span",{className:"text-[13px] text-[#848E9C]",children:pairs.length+" selected"})
     ]}),
     J.jsx(SelectCell,{label:"Timeframe",value:tf,onChange:setTf,options:TF}),
     J.jsx(SelectCell,{label:"R:R",value:rr,onChange:setRr,options:RRS}),
     J.jsx(SelectCell,{label:"Mode",value:mode,onChange:setMode,options:MODES.map(v=>({value:v,label:v[0].toUpperCase()+v.slice(1)}))}),
-    J.jsx("button",{type:"button",onClick:action,disabled:actionDisabled,style:{alignSelf:"center",height:"40px",margin:"0 10px",border:0,borderRadius:"22px",background:actionDisabled?"#5e4d00":"#F0B90B",color:actionDisabled?"#9b8b50":"#0B0E11",fontWeight:900,fontSize:"12px",cursor:actionDisabled?"default":"pointer"},children:actionLabel})
+    J.jsx("button",{type:"button",onClick:action,disabled:actionDisabled,style:{alignSelf:"center",flex:"1 1 150px",minWidth:"130px",height:"40px",margin:"8px 10px",border:0,borderRadius:"22px",background:actionDisabled?"#5e4d00":"#F0B90B",color:actionDisabled?"#9b8b50":"#0B0E11",fontWeight:900,fontSize:"12px",cursor:actionDisabled?"default":"pointer"},children:actionLabel})
   ]});
 
   return J.jsxs("div",{"data-ai5-signal-v8":"1",className:"min-h-screen bg-[#0b0f12] text-zinc-200",style:{overflowAnchor:"none"},children:[
-    J.jsxs("header",{className:"px-4 py-3 border-b border-[#252b33] bg-[#151a20] flex items-center gap-3",children:[
+    J.jsxs("header",{className:"px-4 py-3 border-b border-[#252b33] bg-[#151a20] flex flex-wrap items-center gap-2",children:[
       J.jsx("h2",{className:"text-sm font-extrabold",children:"Market Scanner"}),
       J.jsx("span",{className:"text-[10px] text-zinc-500",children:deepState.status==="scanning"?"Deep scanning":prefilterState.status==="loading"?"Prefiltering":stale?"Filters changed":"Ready"}),
       J.jsx("span",{className:"ml-auto text-[10px] px-2 py-1 rounded border border-[#2a3139] bg-[#0d1115]",children:"Selected "+pairs.length}),
@@ -252,7 +252,7 @@ function MarketScanner(){
         J.jsxs("div",{className:"p-3 max-h-[520px] overflow-y-auto",style:{overflowAnchor:"none"},children:[
           J.jsxs("div",{className:"flex items-center gap-2 mb-2",children:[J.jsx("span",{className:"font-extrabold text-xs",children:"Perpetuals"}),J.jsx("span",{className:"ml-auto text-[10px] text-zinc-500",children:filteredPerps.filter(x=>selected.has(x)).length+"/"+perps.length})]}),
           J.jsx("div",{className:"flex flex-wrap gap-1.5",children:filteredPerps.slice(0,showPerps).map(p=>J.jsx(PairChip,{pair:p,selected:selected.has(p),onToggle:togglePair},p))}),
-          filteredPerps.length>showPerps&&J.jsx("button",{type:"button",onClick:()=>setShowPerps(v=>Math.min(v+80,filteredPerps.length)),className:"w-full mt-3 py-2 rounded-lg text-[10px] font-bold text-[#FFD700] border border-[#3a3217]",children:"Tampilkan "+Math.min(80,filteredPerps.length-showPerps)+" lagi"})
+          filteredPerps.length>showPerps&&J.jsx("button",{type:"button",onClick:()=>setShowPerps(v=>Math.min(v+40,filteredPerps.length)),className:"w-full mt-3 py-2 rounded-lg text-[10px] font-bold text-[#FFD700] border border-[#3a3217]",children:"Tampilkan "+Math.min(40,filteredPerps.length-showPerps)+" lagi"})
         ]})
       ]}),
 

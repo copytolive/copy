@@ -1,0 +1,12 @@
+{
+  "id": "ai4-20260903-1200-fundamental-browser-gallery",
+  "captureDelayMs": 0,
+  "desktop": {
+    "width": 1440,
+    "height": 900
+  },
+  "mobile": {
+    "width": 390,
+    "height": 844
+  }
+}

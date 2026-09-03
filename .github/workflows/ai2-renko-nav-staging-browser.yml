@@ -1,0 +1,80 @@
+name: AI2 Renko Nav Staging Browser Acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai2-nav-staging-requests/**"
+permissions:
+  contents: write
+jobs:
+  accept:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai2-nav-staging-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "out=ai2-nav-staging-results/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Test staged shell against live production DOM
+        shell: bash
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          OUT: ${{ steps.req.outputs.out }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUT")"
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/ch.out 2>/tmp/ch.err &
+          PID=$!; trap 'kill $PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do curl -fsS http://127.0.0.1:9222/json/list >/tmp/pages.json 2>/dev/null && break; sleep .5; done
+          cat >/tmp/test.mjs <<'NODE'
+          import fs from 'node:fs';
+          const ID=process.env.ID,OUT=process.env.OUT,patch=fs.readFileSync('ai2-staging/ai3_public_shell_v1.navfix.js','utf8');
+          const pages=JSON.parse(fs.readFileSync('/tmp/pages.json','utf8')),page=pages.find(x=>x.type==='page');
+          let ws,seq=0;const pending=new Map(),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq,t=setTimeout(()=>{pending.delete(id);reject(Error('timeout '+method))},30000);pending.set(id,{resolve:v=>{clearTimeout(t);resolve(v)},reject});ws.send(JSON.stringify({id,method,params}))});
+          const ev=async expression=>{const x=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(x.exceptionDetails)throw Error(x.exceptionDetails.text||'eval');return x.result.value};
+          const R={id:ID,ok:false,views:{}};
+          try{
+            ws=new WebSocket(page.webSocketDebuggerUrl);await new Promise((a,b)=>{ws.onopen=a;ws.onerror=b});ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result)}};
+            await send('Runtime.enable');await send('Network.enable');await send('Page.enable');
+            await send('Network.setBlockedURLs',{urls:['*ai3_public_shell_v1.js*']});
+            for(const [name,width,height,mobile] of [['desktop',1440,1000,false],['mobile',390,844,true]]){
+              await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile,screenWidth:width,screenHeight:height});
+              await send('Page.navigate',{url:'https://copytolive.com/?view=renko&symbol=SOL&navstage='+encodeURIComponent(ID)+'-'+name});
+              await sleep(8000);
+              await ev(patch);
+              await sleep(1200);
+              const x=await ev(`(()=>{const norm=s=>String(s||'').replace(/\\s+/g,' ').trim(),vis=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'};const nav=[...document.querySelectorAll('nav')].find(n=>{if(n.closest('#desktop-sidebar'))return false;const t=norm(n.innerText);return ['Home','Fundamental','Signal Scan','Crypto','Hyperliquid','Renko'].every(k=>t.includes(k))});if(!nav)return{found:false,body:norm(document.body?.innerText).slice(0,1500)};const buttons=[...nav.querySelectorAll(':scope > button')].filter(vis).map(b=>({text:norm(b.innerText).replace(/^₿\\s*/,''),aria:b.getAttribute('aria-label')||'',x:Math.round(b.getBoundingClientRect().x),w:Math.round(b.getBoundingClientRect().width)}));const names=buttons.map(b=>b.text);const h=names.indexOf('Hyperliquid'),r=names.indexOf('Renko');const shell=!!document.querySelector('[data-testid="renko-top-filter"]');return{found:true,names,buttons,adjacent:h>=0&&r===h+1,shell};})()`);
+              R.views[name]=x;
+              if(!x.found||!x.adjacent||!x.shell)throw Error('NAV_STAGE_'+name+' '+JSON.stringify(x));
+            }
+            R.ok=true;
+          }catch(e){R.error=String(e?.stack||e)}finally{try{ws?.close()}catch{}fs.writeFileSync(OUT,JSON.stringify(R,null,2)+'\n');console.log(JSON.stringify(R,null,2))}
+          NODE
+          node /tmp/test.mjs
+      - name: Commit result
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"; test -s "$OUT"
+          git config user.name "AI2 Renko Nav Staging"
+          git config user.email "ai2-renko-nav-staging@local.invalid"
+          git add "$OUT"
+          git commit -m "ai2 nav staging acceptance: ${{ steps.req.outputs.id }}" || true
+          for n in 1 2 3 4 5; do
+            git fetch origin main; git rebase origin/main || { git rebase --abort || true; sleep "$n"; continue; }
+            git push origin HEAD:main && exit 0; sleep "$n"
+          done
+          exit 1
+      - name: Enforce
+        if: always()
+        shell: bash
+        run: python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));raise SystemExit(0 if d.get("ok") else 1)' "${{ steps.req.outputs.out }}"

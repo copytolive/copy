@@ -1,0 +1,146 @@
+name: AI2 Renko Total Final V3
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai2-renko-final-v3-requests/**"
+
+permissions:
+  contents: write
+
+jobs:
+  accept:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai2-renko-final-v3-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "response=ai2-renko-final-v3-responses/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Browser acceptance
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          RESP: ${{ steps.req.outputs.response }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ai2-renko-final-v3-responses
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/c.out 2>/tmp/c.err &
+          CPID=$!; trap 'kill $CPID 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:9222/json/list >/tmp/pages.tmp 2>/dev/null && \
+               python3 -c 'import json; d=json.load(open("/tmp/pages.tmp")); assert any(x.get("type")=="page" and x.get("webSocketDebuggerUrl") for x in d)' 2>/dev/null; then
+              mv /tmp/pages.tmp /tmp/pages.json
+              break
+            fi
+            sleep .5
+          done
+          test -s /tmp/pages.json
+          cat >/tmp/test.mjs <<'NODE'
+          import fs from 'node:fs';
+          const ID=process.env.ID, OUT=process.env.RESP;
+          const R={id:ID,ok:false,acceptance:'FAIL',quick:{},network:{requests:[],failed:[],httpErrors:[]},consoleErrors:[],exceptions:[],parseFailures:[],performance:{}};
+          let ws,seq=0,gapTimer,lastTick=Date.now(),maxGap=0;const pending=new Map(),urls=new Map();
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq,t=setTimeout(()=>{pending.delete(id);reject(Error('CDP_TIMEOUT '+method))},60000);pending.set(id,{resolve:v=>{clearTimeout(t);resolve(v)},reject:e=>{clearTimeout(t);reject(e)}});ws.send(JSON.stringify({id,method,params}))});
+          const ev=async expression=>{const x=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(x.exceptionDetails)throw Error(x.exceptionDetails.text||'EVAL');return x.result.value};
+          const wait=async(expression,timeout=20000)=>{const end=Date.now()+timeout;let v;while(Date.now()<end){try{v=await ev(expression);if(v)return v}catch{}await sleep(250)}return v};
+          async function click(text){const p=await ev("(()=>{const q="+JSON.stringify(text)+";const n=s=>String(s||'').replace(/\\s+/g,' ').trim();const e=[...document.querySelectorAll('button')].find(x=>n(x.textContent)===q&&getComputedStyle(x).display!=='none'&&x.getBoundingClientRect().width>0);if(!e)return null;const r=e.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,disabled:!!e.disabled}})()");if(!p||p.disabled)return false;await send('Input.dispatchMouseEvent',{type:'mousePressed',x:p.x,y:p.y,button:'left',clickCount:1});await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:p.x,y:p.y,button:'left',clickCount:1});return true}
+          const jf=async url=>await ev("(async()=>{let last={ok:false,status:0,data:{}};for(let i=0;i<3;i++){const r=await fetch("+JSON.stringify(url)+",{cache:'no-store'});let d={};try{d=await r.json()}catch{};last={ok:r.ok,status:r.status,data:d};if(r.ok||![429,502,503,504].includes(r.status))return last;if(i<2)await new Promise(x=>setTimeout(x,300*(i+1)))}return last})()");
+          const header=async()=>await ev("(()=>{const n=s=>String(s||'').replace(/\\s+/g,' ').trim(),v=x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(x).display!=='none'};const p=[...document.querySelectorAll('span')].filter(v).map(x=>n(x.textContent)).filter(x=>x.includes('· RENKO '));const s=[...document.querySelectorAll('select')].find(x=>(x.getAttribute('aria-label')||'').includes('Pair futures'))?.value||'';return p.find(x=>x.startsWith((s==='GOLD'?'GOLD/USD':s+'/USDC')+' · RENKO '))||p[0]||''})()");
+          const pair=async()=>await ev("(()=>{const s=[...document.querySelectorAll('select')].find(x=>(x.getAttribute('aria-label')||'').includes('Pair futures'));return s?.value||''})()");
+          try{
+            const pages=JSON.parse(fs.readFileSync('/tmp/pages.json','utf8')),page=pages.find(x=>x.type==='page');if(!page)throw Error('NO_PAGE');
+            ws=new WebSocket(page.webSocketDebuggerUrl);await new Promise((a,b)=>{ws.onopen=a;ws.onerror=b});
+            ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);return m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result)}if(m.method==='Network.requestWillBeSent'){const u=m.params?.request?.url||'';urls.set(m.params.requestId,u);if(/renko|charting|hyperliquid/i.test(u))R.network.requests.push(u)}if(m.method==='Network.loadingFailed'&&!m.params?.canceled&&m.params.errorText!=='net::ERR_ABORTED')R.network.failed.push((urls.get(m.params.requestId)||'')+' :: '+m.params.errorText);if(m.method==='Network.responseReceived'){const q=m.params?.response;if(q&&Number(q.status)>=400)R.network.httpErrors.push({status:Number(q.status),url:q.url})}if(m.method==='Runtime.exceptionThrown')R.exceptions.push(String(m.params?.exceptionDetails?.text||'exception'));if(m.method==='Debugger.scriptFailedToParse')R.parseFailures.push({url:String(m.params?.url||''),errorMessage:String(m.params?.errorMessage||''),startLine:Number(m.params?.startLine||0),startColumn:Number(m.params?.startColumn||0),endLine:Number(m.params?.endLine||0),endColumn:Number(m.params?.endColumn||0)});if(m.method==='Runtime.consoleAPICalled'&&m.params?.type==='error')R.consoleErrors.push((m.params.args||[]).map(a=>String(a.value??a.description??'')).join(' '));if(m.method==='Log.entryAdded'&&m.params?.entry?.level==='error')R.consoleErrors.push(String(m.params.entry.text||''))};
+            await send('Runtime.enable');await send('Log.enable');await send('Network.enable');await send('Debugger.enable');await send('Page.enable');
+            gapTimer=setInterval(()=>{const n=Date.now(),g=n-lastTick-50;if(g>maxGap)maxGap=g;lastTick=n},50);
+            const start=Date.now();await send('Page.navigate',{url:'https://copytolive.com/?view=renko&embed=1&symbol=SOL&smaPeriod=10&sma=10&v='+encodeURIComponent(ID)});
+            const uiReady=await wait("(()=>document.querySelector('canvas')&&document.querySelector('[aria-label*=\\\"Pair futures\\\"]')&&[...document.querySelectorAll('button')].some(x=>['+25K','FULL','MAX 250K'].includes(String(x.textContent||'').trim())))()",60000);
+            if(!uiReady){
+              R.uiDiag=await ev("(()=>({readyState:document.readyState,href:location.href,title:document.title,bodyText:String(document.body?.innerText||'').slice(0,3000),bodyHtml:String(document.body?.innerHTML||'').slice(0,3000),canvasCount:document.querySelectorAll('canvas').length,selects:[...document.querySelectorAll('select')].map(x=>({aria:x.getAttribute('aria-label')||'',value:x.value})),buttons:[...document.querySelectorAll('button')].map(x=>String(x.textContent||'').replace(/\\s+/g,' ').trim()).filter(Boolean).slice(0,150),scripts:[...document.scripts].map(x=>({type:x.type||'',src:x.src||'',text:x.src?'':String(x.textContent||'').slice(0,1200)})),resources:performance.getEntriesByType('resource').map(x=>x.name).slice(-120)}))()");
+              R.moduleDiag=await ev("(async()=>{const urls=['/assets/js/dashboard-WZpp2Gui.js?ai2diag="+encodeURIComponent(ID)+"','/assets/js/charting-C4jAt7iT.js?ai2diag="+encodeURIComponent(ID)+"','/assets/js/SolRenkoTerminal-BeL2R3qB.js?ai2diag="+encodeURIComponent(ID)+"'];const out=[];for(const url of urls){try{await import(url);out.push({url,ok:true})}catch(e){out.push({url,ok:false,name:String(e?.name||''),message:String(e?.message||e||''),stack:String(e?.stack||'').slice(0,2500)})}}return out})()");
+              throw Error('UI_NOT_READY '+JSON.stringify(R.uiDiag));
+            }
+            R.performance.readyMs=Date.now()-start;
+            R.assetHashes=await ev("(async()=>{const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');const h=async u=>{const r=await fetch(u,{cache:'no-store'}),b=await r.arrayBuffer();return{status:r.status,bytes:b.byteLength,sha256:hex(await crypto.subtle.digest('SHA-256',b)),url:r.url}};return{plain:await h('/assets/js/SolRenkoTerminal-BeL2R3qB.js'),busted:await h('/assets/js/SolRenkoTerminal-BeL2R3qB.js?ai2='+encodeURIComponent("+JSON.stringify(ID)+"))}})()");
+            const u=await jf('/api/charting/hyperliquid/renko-universe'),ps=u.data?.pairs||[],cats={};for(const p of ps)cats[p.category||'unknown']=(cats[p.category||'unknown']||0)+1;R.universe={status:u.status,total:ps.length,categories:cats};if(!u.ok||ps.length!==163||cats.crypto!==141||ps.length-cats.crypto!==22)throw Error('UNIVERSE');
+            const ic=await jf('/api/charting/hyperliquid/indicator-catalog'),gs=ic.data?.groups||[];let it=0;for(const g of gs)it+=Number(g.count)||Number(g.indicators?.length)||0;R.indicators={status:ic.status,groups:gs.length,total:it};if(!ic.ok||gs.length!==11||it!==162)throw Error('INDICATORS');
+
+            if(!await wait("(()=>{const b=[...document.querySelectorAll('button')].map(x=>String(x.textContent||'').replace(/\\s+/g,' ').trim());return b.includes('NON-CRYPTO 22')&&b.includes('CRYPTO 141')})()",20000))throw Error('TABS_NOT_READY');
+            if(!await click('NON-CRYPTO 22')||!await wait("(()=>{const s=[...document.querySelectorAll('select')].find(x=>(x.getAttribute('aria-label')||'').includes('Pair futures'));return s?.value==='GOLD'})()",12000))throw Error('NONCRYPTO_TAB');
+            if(!await click('CRYPTO 141')||!await wait("(()=>{const s=[...document.querySelectorAll('select')].find(x=>(x.getAttribute('aria-label')||'').includes('Pair futures'));return s?.value==='BTC'})()",8000))throw Error('CRYPTO_TAB');
+
+            for(const sym of ['GOLD','ETC','UNI','AVAX','XLM','DOT']){
+              if(!await click(sym))throw Error('CLICK_'+sym);
+              const api=await jf('/api/charting/hyperliquid/renko/'+sym+'?limit=400&smaPeriod=10&sma=10'),brick=Number(api.data?.brickSize)||0,pr=sym==='GOLD'?'GOLD/USD':sym+'/USDC';
+              const cond="(()=>{const n=s=>String(s||'').replace(/\\s+/g,' ').trim(),v=x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(x).display!=='none'};const s=[...document.querySelectorAll('select')].find(x=>(x.getAttribute('aria-label')||'').includes('Pair futures'));const hs=[...document.querySelectorAll('span')].filter(v).map(x=>n(x.textContent));return s?.value==="+JSON.stringify(sym)+"&&hs.some(h=>h.startsWith("+JSON.stringify(pr+' · RENKO ')+")&&h.includes("+JSON.stringify(String(brick))+"))})()";
+              let settled=!!await wait(cond,30000),recoveredOnSecondClick=false;
+              if(!settled){const beforeRetryReq=R.network.requests.length;if(await click(sym)){recoveredOnSecondClick=!!await wait(cond,20000)}R.quick[sym]={retryRequests:R.network.requests.slice(beforeRetryReq)}}
+              R.quick[sym]={...(R.quick[sym]||{}),settled,recoveredOnSecondClick,header:await header(),pair:await pair(),status:api.status,count:Number(api.data?.count)||0,returned:(api.data?.candles||[]).length,brick,recordedTicks:Number(api.data?.recordedTickCount)||0,source:api.data?.source||''};if(!api.ok||R.quick[sym].returned<1||!settled)throw Error('QUICK_STALE_'+sym+' '+JSON.stringify(R.quick[sym]));
+            }
+
+            await ev("window.postMessage({type:'copytolive:renko:set-symbol',symbol:'SOL',smaPeriod:10},location.origin);true");
+            if(!await wait("(()=>{const n=s=>String(s||'').replace(/\\s+/g,' ').trim(),v=x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(x).display!=='none'};const s=[...document.querySelectorAll('select')].find(x=>(x.getAttribute('aria-label')||'').includes('Pair futures'));const hs=[...document.querySelectorAll('span')].filter(v).map(x=>n(x.textContent));return s?.value==='SOL'&&hs.some(h=>/^SOL\\/USDC · RENKO [0-9]/.test(h))})()",30000))throw Error('SOL_RESTORE');
+            await sleep(2300);
+            const pre=String(await ev("document.body?.innerText||''"));
+            R.preTicksMatches=[...pre.matchAll(/TICKS\s+(N\/A|[0-9.]+)/gi)].map(m=>({value:m[1],context:pre.slice(Math.max(0,m.index-80),m.index+140)}));
+            R.preTicksCard=await ev("(()=>{const v=x=>{const r=x.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(x).display!=='none'};const labels=[...document.querySelectorAll('span')].filter(v).filter(x=>String(x.textContent||'').trim()==='TICKS');return labels.map(x=>({parent:String(x.parentElement?.innerText||'').trim(),next:String(x.nextElementSibling?.textContent||'').trim()}))})()");
+            R.preTicks=(R.preTicksCard.find(x=>/^(N\/A|[0-9.]+)$/i.test(x.next))?.next)||'';if(R.preTicks==='0')throw Error('TICKS_ZERO_MISLEADING '+JSON.stringify({card:R.preTicksCard,matches:R.preTicksMatches}));
+            const readHistory=async()=>{const t=String(await ev("document.body?.innerText||''")),m=/History\s+([0-9.]+)\s*\/\s*([0-9.]+)/i.exec(t),num=s=>Number(String(s||'').replace(/\./g,''))||0;return{loaded:m?num(m[1]):0,total:m?num(m[2]):0,text:t}};
+            const h0=await readHistory(),bReq=R.network.requests.length;if(!await click('+25K'))throw Error('PLUS25K_CLICK');
+            const target1=Math.min(h0.total,h0.loaded+20000);
+            const ready25=!!await wait("(()=>{const t=document.body?.innerText||'',m=/History\\s+([0-9.]+)\\s*\/\\s*([0-9.]+)/i.exec(t);if(!m)return false;return Number(m[1].replace(/\\./g,''))>="+target1+"})()",120000);
+            const p1=await readHistory(),newReq=R.network.requests.slice(bReq),realReq=newReq.find(u=>/\/renko\/SOL\?/.test(u)&&/limit=25000/.test(u)&&/offset=/.test(u))||'',off1=Number((/[?&]offset=(\d+)/.exec(realReq)||[])[1]||-1);
+            R.history25k={ready:ready25,request:realReq,offset:off1,before:h0.loaded,loaded:p1.loaded,total:p1.total,delta:p1.loaded-h0.loaded,ticks:(/TICKS\s+(N\/A|[0-9.]+)/i.exec(p1.text)||[])[1]||'',provenance:(/REAL H1 \+ TICKS|RENKO HISTORY/i.exec(p1.text)||[])[0]||''};
+            if(!realReq||off1<h0.loaded||R.history25k.loaded<target1||R.history25k.delta<Math.min(20000,Math.max(0,h0.total-h0.loaded)))throw Error('PLUS25K '+JSON.stringify(R.history25k));
+            const bReq2=R.network.requests.length;if(!await click('+25K'))throw Error('PLUS25K_SECOND_CLICK');
+            const target2=Math.min(p1.total,p1.loaded+20000);
+            const ready50=!!await wait("(()=>{const t=document.body?.innerText||'',m=/History\\s+([0-9.]+)\\s*\/\\s*([0-9.]+)/i.exec(t);if(!m)return false;return Number(m[1].replace(/\\./g,''))>="+target2+"})()",120000);
+            const p2=await readHistory(),newReq2=R.network.requests.slice(bReq2),realReq2=newReq2.find(u=>/\/renko\/SOL\?/.test(u)&&/limit=25000/.test(u)&&/offset=/.test(u))||'',off2=Number((/[?&]offset=(\d+)/.exec(realReq2)||[])[1]||-1);
+            R.history50k={ready:ready50,request:realReq2,offset:off2,before:p1.loaded,loaded:p2.loaded,total:p2.total,delta:p2.loaded-p1.loaded};
+            if(!realReq2||off2<p1.loaded||R.history50k.loaded<target2||R.history50k.delta<Math.min(20000,Math.max(0,p1.total-p1.loaded)))throw Error('PLUS25K_REPEAT '+JSON.stringify(R.history50k));
+
+            const iReq=R.network.requests.length;if(!await click('+ PASANG'))throw Error('PASANG_CLICK');const chip=!!await wait("(()=>[...document.querySelectorAll('button')].some(x=>x.title==='Hapus RSI'))()",15000),reqInd=R.network.requests.slice(iReq).find(u=>/\/api\/charting\/hyperliquid\/indicator(?:$|\?)/.test(u))||'';R.indicatorApplied={chip,request:reqInd};if(!chip||!reqInd)throw Error('INDICATOR_APPLY');
+
+            const lock=await ev("(()=>{const b=[...document.querySelectorAll('button')].find(x=>/Klik untuk aktifkan chart/i.test(x.textContent||''));if(!b)return null;const r=b.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}})()");if(!lock)throw Error('LOCK_MISSING');await send('Input.dispatchMouseEvent',{type:'mousePressed',x:lock.x,y:lock.y,button:'left',clickCount:1});await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:lock.x,y:lock.y,button:'left',clickCount:1});await sleep(350);await send('Input.dispatchMouseEvent',{type:'mouseWheel',x:lock.x,y:lock.y,deltaY:-180,deltaX:0});await send('Input.dispatchMouseEvent',{type:'mousePressed',x:lock.x,y:lock.y,button:'left',clickCount:1});await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:lock.x-100,y:lock.y,button:'left',buttons:1});await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:lock.x-100,y:lock.y,button:'left',clickCount:1});await sleep(600);R.chart={unlocked:!await ev("!![...document.querySelectorAll('button')].find(x=>/Klik untuk aktifkan chart/i.test(x.textContent||''))"),canvases:Number(await ev("document.querySelectorAll('canvas').length"))};if(!R.chart.unlocked)throw Error('CHART_UNLOCK');
+
+            R.network.failed=[...new Set(R.network.failed)];R.consoleErrors=[...new Set(R.consoleErrors)].filter(Boolean);R.exceptions=[...new Set(R.exceptions)].filter(Boolean);
+            const transientStatus=new Set([429,502,503,504]),hardHttp=R.network.httpErrors.filter(x=>!transientStatus.has(Number(x.status))),transientHttp=R.network.httpErrors.filter(x=>transientStatus.has(Number(x.status)));
+            const hardConsole=R.consoleErrors.filter(x=>!/Failed to load resource: the server responded with a status of (429|502|503|504)/i.test(x));
+            R.network.transientHttpErrors=transientHttp;R.network.hardHttpErrors=hardHttp;R.transientConsoleErrors=R.consoleErrors.filter(x=>!hardConsole.includes(x));
+            if(R.network.failed.length||hardConsole.length||R.exceptions.length||hardHttp.length)throw Error('BROWSER_ERRORS '+JSON.stringify({f:R.network.failed,c:hardConsole,e:R.exceptions,h:hardHttp,transientHttp}));
+            R.performance.maxEventLoopGapMs=maxGap;R.finalHeader=await header();R.ok=true;R.acceptance='PASS';
+          }catch(e){R.error=String(e?.stack||e);R.performance.maxEventLoopGapMs=maxGap}finally{try{clearInterval(gapTimer)}catch{}try{ws?.close()}catch{}fs.writeFileSync(OUT,JSON.stringify(R,null,2)+'\n');console.log(JSON.stringify(R,null,2))}
+          NODE
+          node --check /tmp/test.mjs
+          node /tmp/test.mjs
+      - name: Commit response
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESP="${{ steps.req.outputs.response }}"
+          git config user.name "AI2 Renko Final V3"
+          git config user.email "ai2-renko-final-v3@local.invalid"
+          git add "$RESP"
+          git commit -m "ai2 renko final v3: ${{ steps.req.outputs.id }}" || true
+          for n in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; sleep "$n"; continue; }
+            git push origin HEAD:main && exit 0
+            sleep "$n"
+          done
+          exit 1
+      - name: Enforce
+        if: always()
+        shell: bash
+        run: python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));raise SystemExit(0 if d.get("ok") and d.get("acceptance")=="PASS" else 1)' "${{ steps.req.outputs.response }}"

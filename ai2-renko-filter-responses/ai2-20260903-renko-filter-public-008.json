@@ -1,0 +1,36 @@
+{
+  "id": "ai2-20260903-renko-filter-public-008",
+  "ok": false,
+  "acceptance": "FAIL",
+  "checks": {
+    "labels": [
+      "Metode",
+      "Pair",
+      "Market",
+      "OOS WR"
+    ],
+    "crypto": {
+      "expected": "EIGEN",
+      "pair": "EIGEN",
+      "terminal": "EIGEN"
+    },
+    "oos55": {
+      "expected": "EIGEN",
+      "pair": "EIGEN",
+      "terminal": "EIGEN"
+    },
+    "manualPair": {
+      "selected": "GRASS",
+      "terminal": "GRASS"
+    },
+    "noncrypto": {
+      "expected": "GOLD",
+      "pair": "GOLD",
+      "terminal": "GOLD"
+    },
+    "nav": false
+  },
+  "errors": [],
+  "network": [],
+  "error": "Error: RENKO_NAV_MISSING_OR_NOT_NEXT_TO_HYPERLIQUID\n    at file:///tmp/test.mjs:41:27"
+}

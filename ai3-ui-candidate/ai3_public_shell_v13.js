@@ -1,4 +1,4 @@
-(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.3";
+(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.4";
 const K="ot_backtest_view_mode",H=["lucide-coins","lucide-orbit","lucide-circle-dollar-sign","lucide-trending-up"];
 const norm=s=>String(s||"").replace(/\s+/g," ").trim();
 const side=c=>Array.from(document.querySelectorAll("#desktop-sidebar nav button")).find(b=>b.querySelector("svg."+c))||null;
@@ -83,8 +83,9 @@ function normalizeTopNav(){
       const svg=b.querySelector("svg");if(svg){css(svg,"width",icon+"px");css(svg,"height",icon+"px")}
       const l=label(b);if(l){css(l,"font-size",font+"px");css(l,"font-weight","600");css(l,"line-height",mobile?"16.5px":"19.5px");css(l,"height","auto")}
     });
-    const nr=nav.getBoundingClientRect(),dx=(window.innerWidth/2)-(nr.left+nr.width/2);
-    css(nav,"transform",Math.abs(dx)>0.5?"translateX("+dx+"px)":"none");
+    /* Preserve the host shell's horizontal anchor. Equal slot geometry is locked here;
+       cross-route drift is validated against Home instead of forcing viewport centering. */
+    css(nav,"transform","none");
   });
 }
 function fitFilterBars(){

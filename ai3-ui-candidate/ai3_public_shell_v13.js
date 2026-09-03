@@ -1,4 +1,4 @@
-(()=>{"use strict";
+(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.1";
 const K="ot_backtest_view_mode",H=["lucide-coins","lucide-orbit","lucide-circle-dollar-sign","lucide-trending-up"];
 const norm=s=>String(s||"").replace(/\s+/g," ").trim();
 const side=c=>Array.from(document.querySelectorAll("#desktop-sidebar nav button")).find(b=>b.querySelector("svg."+c))||null;
@@ -34,7 +34,7 @@ function go(mode,icon){const b=side(icon);if(b){b.click();setTimeout(install,80)
 function direct(mode){try{localStorage.setItem(K,mode);location.assign("/")}catch(e){location.href="/"}}
 function spans(b){return Array.from(b.querySelectorAll("span"))}
 function label(b){return spans(b).find(s=>["Backtest","Home","Fundamental","Screener Crypto","Crypto","Signal Scan","Hyperliquid","Renko"].includes(norm(s.textContent)))||null}
-function find(nav,names){return Array.from(nav.querySelectorAll(":scope > button")).find(b=>names.includes(norm(b.innerText)))||null}
+function find(nav,names){return Array.from(nav.querySelectorAll(":scope > button")).find(b=>{const t=norm(b.innerText);return names.some(n=>t===n||t.endsWith(" "+n))})||null}
 const sig='<svg viewBox="0 0 60 60" width="36" height="36" aria-hidden="true"><path d="M33 7 17 31h13l-3 22 17-27H31z" fill="#FFD700" stroke="#B8860B" stroke-width="2" stroke-linejoin="round"/></svg>';
 const hyp='<svg viewBox="0 0 60 60" width="36" height="36" aria-hidden="true"><path d="M8 31h9l5-14 8 28 6-20 5 10h11" fill="none" stroke="#FFD700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="30" cy="30" r="24" fill="none" stroke="#B8860B" stroke-width="1.5"/></svg>';
 function add(nav,tpl,k,l,ico,fn){let b=nav.querySelector('[data-ai3="'+k+'"]');if(b)return b;b=tpl.cloneNode(true);b.dataset.ai3=k;b.removeAttribute("style");b.querySelectorAll("span.absolute").forEach(x=>x.remove());const a=spans(b),iw=a[0];if(iw)iw.innerHTML=ico;const tx=label(b)||a[a.length-1];if(tx)tx.textContent=l;b.title=l;b.setAttribute("aria-label",l);b.className=String(b.className).replace(/text-\[#FFD700\]/g,"text-[#848E9C]");b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();fn()});return b}

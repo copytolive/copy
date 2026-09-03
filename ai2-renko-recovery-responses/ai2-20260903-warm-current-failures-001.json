@@ -1,0 +1,372 @@
+{
+  "id": "ai2-20260903-warm-current-failures-001",
+  "ok": false,
+  "symbols": {
+    "MEME": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.422,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "ORDI": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.276,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "NEO": {
+      "ok": false,
+      "attempts": [
+        {
+          "status": 502,
+          "seconds": 6.324,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 1,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 0.351,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 2,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 8.391,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 3,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 4.982,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 4,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 10.015,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 5,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 11.765,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 6,
+          "returned": 0
+        }
+      ]
+    },
+    "ZEN": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 502,
+          "seconds": 0.272,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 1,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 0.246,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 2,
+          "returned": 0
+        },
+        {
+          "status": 200,
+          "seconds": 0.467,
+          "n": 3,
+          "returned": 400
+        }
+      ]
+    },
+    "BIO": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.376,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "SPX": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.334,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "S": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.296,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "MORPHO": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.286,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "MELANIA": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.311,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "VVV": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.318,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "BERA": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.32,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "KAITO": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.286,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "GOLD": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 2.744,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "SILVER": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 4.153,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "WTIOIL": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 5.014,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "BRENTOIL": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 502,
+          "seconds": 9.416,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 1,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 0.257,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 2,
+          "returned": 0
+        },
+        {
+          "status": 200,
+          "seconds": 3.88,
+          "n": 3,
+          "returned": 400
+        }
+      ]
+    },
+    "FIL": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.324,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "PYTH": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.336,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "NATGAS": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 1.559,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "COPPER": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 1.421,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "PLATINUM": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.714,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "SP500": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 4.116,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    },
+    "XYZ100": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 3.953,
+          "n": 1,
+          "returned": 400
+        }
+      ]
+    }
+  },
+  "failed": [
+    "NEO"
+  ],
+  "endpoints": {
+    "universe": [
+      {
+        "n": 1,
+        "status": 200,
+        "seconds": 0.364,
+        "error": ""
+      }
+    ],
+    "indicator": [
+      {
+        "n": 1,
+        "status": 200,
+        "seconds": 0.276,
+        "error": ""
+      }
+    ],
+    "sol": [
+      {
+        "n": 1,
+        "status": 200,
+        "seconds": 0.492,
+        "error": ""
+      }
+    ],
+    "stream": [
+      {
+        "n": 1,
+        "status": 0,
+        "seconds": 323.303,
+        "error": "IncompleteRead(80392 bytes read)"
+      },
+      {
+        "n": 2,
+        "status": 502,
+        "seconds": 0.389,
+        "error": "HTTP Error 502: Bad Gateway"
+      },
+      {
+        "n": 3,
+        "status": 502,
+        "seconds": 9.007,
+        "error": "HTTP Error 502: Bad Gateway"
+      }
+    ]
+  }
+}

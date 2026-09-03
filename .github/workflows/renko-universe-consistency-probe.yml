@@ -12,7 +12,7 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,7 +50,7 @@ jobs:
           def check(sym):
               url=f"{BASE}/renko/{urllib.parse.quote(sym)}?limit=2&smaPeriod=10&sma=10"
               attempts=[]
-              for n in range(1,4):
+              for n in range(1,6):
                   t=time.time()
                   try:
                       status,data=get_json(url,30)
@@ -68,12 +68,12 @@ jobs:
                           return {"symbol":sym,"ok":False,"status":404,"returned":0,"error":data.get("error","") or str(e),"attempts":attempts}
                   except Exception as e:
                       attempts.append({"n":n,"status":0,"returned":0,"seconds":round(time.time()-t,3),"error":str(e)})
-                  time.sleep(0.7*n)
+                  time.sleep(min(8, n*1.5))
               last=attempts[-1]
               return {"symbol":sym,"ok":False,"status":last["status"],"returned":last["returned"],"error":last["error"],"attempts":attempts}
 
           results=[]
-          with ThreadPoolExecutor(max_workers=4) as ex:
+          with ThreadPoolExecutor(max_workers=1) as ex:
               futs=[ex.submit(check,s) for s in syms]
               for f in as_completed(futs): results.append(f.result())
           results.sort(key=lambda x: syms.index(x["symbol"]))

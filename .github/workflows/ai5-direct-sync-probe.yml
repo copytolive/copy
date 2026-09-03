@@ -1,0 +1,54 @@
+name: AI5 Direct Production Sync Probe
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai5-direct-sync-probe/**"
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai5-direct-sync-probe/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "out=ai5-direct-sync-results/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Check direct production sync
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          OUT: ${{ steps.req.outputs.out }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUT")"
+          CODE="$(curl -L -sS -o /tmp/probe.txt -w '%{http_code}' --connect-timeout 8 --max-time 20 "https://copytolive.com/assets/ai5-prod-sync-probe-20260903.txt?x=$GITHUB_RUN_ID" || true)"
+          BODY="$(cat /tmp/probe.txt 2>/dev/null || true)"
+          python3 - "$OUT" "$ID" "$CODE" "$BODY" <<'PY'
+          import json,sys
+          out,id_,code,body=sys.argv[1:5]
+          d={"id":id_,"status":int(code or 0),"body":body[:500],"ok":int(code or 0)==200 and "AI5_PROD_SYNC_PROBE_20260903_0159Z" in body}
+          open(out,"w").write(json.dumps(d,indent=2)+"\n")
+          print(json.dumps(d))
+          PY
+      - name: Commit result
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"; test -s "$OUT"
+          git config user.name "CopyToLive AI5 Sync Probe"
+          git config user.email "copytolive-ai5-sync@local.invalid"
+          git add "$OUT"; git commit -m "ai5 direct sync probe: ${{ steps.req.outputs.id }}" || true
+          git pull --rebase origin main; git push origin HEAD:main
+      - name: Enforce
+        if: always()
+        shell: bash
+        run: python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); raise SystemExit(0 if d.get("ok") else 1)' "${{ steps.req.outputs.out }}"

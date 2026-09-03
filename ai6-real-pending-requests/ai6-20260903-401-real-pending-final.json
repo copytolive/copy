@@ -1,0 +1,5 @@
+{
+  "id": "ai6-20260903-401-real-pending-final",
+  "goal": "Crypto Screener -> REAL Hyperliquid broker-side pending entry -> existing dashboard Open Orders / Positions / Fills lifecycle",
+  "safety": "acceptance must not submit any real order; invalid-wallet probe only"
+}

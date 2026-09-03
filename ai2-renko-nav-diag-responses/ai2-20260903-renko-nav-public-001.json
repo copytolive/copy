@@ -1,0 +1,453 @@
+{
+  "id": "ai2-20260903-renko-nav-public-001",
+  "views": {
+    "desktop": {
+      "href": "https://copytolive.com/",
+      "bodyStart": "Home Fundamental Signal Scan ₿ Crypto Renko All Filter Any Metode Renko OOS Auto Pair EIGEN/USDC · OOS 76.3% GRASS/USDC · OOS 75.1% PURR/USDC · OOS 71.7% WLD/USDC · OOS 71.7% DASH/USDC · OOS 69.8% MORPHO/USDC · OOS 69.8% XPL/USDC · OOS 69.7% JTO/USDC · OOS 69.3% DOT/USDC · OOS 69.2% AAVE/USDC · OOS 69.0% AVAX/USDC · OOS 68.2% ALGO/USDC · OOS 68.1% SPX/USDC · OOS 68.0% IO/USDC · OOS 67.6% NIL/USDC · OOS 67.5% STABLE/USDC · OOS 66.8% HBAR/USDC · OOS 66.6% TNSR/USDC · OOS 66.6% ADA/USDC · OOS 66.5% TIA/USDC · OOS 66.3% BIO/USDC · OOS 66.1% SOL/USDC · OOS 65.8% XAI/USDC · OOS 65.7% APE/USDC · OOS 65.7% JUP/USDC · OOS 65.5% RESOLV/USDC · OOS 65.4% NEO/USDC · OOS 65.3% LINK/USDC · OOS 65.0% BANANA/USDC · OOS 64.9% XLM/USDC · OOS 64.9% ACE/USDC · OOS 64.9% KAITO/USDC · OOS 64.6% ATOM/USDC · OOS 64.5% LIT/USDC · OOS 64.1% BLUR/USDC · OOS 64.0% MON/USDC · OOS 63.9% ETC/USDC · OOS 63.7% LDO/USDC · OOS 63.7% VVV/USDC · OOS 63.5% DYDX/USDC · OOS 63.3% ALT/USDC · OOS 62.8% PYTH/USDC · OOS 62.7% ENA/USDC · OOS 62.7% POPCAT/USDC · OOS 62.6% SKR/USDC · OOS 62.4% SKY/USDC · OOS 62.4% PENDLE/USDC · OOS 62.2% CRV/USDC · OOS 62.1% NOT/USDC · OOS 61.8% FET/USDC · OOS 61.3% KLUNC/USDC · OOS 61.2% CELO/U",
+      "rows": [
+        {
+          "text": "Home",
+          "tag": "BUTTON",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "Home",
+          "href": "",
+          "rect": {
+            "x": 492,
+            "y": 7,
+            "w": 51,
+            "h": 66
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Home",
+          "tag": "SPAN",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "Home",
+          "href": "",
+          "rect": {
+            "x": 492,
+            "y": 7,
+            "w": 51,
+            "h": 66
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Fundamental",
+          "tag": "BUTTON",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "Fundamental",
+          "href": "",
+          "rect": {
+            "x": 571,
+            "y": 7,
+            "w": 96,
+            "h": 66
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Fundamental",
+          "tag": "SPAN",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "Fundamental",
+          "href": "",
+          "rect": {
+            "x": 571,
+            "y": 7,
+            "w": 96,
+            "h": 66
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Signal Scan",
+          "tag": "BUTTON",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "Signal Scan",
+          "href": "",
+          "rect": {
+            "x": 694,
+            "y": 7,
+            "w": 88,
+            "h": 66
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Signal Scan",
+          "tag": "SPAN",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "Signal Scan",
+          "href": "",
+          "rect": {
+            "x": 694,
+            "y": 7,
+            "w": 88,
+            "h": 66
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Crypto",
+          "tag": "SPAN",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "Crypto",
+          "href": "",
+          "rect": {
+            "x": 810,
+            "y": 7,
+            "w": 57,
+            "h": 66
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Renko",
+          "tag": "BUTTON",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "",
+          "href": "",
+          "rect": {
+            "x": 895,
+            "y": 7,
+            "w": 53,
+            "h": 66
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Renko",
+          "tag": "SPAN",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "",
+          "href": "",
+          "rect": {
+            "x": 895,
+            "y": 7,
+            "w": 53,
+            "h": 66
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "tag": "NAV",
+          "role": "",
+          "kids": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "role": "",
+          "kids": [
+            "Renko"
+          ]
+        }
+      ]
+    },
+    "mobile": {
+      "href": "https://copytolive.com/",
+      "bodyStart": "Cari strategi Filter berdasarkan kriteria Home Fundamental Signal Scan ₿ Crypto Renko Metode Renko OOS Auto Pair EIGEN/USDC · OOS 76.3% GRASS/USDC · OOS 75.1% PURR/USDC · OOS 71.7% WLD/USDC · OOS 71.7% DASH/USDC · OOS 69.8% MORPHO/USDC · OOS 69.8% XPL/USDC · OOS 69.7% JTO/USDC · OOS 69.3% DOT/USDC · OOS 69.2% AAVE/USDC · OOS 69.0% AVAX/USDC · OOS 68.2% ALGO/USDC · OOS 68.1% SPX/USDC · OOS 68.0% IO/USDC · OOS 67.6% NIL/USDC · OOS 67.5% STABLE/USDC · OOS 66.8% HBAR/USDC · OOS 66.6% TNSR/USDC · OOS 66.6% ADA/USDC · OOS 66.5% TIA/USDC · OOS 66.3% BIO/USDC · OOS 66.1% SOL/USDC · OOS 65.8% XAI/USDC · OOS 65.7% APE/USDC · OOS 65.7% JUP/USDC · OOS 65.5% RESOLV/USDC · OOS 65.4% NEO/USDC · OOS 65.3% LINK/USDC · OOS 65.0% BANANA/USDC · OOS 64.9% XLM/USDC · OOS 64.9% ACE/USDC · OOS 64.9% KAITO/USDC · OOS 64.6% ATOM/USDC · OOS 64.5% LIT/USDC · OOS 64.1% BLUR/USDC · OOS 64.0% MON/USDC · OOS 63.9% ETC/USDC · OOS 63.7% LDO/USDC · OOS 63.7% VVV/USDC · OOS 63.5% DYDX/USDC · OOS 63.3% ALT/USDC · OOS 62.8% PYTH/USDC · OOS 62.7% ENA/USDC · OOS 62.7% POPCAT/USDC · OOS 62.6% SKR/USDC · OOS 62.4% SKY/USDC · OOS 62.4% PENDLE/USDC · OOS 62.2% CRV/USDC · OOS 62.1% NOT/USDC · OOS 61.8% FET/USDC · OOS 61.3% KL",
+      "rows": [
+        {
+          "text": "Home",
+          "tag": "BUTTON",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "",
+          "href": "",
+          "rect": {
+            "x": 11,
+            "y": 79,
+            "w": 32,
+            "h": 59
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Home",
+          "tag": "SPAN",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "",
+          "href": "",
+          "rect": {
+            "x": 11,
+            "y": 79,
+            "w": 32,
+            "h": 59
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Fundamental",
+          "tag": "BUTTON",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "",
+          "href": "",
+          "rect": {
+            "x": 53,
+            "y": 79,
+            "w": 69,
+            "h": 59
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Fundamental",
+          "tag": "SPAN",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "",
+          "href": "",
+          "rect": {
+            "x": 53,
+            "y": 79,
+            "w": 69,
+            "h": 59
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Signal Scan",
+          "tag": "BUTTON",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "",
+          "href": "",
+          "rect": {
+            "x": 133,
+            "y": 79,
+            "w": 62,
+            "h": 59
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Signal Scan",
+          "tag": "SPAN",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "",
+          "href": "",
+          "rect": {
+            "x": 133,
+            "y": 79,
+            "w": 62,
+            "h": 59
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Crypto",
+          "tag": "SPAN",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "Crypto",
+          "href": "",
+          "rect": {
+            "x": 205,
+            "y": 79,
+            "w": 36,
+            "h": 59
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Renko",
+          "tag": "BUTTON",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "",
+          "href": "",
+          "rect": {
+            "x": 252,
+            "y": 79,
+            "w": 33,
+            "h": 59
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "text": "Renko",
+          "tag": "SPAN",
+          "clickTag": "BUTTON",
+          "role": "",
+          "aria": "",
+          "href": "",
+          "rect": {
+            "x": 252,
+            "y": 79,
+            "w": 33,
+            "h": 59
+          },
+          "parentTag": "NAV",
+          "parentChildren": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "tag": "NAV",
+          "role": "",
+          "kids": [
+            "Home",
+            "Fundamental",
+            "Signal Scan",
+            "₿Crypto",
+            "Renko"
+          ]
+        },
+        {
+          "tag": "BUTTON",
+          "role": "",
+          "kids": [
+            "Renko"
+          ]
+        }
+      ]
+    }
+  }
+}

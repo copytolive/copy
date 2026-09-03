@@ -1,0 +1,60 @@
+name: AI2 Live Static Snapshot
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai2-live-static-requests/**"
+permissions:
+  contents: write
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai2-live-static-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "out=ai2-live-static-results/$ID" >> "$GITHUB_OUTPUT"
+      - name: Fetch current production static files
+        shell: bash
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          OUT: ${{ steps.req.outputs.out }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"
+          curl -LfsS --connect-timeout 10 --max-time 60 "https://copytolive.com/assets/js/ai3_public_shell_v1.js?ai2snapshot=$ID" -o "$OUT/ai3_public_shell_v1.js"
+          curl -LfsS --connect-timeout 10 --max-time 60 "https://copytolive.com/index.html?ai2snapshot=$ID" -o "$OUT/index.html"
+          curl -LfsS --connect-timeout 10 --max-time 60 "https://copytolive.com/assets/js/index-renko-final-06dfdeeb33b1.js?ai2snapshot=$ID" -o "$OUT/index-renko-final-06dfdeeb33b1.js"
+          python3 - "$OUT" "$ID" <<'PY'
+          import hashlib,json,pathlib,sys
+          out=pathlib.Path(sys.argv[1]); aid=sys.argv[2]
+          rows={}
+          for p in out.glob("*"):
+              if p.name=="meta.json": continue
+              raw=p.read_bytes()
+              rows[p.name]={"bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest()}
+          (out/"meta.json").write_text(json.dumps({"id":aid,"ok":True,"files":rows},indent=2)+"\n")
+          PY
+      - name: Commit snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"
+          git config user.name "AI2 Live Static Snapshot"
+          git config user.email "ai2-live-static@local.invalid"
+          git add "$OUT"
+          git commit -m "ai2 live static snapshot: ${{ steps.req.outputs.id }}"
+          for n in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; sleep "$n"; continue; }
+            git push origin HEAD:main && exit 0
+            sleep "$n"
+          done
+          exit 1

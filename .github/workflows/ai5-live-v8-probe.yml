@@ -43,9 +43,11 @@ jobs:
             MAIN_URL="https://copytolive.com/${MAIN#./}"
             MAIN_STATUS="$(curl -L -sS -o /tmp/main.js -w '%{http_code}' --connect-timeout 10 --max-time 30 "$MAIN_URL&probe=$GITHUB_RUN_ID" || true)"
           fi
-          python3 - "$OUT" "$ID" "$ROOT_STATUS" "$V8_STATUS" "$V7_STATUS" "$MAIN_STATUS" "$MAIN" <<'PY'
+          V8_TYPE="$(curl -L -sSI --connect-timeout 10 --max-time 30 "https://copytolive.com/assets/js/MarketScanner-ai5Signal-v8.js?probe=$GITHUB_RUN_ID" | tr -d '\r' | awk 'tolower($1)=="content-type:"{print $2}' | tail -n1 || true)"
+          API_STAGE_STATUS="$(curl -L -sS -o /tmp/stage.json -w '%{http_code}' --connect-timeout 10 --max-time 60 -X POST "https://copytolive.com/trading/signals/unified/scan" -H 'Content-Type: application/json' --data '{"pairs":["BTC"],"timeframe":"1h","account_balance":10000,"rr_target":2,"sensitivity":"strict","stage":"prefilter"}' || true)"
+          python3 - "$OUT" "$ID" "$ROOT_STATUS" "$V8_STATUS" "$V7_STATUS" "$MAIN_STATUS" "$MAIN" "$V8_TYPE" "$API_STAGE_STATUS" <<'PY'
           import json,sys,re
-          out,id_,root,v8,v7,main_status,main=sys.argv[1:8]
+          out,id_,root,v8,v7,main_status,main,v8_type,stage_status=sys.argv[1:10]
           def txt(p):
               try:return open(p,encoding="utf-8",errors="replace").read()
               except:return ""
@@ -62,6 +64,9 @@ jobs:
             "v8_no_hyper_labels":"Hyperliquid Major" not in a and "Hyperliquid Perpetuals" not in a,
             "main_imports_v8":"MarketScanner-ai5Signal-v8.js" in m,
             "main_imports_v7":"MarketScanner-ai5HLPerf-v7.js" in m,
+            "v8_content_type":v8_type,
+            "stage_prefilter_status":int(stage_status or 0),
+            "stage_prefilter_body":txt("/tmp/stage.json")[:2000],
           }
           d["ok"]=d["root_status"]==200 and d["v8_status"]==200 and d["v8_marker"] and d["v8_semi_auto"] and d["v8_no_hyper_labels"] and d["main_imports_v8"]
           open(out,"w").write(json.dumps(d,indent=2)+"\n")

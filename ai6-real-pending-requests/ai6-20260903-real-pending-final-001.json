@@ -1,0 +1,6 @@
+{
+  "id": "ai6-20260903-real-pending-final-001",
+  "goal": "Crypto Screener -> REAL Hyperliquid pending entry -> existing dashboard order lifecycle",
+  "acceptance": "no real-money order; invalid-wallet safety probe only",
+  "preserve": "Renko direct-open"
+}

@@ -29,6 +29,22 @@ jobs:
           curl -fsSL -H 'Cache-Control: no-cache' "$base/assets/js/ai4_fundamental_router_v1.js?audit=$GITHUB_RUN_ID" -o "$OUT/ai4_fundamental_router_v1.js"
           curl -fsSL -H 'Cache-Control: no-cache' "$base/assets/js/ai5_signal_scan_runtime_v1.js?audit=$GITHUB_RUN_ID" -o "$OUT/ai5_signal_scan_runtime_v1.js"
           curl -fsSL -H 'Cache-Control: no-cache' "$base/fundamental.html?audit=$GITHUB_RUN_ID" -o "$OUT/fundamental.html"
+          curl -fsSL -H 'Cache-Control: no-cache' "$base/assets/js/index-renko-final-06dfdeeb33b1.js?audit=$GITHUB_RUN_ID" -o "$OUT/index-renko-final-06dfdeeb33b1.js"
+          python3 - "$OUT" <<'PY2'
+          import pathlib,re,urllib.request,sys
+          out=pathlib.Path(sys.argv[1]); s=(out/"index-renko-final-06dfdeeb33b1.js").read_text("utf-8",errors="ignore")
+          names=[]
+          for m in re.findall(r'["\x27]([^"\x27]*MarketScanner[^"\x27]*\.js)["\x27]',s):
+              name=m.rsplit("/",1)[-1]
+              if name not in names:names.append(name)
+          for name in names[:12]:
+              try:
+                  b=urllib.request.urlopen("https://copytolive.com/assets/js/"+name+"?audit=1",timeout=30).read()
+                  (out/name).write_bytes(b)
+              except Exception as e:
+                  (out/("ERR-"+name+".txt")).write_text(str(e))
+          (out/"scanner-imports.txt").write_text("\n".join(names)+"\n")
+          PY2
           python3 - "$OUT" <<'PY'
           import pathlib,hashlib,json,sys
           out=pathlib.Path(sys.argv[1]); d={}

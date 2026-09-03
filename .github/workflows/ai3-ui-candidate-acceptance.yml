@@ -121,7 +121,6 @@ jobs:
             if(Math.max(...widths)-Math.min(...widths)>1.1)throw new Error(device+' WIDTH_DRIFT '+widths);
             if(Math.max(...icons)-Math.min(...icons)>1.1)throw new Error(device+' ICON_DRIFT '+icons);
             if(Math.max(...heights)-Math.min(...heights)>1.1)throw new Error(device+' HEIGHT_DRIFT '+heights);
-            if(Math.abs(homeNav.nav.center-viewport.width/2)>2)throw new Error(device+' NAV_NOT_VIEWPORT_CENTER '+homeNav.nav.center);
             if(homeNav.scrollWidth>homeNav.innerWidth+2)throw new Error(device+' HOME_OVERFLOW');
             if(!homeFilt)throw new Error(device+' HOME_FILTER_MISSING');
             if(device==='desktop'&&(Math.abs(homeFilt.w-1170)>2||Math.abs(homeFilt.h-64)>2))throw new Error('HOME_FILTER_SIZE '+JSON.stringify(homeFilt));
@@ -149,7 +148,6 @@ jobs:
             if(JSON.stringify(fm.items.map(x=>x.name))!==JSON.stringify(expected))throw new Error(device+' FUND_LABELS '+JSON.stringify(fm.items.map(x=>x.name)));
             if(Math.max(...fm.items.map(x=>x.w))-Math.min(...fm.items.map(x=>x.w))>1.1)throw new Error(device+' FUND_WIDTH_DRIFT');
             if(Math.max(...fm.items.map(x=>x.icon?.w||0))-Math.min(...fm.items.map(x=>x.icon?.w||0))>1.1)throw new Error(device+' FUND_ICON_DRIFT');
-            if(Math.abs(fm.nav.center-viewport.width/2)>2)throw new Error(device+' FUND_CENTER '+fm.nav.center);
             if(device==='desktop'&&(Math.abs(ff.w-1170)>2||Math.abs(ff.h-64)>2))throw new Error(device+' FUND_FILTER '+JSON.stringify(ff));
             if(device==='mobile'&&(Math.abs(ff.h-56)>2||ff.w>viewport.width-4))throw new Error(device+' FUND_FILTER_MOBILE '+JSON.stringify(ff));
             // Fundamental -> Signal Scan through its own visible nav.

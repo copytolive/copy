@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CopyToLive Fundamental Research</title>
+<meta name="description" content="Fundamental stock research, valuation, financials, ownership, insider and SEC filing analysis.">
+<style>
+:root{--bg:#070b0e;--panel:#0d1216;--panel2:#11171c;--line:#20282e;--text:#e8edf0;--muted:#87919a;--yellow:#f0b90b;--green:#16c784;--red:#ea3943;--blue:#4da3ff;--radius:12px}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100%}
+body{overflow-x:hidden}.app{max-width:1680px;margin:0 auto;padding:0 18px 48px}
+header{position:sticky;top:0;z-index:30;background:rgba(7,11,14,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);margin:0 -18px;padding:12px 18px}
+.mainNavRow{display:flex;justify-content:center;align-items:stretch;border-bottom:1px solid #2b3238;min-height:106px;padding:0 0 7px}.mainNavBrand{display:none}.mainNav{display:flex;align-items:stretch;justify-content:center;gap:18px;overflow-x:auto;scrollbar-width:none;padding:0 8px}.mainNav::-webkit-scrollbar{display:none}.mainNavBtn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:128px;min-height:98px;border:1px solid transparent;background:transparent;color:#7f8994;font-weight:850;font-size:14px;padding:12px 14px 10px;border-radius:0;cursor:pointer;white-space:nowrap;transition:.16s ease}.mainNavBtn:hover{color:#d8dee3;background:#0e1418}.mainNavBtn.active{color:var(--yellow);border-color:#7788ff;background:linear-gradient(180deg,rgba(240,185,11,.10),rgba(240,185,11,.02));box-shadow:inset 0 0 18px rgba(240,185,11,.10),0 0 0 1px rgba(119,136,255,.22)}.mainNavBtn.active:after{content:"";position:absolute;left:18px;right:18px;bottom:2px;height:3px;border-radius:999px;background:var(--yellow);box-shadow:0 0 12px rgba(240,185,11,.65)}.mainNavIcon{width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:currentColor}.mainNavIcon svg{width:36px;height:36px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.mainNavBtn.active .mainNavIcon{color:var(--yellow)}.mainNavLabel{font-size:14px;line-height:1;font-weight:850}
+.fundSearchScroll{overflow-x:auto;scrollbar-width:none;padding:12px 0 11px}.fundSearchScroll::-webkit-scrollbar{display:none}.fundSearchBar{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr)) 150px;gap:0;min-width:920px;border:1px solid #303840;border-radius:34px;overflow:hidden;background:#171c22;box-shadow:0 9px 24px rgba(0,0,0,.22)}.fundFilter{padding:13px 22px;border-right:1px solid #343c44;min-width:0}.fundFilterLabel{display:block;color:#eef2f5;font-weight:900;font-size:13px;margin-bottom:6px;letter-spacing:.01em}.fundSelect{width:100%;border:0;background:transparent;color:#919aa5;font-size:14px;outline:none;cursor:pointer;appearance:auto}.fundSelect option{background:#11171c;color:#e8edf0}.fundSearchBtn{margin:10px 12px;border:0;border-radius:28px;background:var(--yellow);color:#080b0d;font-size:15px;font-weight:950;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;box-shadow:0 0 24px rgba(240,185,11,.18)}.fundSearchBtn svg{width:22px;height:22px;stroke:#080b0d;fill:none;stroke-width:2.5}.fundSearchBtn:hover{filter:brightness(1.04)}.fundSearchBtn:disabled{opacity:.55;cursor:wait}
+.top{display:flex;align-items:center;gap:14px;min-height:50px;padding:8px 0 2px}.brand{font-weight:900;letter-spacing:.04em;white-space:nowrap}.brand b{color:var(--yellow)}
+.mode{display:flex;border:1px solid var(--line);border-radius:9px;padding:3px;gap:3px}.mode button,.btn{border:0;background:transparent;color:var(--muted);font-weight:700;padding:8px 12px;border-radius:7px;cursor:pointer}.mode button.active,.btn.primary{background:var(--yellow);color:#080b0d}
+.searchWrap{position:relative;flex:1;max-width:520px}.search{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:11px 14px;border-radius:9px;outline:none}.search:focus{border-color:var(--yellow)}
+.results{position:absolute;left:0;right:0;top:48px;background:#0d1216;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 18px 45px rgba(0,0,0,.45);display:none;max-height:360px;overflow-y:auto}.results.show{display:block}.result{padding:10px 12px;display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #171e23;cursor:pointer}.result:hover{background:#151b20}.result strong{color:var(--yellow)}
+.status{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap}.liveDot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:5px}
+.hero{padding:22px 0 12px;display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.symbol{font-size:30px;font-weight:900;color:var(--yellow);letter-spacing:.03em}.name{font-size:16px;font-weight:700;margin-top:4px}.meta{color:var(--muted);font-size:12px;margin-top:5px}.priceBox{text-align:right}.price{font-size:28px;font-weight:900}.asof{font-size:11px;color:var(--muted);margin-top:4px}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none;position:relative;top:auto;z-index:2;background:var(--bg);padding-top:4px}.tabs::-webkit-scrollbar{display:none}.tab{border:0;background:transparent;color:var(--muted);padding:13px 11px;font-weight:800;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent}.tab.active{color:var(--yellow);border-bottom-color:var(--yellow)}
+.content{padding-top:16px}.grid{display:grid;gap:12px}.grid.cards{grid-template-columns:repeat(6,minmax(0,1fr))}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;min-width:0}.label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}.value{font-size:20px;font-weight:900;margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sub{font-size:11px;color:var(--muted);margin-top:5px}
+.section{margin-top:14px}.sectionTitle{font-size:14px;font-weight:900;margin:0 0 10px}.two{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}table{border-collapse:collapse;width:100%;font-size:12px;min-width:780px}th,td{padding:10px 12px;border-bottom:1px solid #192126;text-align:right;white-space:nowrap}th{position:sticky;top:0;background:#11171c;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em;z-index:2}th:first-child,td:first-child{text-align:left}tr:hover td{background:#10161a}
+.pos{color:var(--green)!important}.neg{color:var(--red)!important}.yellow{color:var(--yellow)!important}.muted{color:var(--muted)}.pill{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;background:#141b20;border:1px solid var(--line);font-size:10px;color:var(--muted);margin:2px 4px 2px 0}.pill.ok{border-color:#154d39;color:var(--green)}.pill.bad{border-color:#5a2025;color:var(--red)}
+.chart{height:280px;width:100%;display:block}.chartEmpty{height:280px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.desc{line-height:1.62;color:#c7cfd4;font-size:13px;max-height:180px;overflow:auto}.link{color:var(--yellow);text-decoration:none}.sourcebar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.loading{padding:90px 0;text-align:center;color:var(--muted)}.spinner{width:28px;height:28px;border:3px solid #263038;border-top-color:var(--yellow);border-radius:50%;margin:0 auto 12px;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.error{background:#211216;border:1px solid #5a2025;color:#ff9ca2;padding:12px;border-radius:9px;margin:12px 0}.empty{padding:34px;text-align:center;color:var(--muted)}
+.formrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.input,.select{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:9px 10px;border-radius:8px;outline:none}.input{min-width:120px}.input:focus,.select:focus{border-color:var(--yellow)}
+.screenerHead{padding:20px 0 12px}.screenerFilters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.preset{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}.preset.active{border-color:var(--yellow);color:var(--yellow)}
+.score{font-size:34px;font-weight:900;color:var(--yellow)}.foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);font-size:10px;color:#5f6970;line-height:1.5}
+@media(max-width:1180px){.grid.cards{grid-template-columns:repeat(3,1fr)}.two{grid-template-columns:1fr}}
+@media(max-width:1180px){.mainNav{gap:8px}.mainNavBtn{min-width:112px}.fundSearchBar{min-width:860px;grid-template-columns:repeat(4,minmax(165px,1fr)) 140px}}
+@media(max-width:720px){.app{padding:0 10px 32px}header{margin:0 -10px;padding:0 10px 8px}.mainNavRow{min-height:82px;margin:0 -10px;padding:0 4px 6px;justify-content:flex-start}.mainNav{justify-content:flex-start;gap:2px;padding:0 4px}.mainNavBtn{min-width:76px;min-height:76px;padding:8px 7px 7px;gap:5px;font-size:11px}.mainNavIcon,.mainNavIcon svg{width:28px;height:28px}.mainNavLabel{font-size:10px}.mainNavBtn.active:after{left:10px;right:10px}.fundSearchScroll{margin:0 -10px;padding:9px 10px 8px}.fundSearchBar{min-width:760px;grid-template-columns:repeat(4,150px) 140px;border-radius:28px}.fundFilter{padding:10px 14px}.fundFilterLabel{font-size:11px}.fundSelect{font-size:12px}.fundSearchBtn{min-height:44px;margin:8px 10px}.top{flex-wrap:wrap;gap:8px;padding-top:6px}.brand{font-size:12px}.mode{order:3}.mode button{padding:7px 9px;font-size:11px}.searchWrap{order:4;flex-basis:100%;max-width:none}.status{font-size:9px;margin-left:0}.hero{padding-top:16px}.symbol{font-size:24px}.name{font-size:13px}.price{font-size:22px}.tabs{margin:0 -10px;padding-left:10px}.tab{padding:11px 9px;font-size:11px}.grid.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:11px}.value{font-size:16px}.three{grid-template-columns:1fr}.chart{height:220px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="mainNavRow">
+    <nav class="mainNav" aria-label="Main">
+      <button class="mainNavBtn" data-main-nav="home"><span class="mainNavIcon"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 34h30M9 31V20h5v11M17 31V14h5v17M25 31V9h5v22M8 18l8-6 6 2 10-8"/></svg></span><span class="mainNavLabel">Home</span></button>
+      <button class="mainNavBtn active" data-main-nav="fundamental"><span class="mainNavIcon"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="8" y="5" width="24" height="30" rx="3"/><path d="M13 13h14M13 19h14M13 25h9M24 27l3 3 6-7"/></svg></span><span class="mainNavLabel">Fundamental</span></button>
+      <button class="mainNavBtn" data-main-nav="signal-scan"><span class="mainNavIcon"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M23 4 9 22h10l-2 14 14-20H21z"/></svg></span><span class="mainNavLabel">Signal Scan</span></button>
+      <button class="mainNavBtn" data-main-nav="screener-crypto"><span class="mainNavIcon"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="17" cy="17" r="9"/><path d="M17 10v14M13 12h6a3 3 0 0 1 0 6h-6 7a3 3 0 0 1 0 6h-7M14 8v4M20 8v4"/><circle cx="29" cy="29" r="6"/><path d="m33 33 4 4"/></svg></span><span class="mainNavLabel">Crypto</span></button>
+      <button class="mainNavBtn" data-main-nav="hyperliquid"><span class="mainNavIcon"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M3 22h8l4-14 7 25 5-17 4 8h6"/></svg></span><span class="mainNavLabel">Hyperliquid</span></button>
+      <button class="mainNavBtn" data-main-nav="renko"><span class="mainNavIcon"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="6" width="12" height="9" rx="1"/><rect x="22" y="13" width="12" height="9" rx="1"/><rect x="10" y="25" width="12" height="9" rx="1"/></svg></span><span class="mainNavLabel">Renko</span></button>
+    </nav>
+  </div>
+  <div class="fundSearchScroll">
+    <div class="fundSearchBar" id="fundSearchBar" aria-label="Fundamental numeric filters">
+      <label class="fundFilter"><span class="fundFilterLabel">P/E</span><select id="topMaxPE" class="fundSelect"><option value="">Any</option><option value="10">≤ 10</option><option value="15">≤ 15</option><option value="20">≤ 20</option><option value="25">≤ 25</option><option value="30">≤ 30</option><option value="40">≤ 40</option><option value="50">≤ 50</option></select></label>
+      <label class="fundFilter"><span class="fundFilterLabel">ROE</span><select id="topMinROE" class="fundSelect"><option value="">Any</option><option value="5">≥ 5%</option><option value="10">≥ 10%</option><option value="15">≥ 15%</option><option value="20">≥ 20%</option><option value="25">≥ 25%</option><option value="30">≥ 30%</option></select></label>
+      <label class="fundFilter"><span class="fundFilterLabel">Debt / Equity</span><select id="topMaxDE" class="fundSelect"><option value="">Any</option><option value="0.25">≤ 0.25</option><option value="0.5">≤ 0.50</option><option value="1">≤ 1.00</option><option value="1.5">≤ 1.50</option><option value="2">≤ 2.00</option></select></label>
+      <label class="fundFilter"><span class="fundFilterLabel">Revenue Growth</span><select id="topMinGrowth" class="fundSelect"><option value="">Any</option><option value="0">≥ 0%</option><option value="5">≥ 5%</option><option value="10">≥ 10%</option><option value="15">≥ 15%</option><option value="20">≥ 20%</option><option value="30">≥ 30%</option></select></label>
+      <button id="fundSearchBtn" class="fundSearchBtn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><span>Cari</span></button>
+    </div>
+  </div>
+  <div class="top">
+    <div class="brand"><b>FUNDAMENTAL</b> RESEARCH</div>
+    <div class="mode">
+      <button id="researchMode" class="active">Stock Research</button>
+      <button id="screenerMode">Screener</button>
+      <button id="watchlistMode">Watchlist</button>
+    </div>
+    <div class="searchWrap" id="searchWrap">
+      <input id="search" class="search" placeholder="Ticker / company: AAPL, Microsoft, NVDA...">
+      <div id="results" class="results"></div>
+    </div>
+    <div class="status"><span class="liveDot"></span><span id="apiStatus">Connecting</span></div>
+  </div>
+</header>
+<main id="main"><div class="loading"><div class="spinner"></div>Loading fundamental research...</div></main>
+<div class="foot">Data is sourced from SEC EDGAR/XBRL and Yahoo Finance when available. DCF values are model estimates derived from reported free cash flow and explicit assumptions, not a recommendation. Research use only; not investment advice.</div>
+</div>
+<script>
+const API='/api/fundamental';
+const TABS=['Overview','Valuation','Growth','Profitability','Financials','Health','Ownership','Insiders','Filings','Estimates','Compare'];
+const POPULAR=['AAPL','MSFT','NVDA','GOOGL','AMZN','META','BRK-B','LLY','AVGO','JPM','V','MA','WMT','COST','XOM','ORCL','NFLX','HD','PG','JNJ'];
+function readWatchlist(){try{const x=JSON.parse(localStorage.getItem('copytoliveFundamentalWatchlist')||'[]');return Array.isArray(x)?[...new Set(x.map(v=>String(v||'').toUpperCase()).filter(v=>/^[A-Z0-9.^=-]{1,20}$/.test(v)))].slice(0,100):[]}catch(_){return[]}}
+let state={symbol:(location.hash||'#AAPL').slice(1).toUpperCase(),tab:'Overview',data:null,mode:'research',financialPeriod:'annual',compare:['AAPL','MSFT','GOOGL'],screenRows:[],screenPreset:'All',screenAsOf:null,screenNumeric:{maxPE:null,minROE:null,maxDE:null,minGrowth:null},watchlist:readWatchlist()};
+function saveWatchlist(){try{localStorage.setItem('copytoliveFundamentalWatchlist',JSON.stringify(state.watchlist))}catch(_){}}
+function inWatchlist(symbol){return state.watchlist.includes(String(symbol||'').toUpperCase())}
+function toggleWatchlist(symbol){symbol=String(symbol||'').toUpperCase();if(!symbol)return;state.watchlist=inWatchlist(symbol)?state.watchlist.filter(x=>x!==symbol):[symbol,...state.watchlist].slice(0,100);saveWatchlist();const b=$('#watchBtn');if(b){b.textContent=(inWatchlist(symbol)?'★ In Watchlist':'☆ Add Watchlist');b.classList.toggle('primary',inWatchlist(symbol));}}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const raw=v=>v&&typeof v==='object'&&v.raw!=null?v.raw:v;
+const n=v=>{v=raw(v);const x=Number(v);return Number.isFinite(x)?x:null};
+const fmtNum=(v,d=2)=>{v=n(v);return v==null?'N/A':v.toLocaleString(undefined,{maximumFractionDigits:d})};
+const fmtPct=v=>{v=n(v);return v==null?'N/A':(v*100).toLocaleString(undefined,{maximumFractionDigits:2})+'%'};
+const fmtPctRaw=v=>{v=n(v);return v==null?'N/A':v.toLocaleString(undefined,{maximumFractionDigits:2})+'%'};
+const fmtMoney=v=>{v=n(v);if(v==null)return'N/A';const a=Math.abs(v);if(a>=1e12)return'$'+(v/1e12).toFixed(2)+'T';if(a>=1e9)return'$'+(v/1e9).toFixed(2)+'B';if(a>=1e6)return'$'+(v/1e6).toFixed(2)+'M';if(a>=1e3)return'$'+(v/1e3).toFixed(1)+'K';return'$'+v.toLocaleString(undefined,{maximumFractionDigits:2})};
+const cls=v=>n(v)==null?'':n(v)>=0?'pos':'neg';
+const pick=(o,path)=>path.split('.').reduce((a,k)=>a&&a[k]!=null?a[k]:null,o);
+const api=async url=>{const r=await fetch(url,{headers:{Accept:'application/json'}});const j=await r.json().catch(()=>({}));if(!r.ok||j.ok===false)throw new Error(j.error||('HTTP '+r.status));return j};
+function card(label,value,sub='',c=''){return '<div class="card"><div class="label">'+esc(label)+'</div><div class="value '+c+'">'+value+'</div>'+(sub?'<div class="sub">'+sub+'</div>':'')+'</div>'}
+function pills(d){const s=d.sourceStatus||{};return '<div class="sourcebar">'+
+  '<span class="pill '+(s.sec?'ok':'bad')+'">SEC EDGAR '+(s.sec?'LIVE':'UNAVAILABLE')+'</span>'+
+  '<span class="pill '+(s.yahooChart?'ok':'bad')+'">Yahoo Price '+(s.yahooChart?'LIVE':'UNAVAILABLE')+'</span>'+
+  '<span class="pill '+(s.yahooSummary?'ok':'bad')+'">Yahoo Fundamental '+(s.yahooSummary?'LIVE':'UNAVAILABLE')+'</span>'+
+  (s.precomputed?'<span class="pill ok">Precomputed Fundamentals '+esc(s.precomputedAsOf||'AVAILABLE')+'</span>':'')+
+  (s.errors||[]).map(x=>'<span class="pill bad">'+esc(x)+'</span>').join('')+'</div>'}
+function chartSvg(d){
+ const c=d.chart, ts=c&&c.timestamp||[], closes=pick(c,'indicators.quote.0.close')||[];
+ const pts=[];for(let i=0;i<Math.min(ts.length,closes.length);i++)if(n(closes[i])!=null)pts.push([ts[i],n(closes[i])]);
+ if(pts.length<2)return'<div class="chartEmpty">Price history unavailable</div>';
+ const w=1000,h=280,p=18,min=Math.min(...pts.map(x=>x[1])),max=Math.max(...pts.map(x=>x[1])),span=max-min||1;
+ const poly=pts.map((x,i)=>((p+(w-2*p)*i/(pts.length-1)).toFixed(1))+','+((h-p-(h-2*p)*(x[1]-min)/span).toFixed(1))).join(' ');
+ return '<svg class="chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f0b90b" stop-opacity=".28"/><stop offset="100%" stop-color="#f0b90b" stop-opacity="0"/></linearGradient></defs><polyline points="'+poly+'" fill="none" stroke="#f0b90b" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>';
+}
+function baseShell(d){
+ const m=d.metrics||{},co=d.company||{};
+ return '<div class="hero"><div><div class="symbol">'+esc(d.symbol)+'</div><div class="name">'+esc(co.name||d.symbol)+'</div><div class="meta">'+[co.sector,co.industry,co.country,m.exchange].filter(Boolean).map(esc).join(' | ')+'</div>'+pills(d)+'</div><div class="priceBox"><div class="price">'+(n(m.price)!=null?'$'+fmtNum(m.price,2):'N/A')+'</div><div class="asof">As of '+esc(new Date(d.asOf).toLocaleString())+'</div><button id="watchBtn" class="btn '+(inWatchlist(d.symbol)?'primary':'')+'" style="margin-top:9px">'+(inWatchlist(d.symbol)?'★ In Watchlist':'☆ Add Watchlist')+'</button></div></div>'+
+ '<div class="tabs">'+TABS.map(t=>'<button class="tab '+(state.tab===t?'active':'')+'" data-tab="'+t+'">'+t+'</button>').join('')+'</div><div id="tabContent" class="content"></div>';
+}
+function overview(d){
+ const m=d.metrics||{},co=d.company||{},dcf=d.valuation&&d.valuation.scenarios&&d.valuation.scenarios.find(x=>x.name==='Base');
+ return '<div class="grid cards">'+
+ card('Market Cap',fmtMoney(m.marketCap))+
+ card('P/E',fmtNum(m.pe))+
+ card('Forward P/E',fmtNum(m.forwardPE))+
+ card('ROIC',fmtPct(m.roic),'Return on invested capital',cls(m.roic))+
+ card('FCF Yield',fmtPct(m.fcfYield),'Free cash flow / market cap',cls(m.fcfYield))+
+ card('DCF Fair Value',dcf&&n(dcf.fairValuePerShare)!=null?'$'+fmtNum(dcf.fairValuePerShare):'N/A',dcf&&n(dcf.upside)!=null?'Upside '+fmtPct(dcf.upside):'')+
+ '</div><div class="two section"><div class="card"><div class="sectionTitle">Price history</div>'+chartSvg(d)+'</div><div class="card"><div class="sectionTitle">Company overview</div><div class="desc">'+esc(co.description||'Company description is not available from the current upstream source.')+'</div>'+
+ (co.website?'<div style="margin-top:10px"><a class="link" href="'+esc(co.website)+'" target="_blank" rel="noopener">Company website</a></div>':'')+
+ '<div class="sourcebar"><span class="pill">CIK '+esc(co.cik||'N/A')+'</span><span class="pill">SIC '+esc(co.sic||'N/A')+'</span><span class="pill">Employees '+fmtNum(co.employees,0)+'</span></div></div></div>'+
+ '<div class="grid cards section">'+
+ card('Revenue',fmtMoney(m.revenue))+card('Net Income',fmtMoney(m.netIncome))+card('Free Cash Flow',fmtMoney(m.freeCashFlow))+
+ card('Net Debt',fmtMoney(m.netDebt))+card('Revenue Growth 1Y',fmtPct(m.revenueGrowth1y),'',cls(m.revenueGrowth1y))+card('EPS Growth 1Y',fmtPct(m.epsGrowth1y),'',cls(m.epsGrowth1y))+'</div>';
+}
+function valuation(d){
+ const m=d.metrics||{},v=d.valuation;
+ let scenarios='<div class="empty">DCF cannot be calculated because positive reported free cash flow or shares outstanding are unavailable.</div>';
+ if(v&&Array.isArray(v.scenarios)){
+ scenarios='<div class="tableWrap"><table><thead><tr><th>Scenario</th><th>Growth</th><th>WACC</th><th>Terminal Growth</th><th>Equity Value</th><th>Fair Value / Share</th><th>Upside</th></tr></thead><tbody>'+v.scenarios.map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+fmtPct(x.growth)+'</td><td>'+fmtPct(x.wacc)+'</td><td>'+fmtPct(x.terminalGrowth)+'</td><td>'+fmtMoney(x.equityValue)+'</td><td class="yellow">$'+fmtNum(x.fairValuePerShare)+'</td><td class="'+cls(x.upside)+'">'+fmtPct(x.upside)+'</td></tr>').join('')+'</tbody></table></div>';
+ }
+ return '<div class="grid cards">'+card('P/E',fmtNum(m.pe))+card('Forward P/E',fmtNum(m.forwardPE))+card('P/B',fmtNum(m.priceToBook))+card('P/S',fmtNum(m.priceToSales))+card('EV / EBITDA',fmtNum(m.evToEbitda))+card('FCF Yield',fmtPct(m.fcfYield))+'</div>'+
+ '<div class="section card"><div class="sectionTitle">DCF valuation</div><div class="sub" style="margin-bottom:10px">'+esc(v&&v.method||'FCF DCF model')+'. Assumptions are shown explicitly and derived from reported cash flow, not hidden analyst inputs.</div>'+scenarios+'</div>';
+}
+function seriesRows(d,keys){
+ const f=pick(d,'sec.facts')||{};const dates=new Set();keys.forEach(k=>(pick(f,k+'.annual')||[]).forEach(x=>dates.add(x.end)));const ds=[...dates].sort().slice(-6);
+ if(!ds.length)return'<div class="empty">SEC XBRL financial history unavailable for this symbol.</div>';
+ const map=(k,date)=>{const a=pick(f,k+'.annual')||[];const r=[...a].reverse().find(x=>x.end===date);return r?n(r.val):null};
+ return '<div class="tableWrap"><table><thead><tr><th>Metric</th>'+ds.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+keys.map(k=>'<tr><td><b>'+esc(k.replace(/([A-Z])/g,' $1').replace(/^./,x=>x.toUpperCase()))+'</b></td>'+ds.map(dt=>'<td>'+fmtMoney(map(k,dt))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+}
+function growth(d){
+ const m=d.metrics||{};
+ return '<div class="grid cards">'+card('Revenue Growth 1Y',fmtPct(m.revenueGrowth1y),'',cls(m.revenueGrowth1y))+card('Revenue CAGR 3Y',fmtPct(m.revenueCagr3y),'',cls(m.revenueCagr3y))+card('EPS Growth 1Y',fmtPct(m.epsGrowth1y),'',cls(m.epsGrowth1y))+card('EPS CAGR 3Y',fmtPct(m.epsCagr3y),'',cls(m.epsCagr3y))+card('Revenue',fmtMoney(m.revenue))+card('Free Cash Flow',fmtMoney(m.freeCashFlow))+'</div><div class="section"><div class="sectionTitle">Reported annual growth history</div>'+seriesRows(d,['revenue','operatingIncome','netIncome','operatingCashFlow','capex'])+'</div>';
+}
+function profitability(d){
+ const m=d.metrics||{};
+ return '<div class="grid cards">'+card('Gross Margin',fmtPct(m.grossMargin),'',cls(m.grossMargin))+card('Operating Margin',fmtPct(m.operatingMargin),'',cls(m.operatingMargin))+card('Net Margin',fmtPct(m.netMargin),'',cls(m.netMargin))+card('ROE',fmtPct(m.roe),'',cls(m.roe))+card('ROA',fmtPct(m.roa),'',cls(m.roa))+card('ROIC',fmtPct(m.roic),'NOPAT / invested capital',cls(m.roic))+'</div><div class="section">'+seriesRows(d,['revenue','grossProfit','operatingIncome','netIncome','assets','equity'])+'</div>';
+}
+function financials(d){
+ const f=pick(d,'sec.facts')||{},period=state.financialPeriod;
+ const keys=['revenue','grossProfit','operatingIncome','netIncome','assets','liabilities','equity','cash','debtTotal','operatingCashFlow','capex','shares'];
+ const dates=new Set();keys.forEach(k=>(pick(f,k+'.'+period)||[]).forEach(x=>dates.add(x.end)));const ds=[...dates].sort().slice(-8);
+ const get=(k,date)=>{const a=pick(f,k+'.'+period)||[];const r=[...a].reverse().find(x=>x.end===date);return r?n(r.val):null};
+ let body=ds.length?'<div class="tableWrap"><table><thead><tr><th>Statement item</th>'+ds.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+keys.map(k=>'<tr><td><b>'+esc(k.replace(/([A-Z])/g,' $1').replace(/^./,x=>x.toUpperCase()))+'</b></td>'+ds.map(dt=>'<td>'+(k==='shares'?fmtNum(get(k,dt),0):fmtMoney(get(k,dt)))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'<div class="empty">No '+esc(period)+' SEC XBRL series is available.</div>';
+ return '<div class="formrow" style="margin-bottom:12px"><button class="btn '+(period==='annual'?'primary':'')+'" data-fin="annual">Annual</button><button class="btn '+(period==='quarterly'?'primary':'')+'" data-fin="quarterly">Quarterly / Filing periods</button><span class="muted" style="font-size:11px">Raw standardized SEC XBRL periods; no synthetic values.</span></div>'+body;
+}
+function health(d){
+ const m=d.metrics||{},p=m.piotroski||{};
+ const z=n(m.altmanZ),zClass=z==null?'':z>2.99?'pos':z<1.81?'neg':'yellow';
+ const pClass=n(p.score)==null?'':p.score>=7?'pos':p.score<=3?'neg':'yellow';
+ return '<div class="grid cards">'+card('Debt / Equity',fmtNum(m.debtToEquity))+card('Current Ratio',fmtNum(m.currentRatio))+card('Interest Coverage',fmtNum(m.interestCoverage),'Operating income / interest expense')+card('Net Debt',fmtMoney(m.netDebt))+card('Piotroski F-Score',p.score==null?'N/A':fmtNum(p.score,0)+' / '+fmtNum(p.maxKnown,0),'Only criteria supported by available XBRL facts are counted',pClass)+card('Altman Z-Score',fmtNum(z),'Distress model when required XBRL inputs exist',zClass)+card('Cash',fmtMoney(m.cash))+'</div>'+
+ '<div class="two section"><div class="card"><div class="sectionTitle">Balance sheet quality</div><div class="desc">Health metrics are calculated from SEC reported assets, liabilities, equity, cash, debt and cash-flow facts. Missing XBRL inputs remain N/A rather than being fabricated.</div></div><div class="card"><div class="sectionTitle">Interpretation</div><div class="sourcebar"><span class="pill ok">Piotroski 7-9 strong</span><span class="pill">Piotroski 4-6 mixed</span><span class="pill bad">Piotroski 0-3 weak</span><span class="pill ok">Altman > 2.99</span><span class="pill bad">Altman < 1.81</span></div></div></div>';
+}
+function ownership(d){
+ const y=pick(d,'yahoo.ownership')||{},major=y.major||{},inst=pick(y,'institutions.ownershipList')||[],fund=pick(y,'funds.ownershipList')||[];
+ const majorEntries=Object.entries(major).filter(([k,v])=>v&&typeof v==='object'&&raw(v)!=null);
+ let top=majorEntries.length?'<div class="grid cards">'+majorEntries.slice(0,6).map(([k,v])=>card(k.replace(/([A-Z])/g,' $1'),typeof raw(v)==='number'&&Math.abs(raw(v))<=1?fmtPct(raw(v)):fmtNum(raw(v)))).join('')+'</div>':'';
+ function list(title,rows){if(!rows.length)return'<div class="card"><div class="sectionTitle">'+title+'</div><div class="empty">Ownership feed unavailable for this symbol.</div></div>';return'<div class="card"><div class="sectionTitle">'+title+'</div><div class="tableWrap"><table><thead><tr><th>Holder</th><th>Position</th><th>% Held</th><th>Value</th></tr></thead><tbody>'+rows.slice(0,20).map(x=>'<tr><td>'+esc(x.organization||x.name||'N/A')+'</td><td>'+fmtNum(raw(x.position),0)+'</td><td>'+fmtPct(raw(x.pctHeld))+'</td><td>'+fmtMoney(raw(x.value))+'</td></tr>').join('')+'</tbody></table></div></div>'}
+ return top+'<div class="two section">'+list('Institutional ownership',inst)+list('Fund ownership',fund)+'</div>';
+}
+function insiders(d){
+ const tx=pick(d,'yahoo.insiders.transactions.transactions')||pick(d,'yahoo.insiders.transactions')||[];
+ const forms=(pick(d,'sec.filings')||[]).filter(x=>['3','4','5'].includes(x.form)).slice(0,30);
+ let y=Array.isArray(tx)&&tx.length?'<div class="tableWrap"><table><thead><tr><th>Insider</th><th>Relation</th><th>Transaction</th><th>Shares</th><th>Value</th><th>Date</th></tr></thead><tbody>'+tx.slice(0,30).map(x=>'<tr><td>'+esc(x.filerName||x.name||'N/A')+'</td><td>'+esc(x.filerRelation||x.relation||'')+'</td><td>'+esc(x.transactionText||x.transaction||'')+'</td><td>'+fmtNum(raw(x.shares),0)+'</td><td>'+fmtMoney(raw(x.value))+'</td><td>'+esc(x.startDate&&x.startDate.fmt||x.date&&x.date.fmt||'')+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Yahoo insider transaction feed unavailable.</div>';
+ let sec=forms.length?'<div class="tableWrap"><table><thead><tr><th>Form</th><th>Filed</th><th>Report Date</th><th>Official SEC Filing</th></tr></thead><tbody>'+forms.map(x=>'<tr><td><b>'+esc(x.form)+'</b></td><td>'+esc(x.filingDate||'')+'</td><td>'+esc(x.reportDate||'')+'</td><td>'+(x.url?'<a class="link" target="_blank" rel="noopener" href="'+esc(x.url)+'">Open SEC</a>':'N/A')+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty">No recent Forms 3/4/5 in the SEC submissions feed.</div>';
+ return '<div class="sectionTitle">Insider transactions</div>'+y+'<div class="sectionTitle section">SEC ownership filings (Forms 3, 4, 5)</div>'+sec;
+}
+function filings(d){
+ const rows=pick(d,'sec.filings')||[];
+ if(!rows.length)return'<div class="empty">SEC filing feed unavailable for this symbol.</div>';
+ return'<div class="screenerFilters"><button class="preset active" data-form="ALL">All</button><button class="preset" data-form="10-K">10-K</button><button class="preset" data-form="10-Q">10-Q</button><button class="preset" data-form="8-K">8-K</button><button class="preset" data-form="4">Form 4</button></div><div class="tableWrap"><table id="filingTable"><thead><tr><th>Form</th><th>Filed</th><th>Report Date</th><th>Accession</th><th>Official filing</th></tr></thead><tbody>'+rows.map(x=>'<tr data-formrow="'+esc(x.form)+'"><td><b>'+esc(x.form)+'</b></td><td>'+esc(x.filingDate||'')+'</td><td>'+esc(x.reportDate||'')+'</td><td>'+esc(x.accessionNumber||'')+'</td><td>'+(x.url?'<a class="link" target="_blank" rel="noopener" href="'+esc(x.url)+'">SEC EDGAR</a>':'N/A')+'</td></tr>').join('')+'</tbody></table></div>';
+}
+function estimates(d){
+ const y=d.yahoo||{},fd=y.financialData||{},trend=pick(y,'earningsTrend.trend')||[],rec=pick(y,'recommendationTrend.trend')||[];
+ let t=trend.length?'<div class="tableWrap"><table><thead><tr><th>Period</th><th>End Date</th><th>EPS Estimate</th><th>EPS Growth</th><th>Revenue Estimate</th><th>Revenue Growth</th></tr></thead><tbody>'+trend.map(x=>'<tr><td><b>'+esc(x.period||'')+'</b></td><td>'+esc(x.endDate||'')+'</td><td>'+fmtNum(raw(x.earningsEstimate&&x.earningsEstimate.avg))+'</td><td>'+fmtPct(raw(x.earningsEstimate&&x.earningsEstimate.growth))+'</td><td>'+fmtMoney(raw(x.revenueEstimate&&x.revenueEstimate.avg))+'</td><td>'+fmtPct(raw(x.revenueEstimate&&x.revenueEstimate.growth))+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Analyst estimate feed unavailable for this symbol.</div>';
+ return '<div class="grid cards">'+card('Target Mean',n(raw(fd.targetMeanPrice))!=null?'$'+fmtNum(raw(fd.targetMeanPrice)):'N/A')+card('Target High',n(raw(fd.targetHighPrice))!=null?'$'+fmtNum(raw(fd.targetHighPrice)):'N/A')+card('Target Low',n(raw(fd.targetLowPrice))!=null?'$'+fmtNum(raw(fd.targetLowPrice)):'N/A')+card('Recommendation',esc(fd.recommendationKey||'N/A'))+card('Analyst Opinions',fmtNum(raw(fd.numberOfAnalystOpinions),0))+card('Current Price',n(raw(fd.currentPrice))!=null?'$'+fmtNum(raw(fd.currentPrice)):'N/A')+'</div><div class="sectionTitle section">Earnings and revenue estimates</div>'+t;
+}
+function compareView(){
+ return '<div class="card"><div class="sectionTitle">Compare 2-6 stocks</div><div class="formrow"><input id="compareInput" class="input" style="min-width:300px" value="'+esc(state.compare.join(','))+'" placeholder="AAPL,MSFT,GOOGL"><button id="compareBtn" class="btn primary">Compare</button></div><div id="compareResult" class="section"><div class="empty">Choose 2-6 symbols and run comparison.</div></div></div>';
+}
+function renderTab(){
+ const d=state.data;if(!d)return;let h='';
+ if(state.tab==='Overview')h=overview(d);
+ if(state.tab==='Valuation')h=valuation(d);
+ if(state.tab==='Growth')h=growth(d);
+ if(state.tab==='Profitability')h=profitability(d);
+ if(state.tab==='Financials')h=financials(d);
+ if(state.tab==='Health')h=health(d);
+ if(state.tab==='Ownership')h=ownership(d);
+ if(state.tab==='Insiders')h=insiders(d);
+ if(state.tab==='Filings')h=filings(d);
+ if(state.tab==='Estimates')h=estimates(d);
+ if(state.tab==='Compare')h=compareView();
+ $('#tabContent').innerHTML=h;
+ bindTabExtras();
+}
+function bindTabExtras(){
+ document.querySelectorAll('[data-fin]').forEach(b=>b.onclick=()=>{state.financialPeriod=b.dataset.fin;renderTab()});
+ document.querySelectorAll('[data-form]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-form]').forEach(x=>x.classList.remove('active'));b.classList.add('active');const f=b.dataset.form;document.querySelectorAll('[data-formrow]').forEach(r=>r.style.display=f==='ALL'||r.dataset.formrow===f?'':'none')});
+ const cb=$('#compareBtn');if(cb)cb.onclick=runCompare;
+}
+async function runCompare(){
+ const input=$('#compareInput');const syms=[...new Set(input.value.toUpperCase().split(',').map(x=>x.trim()).filter(Boolean))].slice(0,6);
+ if(syms.length<2){$('#compareResult').innerHTML='<div class="error">Enter 2-6 symbols.</div>';return}
+ state.compare=syms;$('#compareResult').innerHTML='<div class="loading"><div class="spinner"></div>Comparing reported fundamentals...</div>';
+ try{
+  const j=await api(API+'/compare?symbols='+encodeURIComponent(syms.join(',')));const rows=j.rows||[];
+  $('#compareResult').innerHTML='<div class="tableWrap"><table><thead><tr><th>Metric</th>'+rows.map(r=>'<th>'+esc(r.symbol)+'</th>').join('')+'</tr></thead><tbody>'+
+  [
+   ['Company',r=>r.company&&r.company.name||'N/A'],['Price',r=>n(r.metrics&&r.metrics.price)!=null?'$'+fmtNum(r.metrics.price):'N/A'],['Market Cap',r=>fmtMoney(r.metrics&&r.metrics.marketCap)],
+   ['P/E',r=>fmtNum(r.metrics&&r.metrics.pe)],['Forward P/E',r=>fmtNum(r.metrics&&r.metrics.forwardPE)],['P/B',r=>fmtNum(r.metrics&&r.metrics.priceToBook)],['EV/EBITDA',r=>fmtNum(r.metrics&&r.metrics.evToEbitda)],
+   ['ROIC',r=>fmtPct(r.metrics&&r.metrics.roic)],['ROE',r=>fmtPct(r.metrics&&r.metrics.roe)],['Gross Margin',r=>fmtPct(r.metrics&&r.metrics.grossMargin)],['Net Margin',r=>fmtPct(r.metrics&&r.metrics.netMargin)],
+   ['Revenue Growth 1Y',r=>fmtPct(r.metrics&&r.metrics.revenueGrowth1y)],['Revenue CAGR 3Y',r=>fmtPct(r.metrics&&r.metrics.revenueCagr3y)],['FCF Yield',r=>fmtPct(r.metrics&&r.metrics.fcfYield)],
+   ['Debt/Equity',r=>fmtNum(r.metrics&&r.metrics.debtToEquity)],['Current Ratio',r=>fmtNum(r.metrics&&r.metrics.currentRatio)],['Piotroski',r=>r.metrics&&r.metrics.piotroski&&r.metrics.piotroski.score!=null?fmtNum(r.metrics.piotroski.score,0):'N/A'],
+   ['Altman Z',r=>fmtNum(r.metrics&&r.metrics.altmanZ)],['DCF Base',r=>{const x=r.valuation&&r.valuation.scenarios&&r.valuation.scenarios.find(s=>s.name==='Base');return x?'$'+fmtNum(x.fairValuePerShare):'N/A'}]
+  ].map(([label,fn])=>'<tr><td><b>'+label+'</b></td>'+rows.map(r=>'<td>'+esc(fn(r))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+ }catch(e){$('#compareResult').innerHTML='<div class="error">'+esc(e.message)+'</div>'}
+}
+async function loadSymbol(symbol){
+ state.symbol=symbol.toUpperCase();location.hash=state.symbol;state.mode='research';$('#researchMode').classList.add('active');$('#screenerMode').classList.remove('active');$('#watchlistMode').classList.remove('active');
+ $('#main').innerHTML='<div class="loading"><div class="spinner"></div>Loading '+esc(state.symbol)+' from SEC and market sources...</div>';
+ try{
+  const j=await api(API+'/detail/'+encodeURIComponent(state.symbol));state.data=j.data;$('#main').innerHTML=baseShell(state.data);
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===state.tab));renderTab()});
+  const wb=$('#watchBtn');if(wb)wb.onclick=()=>toggleWatchlist(state.symbol);
+  renderTab();
+ }catch(e){$('#main').innerHTML='<div class="error">Unable to load '+esc(state.symbol)+': '+esc(e.message)+'</div><div class="empty">Try another listed US equity or reload later.</div>'}
+}
+function numericFundFilter(rows){
+ const f=state.screenNumeric||{},toFilterNumber=v=>v==null?null:n(v),maxPE=toFilterNumber(f.maxPE),minROE=toFilterNumber(f.minROE),maxDE=toFilterNumber(f.maxDE),minGrowth=toFilterNumber(f.minGrowth);
+ let rr=rows.slice();
+ if(maxPE!=null)rr=rr.filter(x=>n(x.trailingPE)!=null&&x.trailingPE>0&&x.trailingPE<=maxPE);
+ if(minROE!=null)rr=rr.filter(x=>n(x.roe)!=null&&x.roe>=minROE/100);
+ if(maxDE!=null)rr=rr.filter(x=>n(x.debtToEquity)!=null&&x.debtToEquity<=maxDE);
+ if(minGrowth!=null)rr=rr.filter(x=>n(x.revenueGrowth1y)!=null&&x.revenueGrowth1y>=minGrowth/100);
+ return rr;
+}
+function syncTopFundFilters(){
+ const f=state.screenNumeric||{};
+ if($('#topMaxPE'))$('#topMaxPE').value=f.maxPE==null?'':String(f.maxPE);
+ if($('#topMinROE'))$('#topMinROE').value=f.minROE==null?'':String(f.minROE);
+ if($('#topMaxDE'))$('#topMaxDE').value=f.maxDE==null?'':String(f.maxDE);
+ if($('#topMinGrowth'))$('#topMinGrowth').value=f.minGrowth==null?'':String(f.minGrowth);
+}
+function selectedNumber(id){
+ const el=$('#'+id);
+ if(!el)return null;
+ const v=String(el.value==null?'':el.value).trim();
+ return v===''?null:n(v);
+}
+function readTopFundFilters(){
+ state.screenNumeric={
+  maxPE:selectedNumber('topMaxPE'),
+  minROE:selectedNumber('topMinROE'),
+  maxDE:selectedNumber('topMaxDE'),
+  minGrowth:selectedNumber('topMinGrowth')
+ };
+}
+async function runFundamentalSearch(){
+ const btn=$('#fundSearchBtn');if(btn)btn.disabled=true;
+ readTopFundFilters();
+ state.screenPreset='All';
+ try{
+  if(!state.screenRows.length){
+   const j=await api(API+'/screener');
+   state.screenRows=j.rows||[];state.screenAsOf=j.asOf||null;
+  }
+  state.mode='screener';
+  $('#screenerMode').classList.add('active');$('#researchMode').classList.remove('active');$('#watchlistMode').classList.remove('active');
+  renderScreener();
+ }catch(e){
+  $('#main').innerHTML='<div class="error">Fundamental search unavailable: '+esc(e.message)+'</div>';
+ }finally{if(btn)btn.disabled=false}
+}
+function mainNavigate(target){
+ if(target==='fundamental')return;
+ try{
+  if(window.parent&&window.parent!==window){
+   const p=window.parent;
+   if(target==='home'){
+    const overlay=p.document&&p.document.getElementById('ai4-fundamental-root-view');
+    if(overlay)overlay.remove();
+    if(p.document&&p.document.documentElement)p.document.documentElement.style.overflow='';
+    if(p.document&&p.document.body)p.document.body.style.overflow='';
+    try{p.history.replaceState(null,'','/')}catch(_){}
+    return;
+   }
+   const mode={
+    'signal-scan':'scanner-signal',
+    'screener-crypto':'crypto',
+    'hyperliquid':'live-trading',
+    'renko':'renko'
+   }[target];
+   if(!mode)return;
+   try{p.localStorage.setItem('ot_backtest_view_mode',mode)}catch(_){}
+   try{p.sessionStorage.setItem('copytolive_ai4_nav_target',target)}catch(_){}
+   // Navigate the parent synchronously while this iframe is still alive.
+   // Removing our own iframe first can terminate this JS context before navigation runs.
+   try{p.location.replace('/')}catch(_){try{p.location.assign('/')}catch(__){p.location.href='/'}}
+   return;
+  }
+  if(target==='home')location.href='/';
+ }catch(_){
+  if(target==='home')location.href='/';
+ }
+}
+function presetFilter(name,rows){
+ if(name==='Value')return rows.filter(x=>n(x.trailingPE)!=null&&x.trailingPE>0&&x.trailingPE<=20&&n(x.priceToBook)!=null&&x.priceToBook<=4);
+ if(name==='Quality')return rows.filter(x=>n(x.roe)!=null&&x.roe>=0.15&&n(x.operatingMargin)!=null&&x.operatingMargin>=0.10&&(n(x.debtToEquity)==null||x.debtToEquity<=1.5));
+ if(name==='Growth')return rows.filter(x=>(n(x.revenueGrowth1y)!=null&&x.revenueGrowth1y>=0.10)||(n(x.epsGrowth1y)!=null&&x.epsGrowth1y>=0.10));
+ if(name==='Dividend')return rows.filter(x=>n(x.dividendYield)!=null&&x.dividendYield>=0.015);
+ if(name==='Compounder')return rows.filter(x=>n(x.roe)!=null&&x.roe>=0.15&&n(x.operatingMargin)!=null&&x.operatingMargin>=0.15&&n(x.revenueGrowth1y)!=null&&x.revenueGrowth1y>=0.05&&(n(x.debtToEquity)==null||x.debtToEquity<=1));
+ if(name==='Low Debt')return rows.filter(x=>n(x.debtToEquity)!=null&&x.debtToEquity<=0.5);
+ if(name==='Complete Data')return rows.filter(x=>n(x.dataCompleteness)!=null&&x.dataCompleteness>=90);
+ return rows;
+}
+function renderScreener(){
+ const rows=numericFundFilter(presetFilter(state.screenPreset,state.screenRows));
+ const asof=state.screenAsOf?new Date(state.screenAsOf).toLocaleString():'source timestamp unavailable';
+ $('#main').innerHTML='<div class="screenerHead"><div class="symbol" style="font-size:24px">FUNDAMENTAL SCREENER</div><div class="meta">Equity-only fundamental universe • '+esc(state.screenRows.length)+' securities • Fundamentals as of '+esc(asof)+'. Click any row for full 11-tab research.</div></div>'+
+ '<div class="screenerFilters">'+['All','Value','Quality','Growth','Dividend','Compounder','Low Debt','Complete Data'].map(x=>'<button class="preset '+(state.screenPreset===x?'active':'')+'" data-preset="'+x+'">'+x+'</button>').join('')+
+ '<span class="pill ok">Numeric filters: '+(state.screenNumeric.maxPE==null?'P/E Any':'P/E ≤ '+esc(state.screenNumeric.maxPE))+' · '+(state.screenNumeric.minROE==null?'ROE Any':'ROE ≥ '+esc(state.screenNumeric.minROE)+'%')+' · '+(state.screenNumeric.maxDE==null?'D/E Any':'D/E ≤ '+esc(state.screenNumeric.maxDE))+' · '+(state.screenNumeric.minGrowth==null?'Growth Any':'Growth ≥ '+esc(state.screenNumeric.minGrowth)+'%')+'</span></div>'+
+ '<div class="tableWrap"><table><thead><tr><th>Symbol</th><th>Company</th><th>Exchange</th><th>Industry</th><th>P/E</th><th>P/B</th><th>P/S</th><th>EV/EBITDA</th><th>ROE</th><th>ROA</th><th>Gross Margin</th><th>Operating Margin</th><th>Net Margin</th><th>D/E</th><th>Current Ratio</th><th>Interest Cover</th><th>Dividend Yield</th><th>Revenue Growth</th><th>EPS Growth</th><th>Data</th></tr></thead><tbody id="screenBody">'+rows.map(x=>screenRow(x)).join('')+'</tbody></table></div>';
+ document.querySelectorAll('[data-preset]').forEach(btn=>btn.onclick=()=>{state.screenPreset=btn.dataset.preset;renderScreener()});
+ bindScreenRows();
+ syncTopFundFilters();
+}
+function screenRow(x){return'<tr data-screen-symbol="'+esc(x.symbol)+'" style="cursor:pointer"><td class="yellow"><b>'+esc(x.symbol)+'</b></td><td>'+esc(x.name||x.symbol)+'</td><td>'+esc(x.exchange||'')+'</td><td>'+esc(x.industry||'')+'</td><td>'+fmtNum(x.trailingPE)+'</td><td>'+fmtNum(x.priceToBook)+'</td><td>'+fmtNum(x.priceToSales)+'</td><td>'+fmtNum(x.evToEbitda)+'</td><td class="'+cls(x.roe)+'">'+fmtPct(x.roe)+'</td><td class="'+cls(x.roa)+'">'+fmtPct(x.roa)+'</td><td>'+fmtPct(x.grossMargin)+'</td><td>'+fmtPct(x.operatingMargin)+'</td><td>'+fmtPct(x.netMargin)+'</td><td>'+fmtNum(x.debtToEquity)+'</td><td>'+fmtNum(x.currentRatio)+'</td><td>'+fmtNum(x.interestCoverage)+'</td><td>'+fmtPct(x.dividendYield)+'</td><td class="'+cls(x.revenueGrowth1y)+'">'+fmtPct(x.revenueGrowth1y)+'</td><td class="'+cls(x.epsGrowth1y)+'">'+fmtPct(x.epsGrowth1y)+'</td><td>'+fmtNum(x.dataCompleteness,0)+'%</td></tr>'}
+function bindScreenRows(){document.querySelectorAll('[data-screen-symbol]').forEach(r=>r.onclick=()=>loadSymbol(r.dataset.screenSymbol))}
+async function loadScreener(){
+ state.mode='screener';$('#screenerMode').classList.add('active');$('#researchMode').classList.remove('active');$('#watchlistMode').classList.remove('active');$('#main').innerHTML='<div class="loading"><div class="spinner"></div>Loading equity fundamental universe...</div>';
+ try{const j=await api(API+'/screener');state.screenRows=j.rows||[];state.screenAsOf=j.asOf||null;renderScreener()}catch(e){$('#main').innerHTML='<div class="error">Screener unavailable: '+esc(e.message)+'</div>'}
+}
+function renderWatchlist(){
+ state.mode='watchlist';$('#watchlistMode').classList.add('active');$('#researchMode').classList.remove('active');$('#screenerMode').classList.remove('active');
+ const rows=state.watchlist;
+ $('#main').innerHTML='<div class="screenerHead"><div class="symbol" style="font-size:24px">WATCHLIST</div><div class="meta">Saved locally in this browser. Click a symbol to open full fundamental research.</div></div>'+
+ (rows.length?'<div class="tableWrap"><table><thead><tr><th>Symbol</th><th>Action</th></tr></thead><tbody>'+rows.map(x=>'<tr><td data-watch-symbol="'+esc(x)+'" class="yellow" style="cursor:pointer"><b>'+esc(x)+'</b></td><td><button class="btn" data-remove-watch="'+esc(x)+'">Remove</button></td></tr>').join('')+'</tbody></table></div>':'<div class="empty">No stocks saved yet. Open a stock and choose “☆ Add Watchlist”.</div>');
+ document.querySelectorAll('[data-watch-symbol]').forEach(x=>x.onclick=()=>loadSymbol(x.dataset.watchSymbol));
+ document.querySelectorAll('[data-remove-watch]').forEach(x=>x.onclick=()=>{state.watchlist=state.watchlist.filter(s=>s!==x.dataset.removeWatch);saveWatchlist();renderWatchlist()});
+}
+let searchTimer=null;
+$('#search').addEventListener('input',e=>{clearTimeout(searchTimer);const q=e.target.value.trim();if(!q){$('#results').classList.remove('show');return}searchTimer=setTimeout(async()=>{try{const j=await api(API+'/search?q='+encodeURIComponent(q));const rows=j.results||[];$('#results').innerHTML=rows.map(x=>'<div class="result" data-symbol="'+esc(x.symbol)+'"><div><strong>'+esc(x.symbol)+'</strong><div style="font-size:11px;color:#87919a;margin-top:3px">'+esc(x.name)+'</div></div><div class="muted" style="font-size:10px;text-align:right">'+esc(x.exchange||'')+'<br>'+esc(x.type||'')+'</div></div>').join('')||'<div class="empty">No results</div>';$('#results').classList.add('show');document.querySelectorAll('.result[data-symbol]').forEach(r=>r.onclick=()=>{$('#search').value='';$('#results').classList.remove('show');loadSymbol(r.dataset.symbol)})}catch(e){$('#results').innerHTML='<div class="empty">'+esc(e.message)+'</div>';$('#results').classList.add('show')}},250)});
+document.addEventListener('click',e=>{if(!e.target.closest('#searchWrap'))$('#results').classList.remove('show')});
+document.querySelectorAll('[data-main-nav]').forEach(btn=>btn.onclick=()=>mainNavigate(btn.dataset.mainNav));
+$('#fundSearchBtn').onclick=runFundamentalSearch;
+['topMaxPE','topMinROE','topMaxDE','topMinGrowth'].forEach(id=>{const el=$('#'+id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')runFundamentalSearch()})});
+$('#researchMode').onclick=()=>loadSymbol(state.symbol||'AAPL');
+$('#screenerMode').onclick=loadScreener;
+$('#watchlistMode').onclick=renderWatchlist;
+syncTopFundFilters();
+window.addEventListener('hashchange',()=>{const s=(location.hash||'').slice(1).toUpperCase();if(s&&s!==state.symbol&&/^[A-Z0-9.^=-]{1,20}$/.test(s))loadSymbol(s)});
+(async()=>{try{await api(API+'/health');$('#apiStatus').textContent='Fundamental API Live'}catch(e){$('#apiStatus').textContent='API Degraded'}loadSymbol(state.symbol||'AAPL')})();
+</script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+{
+  "id": "ai2-20260903-targeted-recovery-002",
+  "ok": true,
+  "checks": {
+    "NEO": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 502,
+          "seconds": 10.955,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 1
+        },
+        {
+          "status": 502,
+          "seconds": 0.31,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 2
+        },
+        {
+          "status": 502,
+          "seconds": 9.074,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 3
+        },
+        {
+          "status": 502,
+          "seconds": 8.071,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 4
+        },
+        {
+          "status": 502,
+          "seconds": 14.881,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 5
+        },
+        {
+          "status": 502,
+          "seconds": 7.085,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 6
+        },
+        {
+          "status": 200,
+          "seconds": 11.408,
+          "returned": 400,
+          "count": 2307401,
+          "error": "",
+          "n": 7
+        }
+      ]
+    },
+    "SOL": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 502,
+          "seconds": 5.842,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 1
+        },
+        {
+          "status": 502,
+          "seconds": 0.294,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 2
+        },
+        {
+          "status": 200,
+          "seconds": 0.775,
+          "returned": 400,
+          "count": 159308,
+          "error": "",
+          "n": 3
+        }
+      ]
+    },
+    "GOLD": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 502,
+          "seconds": 9.147,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 1
+        },
+        {
+          "status": 502,
+          "seconds": 0.29,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 2
+        },
+        {
+          "status": 502,
+          "seconds": 7.169,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 3
+        },
+        {
+          "status": 502,
+          "seconds": 7.1,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 4
+        },
+        {
+          "status": 200,
+          "seconds": 2.197,
+          "returned": 400,
+          "count": 8824,
+          "error": "",
+          "n": 5
+        }
+      ]
+    },
+    "SILVER": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 502,
+          "seconds": 4.909,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 1
+        },
+        {
+          "status": 502,
+          "seconds": 0.287,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 2
+        },
+        {
+          "status": 200,
+          "seconds": 3.77,
+          "returned": 400,
+          "count": 24332,
+          "error": "",
+          "n": 3
+        }
+      ]
+    },
+    "WTIOIL": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 502,
+          "seconds": 10.938,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 1
+        },
+        {
+          "status": 502,
+          "seconds": 0.286,
+          "returned": 0,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 2
+        },
+        {
+          "status": 200,
+          "seconds": 4.526,
+          "returned": 400,
+          "count": 41574,
+          "error": "",
+          "n": 3
+        }
+      ]
+    },
+    "BRENTOIL": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 3.778,
+          "returned": 400,
+          "count": 38448,
+          "error": "",
+          "n": 1
+        }
+      ]
+    },
+    "universe": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.281,
+          "returned": 0,
+          "count": 163,
+          "error": "",
+          "n": 1
+        }
+      ]
+    },
+    "indicator": {
+      "ok": true,
+      "attempts": [
+        {
+          "status": 200,
+          "seconds": 0.267,
+          "returned": 0,
+          "count": null,
+          "error": "",
+          "n": 1
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,81 @@
+name: AI5 Signal V8 Static QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai5-v8-static-qa/**"
+permissions:
+  contents: write
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai5-v8-static-qa/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "out=ai5-v8-static-results/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Validate staged v8 source
+        env:
+          OUT: ${{ steps.req.outputs.out }}
+          ID: ${{ steps.req.outputs.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=ai5-staging/MarketScanner-ai5Signal-v8.js
+          test -s "$SRC"
+          node --check "$SRC"
+          python3 - "$SRC" "$OUT" "$ID" <<'PY'
+          import json,sys,re
+          src,out,id_=sys.argv[1:4]
+          s=open(src,encoding="utf-8").read()
+          checks={
+            "marker": 'data-ai5-signal-v8' in s,
+            "single_filter_bar_source": s.count('data-ai5-filterbar') >= 1,
+            "semi_auto_copy": 'Auto Filter + Auto Prefilter' in s and 'Deep Scan' in s,
+            "prefilter_stage_request": 'stage:"prefilter"' in s,
+            "deep_stage_request": 'stage:"deep"' in s,
+            "deep_lock": 'deepBusy.current' in s,
+            "prefilter_lock": 'prefilterBusy.current' in s and 'queuedPrefilter.current' in s,
+            "stale_protection": 'Previous Scan · Filters Changed' in s,
+            "manual_deep": 'Deep Scan tetap manual' in s,
+            "static_chart": 'static candlestick chart' in s and '"svg"' in s,
+            "no_canvas": 'canvas' not in s.lower(),
+            "no_mutation_observer": 'MutationObserver' not in s,
+            "no_resize_observer": 'ResizeObserver' not in s,
+            "no_animation_loop": 'requestAnimationFrame' not in s,
+            "no_poll_interval": 'setInterval' not in s,
+            "no_hyperliquid_ui_groups": 'Hyperliquid Major' not in s and 'Hyperliquid Perpetuals' not in s,
+            "no_forex_ui_groups": 'Forex Major' not in s and 'Forex Cross' not in s,
+            "group_labels": 'children:"Major"' in s and 'children:"Perpetuals"' in s,
+            "responsive_filter_wrap": 'flexWrap:"wrap"' in s,
+            "perp_dom_chunk_40": 'useState(40)' in s and 'Math.min(v+40,filteredPerps.length)' in s,
+            "max_selected_40": 'MAX_SELECTED=40' in s,
+            "auto_prefilter_cap": 'AUTO_PREFILTER_MAX=20' in s,
+          }
+          bad=[k for k,v in checks.items() if not v]
+          d={"id":id_,"checks":checks,"failed":bad,"ok":not bad,"bytes":len(s.encode())}
+          open(out,"w").write(json.dumps(d,indent=2)+"\n")
+          print(json.dumps(d))
+          if bad: raise SystemExit(2)
+          PY
+      - name: Commit result
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"
+          test -s "$OUT"
+          git config user.name "CopyToLive AI5 Static QA"
+          git config user.email "copytolive-ai5-static@local.invalid"
+          git add "$OUT"
+          git commit -m "ai5 v8 static qa: ${{ steps.req.outputs.id }}" || true
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -1,0 +1,48 @@
+name: AI3 Domain Route Audit
+on:
+  push:
+    branches: [main]
+    paths: ["ai3-domain-route-requests/**"]
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai3-domain-route-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"; echo "out=ai3-domain-route-results/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Resolve and inspect production route
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"; mkdir -p "$(dirname "$OUT")"
+          python3 - "$OUT" <<'PY'
+          import json,subprocess,sys,re
+          def sh(cmd):
+              p=subprocess.run(cmd,shell=True,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+              return p.returncode,p.stdout
+          rc_dns,dns=sh("getent ahostsv4 copytolive.com | head -20")
+          rc_h,h=sh("curl -sSIL --max-time 20 https://copytolive.com/ | head -80")
+          rc_gh,gh=sh("curl -sSIL --max-time 20 https://copytolive.github.io/copy/ | head -80")
+          rc_404,h404=sh("curl -sSIL --max-time 20 https://copytolive.com/ai3-route-missing-20260903.txt | head -80")
+          out={"ok":True,"dns":dns,"root_headers":h,"pages_headers":gh,"missing_headers":h404}
+          open(sys.argv[1],"w").write(json.dumps(out,indent=2)+"\n")
+          PY
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"
+          git config user.name "CopyToLive AI3 Route Audit"
+          git config user.email "ai3-route-audit@local.invalid"
+          git add "$OUT"; git commit -m "ai3 domain route: ${{ steps.req.outputs.id }}" || true
+          git pull --rebase origin main
+          git push origin HEAD:main

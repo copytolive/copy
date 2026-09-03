@@ -1,0 +1,4 @@
+{
+  "id": "ai3-ui-candidate-009",
+  "note": "anchor only from stable Home filter state; prevent transition-time anchor overwrite"
+}

@@ -1,0 +1,217 @@
+name: AI4 Fundamental Browser Public Gallery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai4-fundamental-browser-gallery-requests/**"
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai4-fundamental-browser-gallery-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install chromium --with-deps >/dev/null
+
+      - name: Capture all Fundamental features
+        env:
+          ID: ${{ steps.req.outputs.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "qa/fundamental/$ID"
+          cat > .ai4-gallery.mjs <<'JS'
+          import fs from 'fs';
+          import { chromium } from 'playwright';
+
+          const id=process.env.ID;
+          const dir=`qa/fundamental/${id}`;
+          const ROOT='https://copytolive.com/';
+          const tabs=['Overview','Valuation','Growth','Profitability','Financials','Health','Ownership','Insiders','Filings','Estimates','Compare'];
+          const report={id,captureDelayMs:0,acceptance:'FAIL',ok:false,devices:{},screenshots:[]};
+          const browser=await chromium.launch({headless:true});
+
+          const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+          async function clickRootFundamental(page){
+            const loc=page.getByText('Fundamental',{exact:true});
+            for(let i=0;i<await loc.count();i++){
+              const x=loc.nth(i);
+              if(await x.isVisible()){
+                const b=await x.boundingBox();
+                if(b&&b.y<260){await x.click({timeout:15000});return;}
+              }
+            }
+            throw new Error('visible root Fundamental control not found');
+          }
+
+          async function openFundamental(page){
+            const r=await page.goto(ROOT+`?ai4gallery=${encodeURIComponent(id)}`,{waitUntil:'domcontentloaded',timeout:60000});
+            if(r?.status()!==200) throw new Error('root HTTP '+r?.status());
+            await clickRootFundamental(page);
+            await page.waitForSelector('#ai4-fundamental-root-view iframe',{timeout:30000});
+            const frame=page.frameLocator('#ai4-fundamental-root-view iframe');
+            await frame.locator('.symbol').waitFor({state:'visible',timeout:60000});
+            return frame;
+          }
+
+          async function shot(page,device,feature){
+            const file=`${device}-${feature}.png`;
+            await page.screenshot({path:`${dir}/${file}`,fullPage:true});
+            report.screenshots.push({device,feature,file,captureDelayMs:0});
+          }
+
+          async function geom(frame){
+            return frame.locator('header').evaluate(h=>{
+              const rr=s=>h.querySelector(s)?.getBoundingClientRect();
+              const nav=rr('.mainNavRow'), filters=rr('.fundSearchScroll'), tools=rr('.top');
+              const overlap=(a,b)=>{
+                if(!a||!b)return false;
+                const x=Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left));
+                const y=Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+                return x>2&&y>2;
+              };
+              return {overlap:overlap(nav,filters)||overlap(filters,tools)||overlap(nav,tools),
+                nav:nav&&{top:nav.top,bottom:nav.bottom},filters:filters&&{top:filters.top,bottom:filters.bottom},
+                tools:tools&&{top:tools.top,bottom:tools.bottom}};
+            });
+          }
+
+          async function run(device,viewport){
+            const ctx=await browser.newContext({viewport});
+            const page=await ctx.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+            page.on('console',m=>{if(m.type()==='error'&&!/favicon|429|Failed to load resource/i.test(m.text()))errors.push('console: '+m.text())});
+            const rec={viewport,ok:false};
+            try{
+              let frame=await openFundamental(page);
+              rec.rootUrl=page.url()==='https://copytolive.com/';
+              rec.symbol=(await frame.locator('.symbol').first().innerText()).trim();
+              rec.nav=await frame.locator('[data-main-nav]').allInnerTexts();
+              rec.filterLabels=await frame.locator('.fundFilterLabel').allInnerTexts();
+              rec.topFilterBars=await frame.locator('#fundSearchBar').count();
+              rec.topSearchButtons=await frame.locator('#fundSearchBtn').count();
+              rec.topFilterFields=await frame.locator('#topMaxPE,#topMinROE,#topMaxDE,#topMinGrowth').count();
+              rec.headerGeometry=await geom(frame);
+              rec.rootOverflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+8);
+              rec.frameOverflow=await frame.locator('html').evaluate(el=>el.scrollWidth>el.clientWidth+8);
+
+              await frame.locator('#search').fill('MSFT');
+              await frame.locator('#results.show').waitFor({state:'visible',timeout:30000});
+              rec.searchResults=await frame.locator('#results .result').count();
+              await shot(page,device,'00-search-results');
+              await frame.locator('#search').fill('');
+              await frame.locator('#results').evaluate(el=>el.classList.remove('show'));
+
+              const add=frame.locator('#watchBtn');
+              if(await add.count()) await add.click();
+
+              for(let i=0;i<tabs.length;i++){
+                const t=tabs[i];
+                const btn=frame.locator('.tab').filter({hasText:t}).first();
+                await btn.click();
+                await frame.locator('.tab.active').filter({hasText:t}).waitFor({state:'visible',timeout:15000});
+                if(t==='Compare'){
+                  const input=frame.locator('#compareInput');
+                  if(await input.count()){
+                    await input.fill('AAPL,MSFT');
+                    await frame.locator('#compareBtn').click();
+                    await frame.locator('#compareResult').waitFor({state:'visible',timeout:60000});
+                  }
+                }
+                await shot(page,device,`${String(i+1).padStart(2,'0')}-${t.toLowerCase()}`);
+              }
+
+              await frame.getByRole('button',{name:'Screener',exact:true}).click();
+              await frame.locator('#screenBody').waitFor({state:'attached',timeout:90000});
+              rec.defaultRows=await frame.locator('#screenBody tr').count();
+              rec.secondaryPresetControls=await frame.locator('[data-preset],.screenerFilters .preset').count();
+              rec.secondaryFilterRows=await frame.locator('.screenerFilters').count();
+              await shot(page,device,'12-screener-default');
+
+              await frame.locator('#topMaxPE').selectOption('50');
+              await frame.locator('#topMinROE').selectOption('5');
+              await frame.locator('#topMaxDE').selectOption('');
+              await frame.locator('#topMinGrowth').selectOption('');
+              await frame.locator('#fundSearchBtn').click();
+              await frame.locator('#screenBody').waitFor({state:'attached',timeout:90000});
+              rec.filteredRows=await frame.locator('#screenBody tr').count();
+              await shot(page,device,'13-screener-filtered-pe50-roe5');
+
+              await frame.getByRole('button',{name:'Watchlist',exact:true}).click();
+              await frame.getByText('WATCHLIST',{exact:true}).waitFor({state:'visible',timeout:15000});
+              rec.watchlistHasAAPL=(await frame.getByText('AAPL',{exact:true}).count())>0;
+              await shot(page,device,'14-watchlist');
+
+              rec.errors=errors;
+              rec.ok=rec.rootUrl&&rec.symbol==='AAPL'&&rec.nav.length===6&&
+                ['Home','Fundamental','Signal Scan','Crypto','Hyperliquid','Renko'].every(x=>rec.nav.includes(x))&&
+                rec.topFilterBars===1&&rec.topSearchButtons===1&&rec.topFilterFields===4&&
+                ['P/E','ROE','Debt / Equity','Revenue Growth'].every(x=>rec.filterLabels.includes(x))&&
+                rec.defaultRows===247&&rec.filteredRows===47&&rec.searchResults>0&&rec.watchlistHasAAPL&&
+                rec.secondaryPresetControls===0&&rec.secondaryFilterRows===0&&
+                !rec.headerGeometry.overlap&&!rec.rootOverflow&&(device==='desktop'||!rec.frameOverflow)&&
+                !errors.some(x=>x.startsWith('pageerror:'));
+            }catch(e){rec.error=e.stack||e.message;rec.errors=errors;}
+            report.devices[device]=rec;
+            await ctx.close();
+          }
+
+          await run('desktop',{width:1440,height:900});
+          await run('mobile',{width:390,height:844});
+          await browser.close();
+
+          report.screenshotCount=report.screenshots.length;
+          report.expectedScreenshotCount=30;
+          report.ok=report.devices.desktop?.ok===true&&report.devices.mobile?.ok===true&&report.screenshotCount===30;
+          report.acceptance=report.ok?'PASS':'FAIL';
+
+          const items=report.screenshots.map(s=>{
+            const src=`./${s.file}`;
+            return `<article><h3>${esc(s.device.toUpperCase())} · ${esc(s.feature)}</h3><a href="${src}"><img src="${src}" loading="lazy" alt="${esc(s.device+' '+s.feature)}"></a></article>`;
+          }).join('');
+          const html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CopyToLive Fundamental QA</title><style>body{margin:0;padding:20px;background:#070b0e;color:#e8edf0;font:14px Arial,sans-serif}h1{color:#f0b90b}.meta{padding:12px;border:1px solid #293138;border-radius:12px;margin-bottom:18px}.grid{display:grid;grid-template-columns:1fr;gap:18px}article{background:#0d1216;border:1px solid #20282e;border-radius:12px;padding:10px}h3{margin:0 0 10px}img{display:block;width:100%;height:auto;border:1px solid #20282e;border-radius:8px}@media(min-width:1200px){.grid{grid-template-columns:1fr 1fr}}</style></head><body><h1>CopyToLive Fundamental Full QA</h1><div class="meta">Acceptance: <b>${report.acceptance}</b> · Desktop + Mobile · 0ms artificial screenshot delay · ${report.screenshotCount}/30 screenshots</div><div class="grid">${items}</div></body></html>`;
+          fs.writeFileSync(`${dir}/index.html`,html);
+          fs.writeFileSync(`${dir}/report.json`,JSON.stringify(report,null,2));
+          console.log('AI4_GALLERY_REPORT='+JSON.stringify(report));
+          JS
+          node ./.ai4-gallery.mjs
+
+      - name: Commit public gallery
+        shell: bash
+        run: |
+          set -euo pipefail
+          ID="${{ steps.req.outputs.id }}"
+          git config user.name "AI4 Fundamental Gallery"
+          git config user.email "ai4-fundamental-gallery@local.invalid"
+          git add "qa/fundamental/$ID"
+          git commit -m "ai4 Fundamental public gallery: $ID"
+          for n in 1 2 3 4 5 6 7 8; do
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; sleep "$n"; continue; }
+            git push origin HEAD:main && exit 0
+            sleep "$n"
+          done
+          exit 1

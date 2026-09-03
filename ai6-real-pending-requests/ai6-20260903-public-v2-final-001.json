@@ -1,0 +1,6 @@
+{
+  "id": "ai6-20260903-public-v2-final-001",
+  "goal": "Crypto Screener -> REAL Hyperliquid pending entry -> existing dashboard lifecycle",
+  "implementation": "hardened V2",
+  "acceptance": "non-mutating"
+}

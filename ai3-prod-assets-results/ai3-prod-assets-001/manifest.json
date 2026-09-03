@@ -1,0 +1,22 @@
+{
+  "index.html": {
+    "bytes": 17707,
+    "sha256": "3dd6a084dbc0665dd2f21a055918b2ec30f66cde6586ee21ad613e088e853969"
+  },
+  "fundamental.html": {
+    "bytes": 48928,
+    "sha256": "dc478ea19688b23cc8168385194fc14e7ca3d972f1ffef193a3c4d1cb4182d01"
+  },
+  "ai5_signal_scan_runtime_v1.js": {
+    "bytes": 4475,
+    "sha256": "d3681a1a623f96ff679f9d781f251fbbdf35b44bc8888088b7b9e494c7a37cac"
+  },
+  "ai3_public_shell_v1.js": {
+    "bytes": 12750,
+    "sha256": "dd2408c3072af3522dce26bf3906fba75e16a05ffab3f9ee6777927735698941"
+  },
+  "ai4_fundamental_router_v1.js": {
+    "bytes": 3748,
+    "sha256": "3eab79c79104f86e11826fa7a3fcc9bf1b0c148a517af4f145bceddd87b9e83b"
+  }
+}

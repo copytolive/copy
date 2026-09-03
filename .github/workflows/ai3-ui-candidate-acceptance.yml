@@ -1,0 +1,224 @@
+name: AI3 UI Candidate Acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai3-ui-candidate-requests/**"
+
+permissions:
+  contents: write
+
+jobs:
+  accept:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai3-ui-candidate-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"; echo "out=ai3-ui-candidate-results/$ID" >> "$GITHUB_OUTPUT"
+      - name: Syntax
+        shell: bash
+        run: |
+          node --check ai3-ui-candidate/ai3_public_shell_v13.js
+          node --check ai3-ui-candidate/ai5_signal_scan_runtime_v5.js
+      - name: Install browser
+        shell: bash
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install chromium --with-deps >/dev/null
+      - name: Test candidate against live production
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          OUT: ${{ steps.req.outputs.out }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"
+          cat > /tmp/ai3candidate.mjs <<'JS'
+          import fs from 'fs';
+          import {chromium} from 'playwright';
+          const ID=process.env.ID,OUT=process.env.OUT,ROOT='https://copytolive.com/';
+          const shell=fs.readFileSync('ai3-ui-candidate/ai3_public_shell_v13.js','utf8');
+          const runtime=fs.readFileSync('ai3-ui-candidate/ai5_signal_scan_runtime_v5.js','utf8');
+          const fundamental=fs.readFileSync('ai3-ui-candidate/fundamental-v12.html','utf8');
+          const report={id:ID,acceptance:'FAIL',ok:false,devices:{},errors:[]};
+          const browser=await chromium.launch({headless:true});
+          const clean=s=>String(s||'').replace(/\s+/g,' ').trim();
+          async function routeCandidate(ctx){
+            await ctx.route(/\/assets\/js\/ai3_public_shell_v1\.js(?:\?.*)?$/,r=>r.fulfill({status:200,contentType:'application/javascript; charset=utf-8',body:shell}));
+            await ctx.route(/\/assets\/js\/ai5_signal_scan_runtime_v1\.js(?:\?.*)?$/,r=>r.fulfill({status:200,contentType:'application/javascript; charset=utf-8',body:runtime}));
+            await ctx.route(/\/fundamental\.html(?:\?.*)?$/,r=>r.fulfill({status:200,contentType:'text/html; charset=utf-8',body:fundamental}));
+          }
+          async function waitRoot(page){
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForTimeout(2500);
+          }
+          async function setHome(page){
+            await page.goto(ROOT+'?ai3candidate='+ID+'&t='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
+            await page.evaluate(()=>localStorage.setItem('ot_backtest_view_mode','home'));
+            await page.goto(ROOT+'?ai3candidate='+ID+'&home='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(3000);
+          }
+          async function visibleTop(page){
+            return page.evaluate(()=>{
+              const C=s=>String(s||'').replace(/\s+/g,' ').trim(),V=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'&&+s.opacity!==0};
+              const names=['Home','Fundamental','Signal Scan','Crypto','Renko'];
+              const N=t=>{t=C(t);return names.find(n=>t===n||t.endsWith(' '+n))||t};
+              const navs=[...document.querySelectorAll('nav')].filter(n=>!n.closest('#desktop-sidebar')&&V(n)&&names.filter(x=>C(n.innerText).includes(x)).length>=4);
+              navs.sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top);
+              const n=navs[0];if(!n)return null;const nr=n.getBoundingClientRect();
+              const items=[...n.querySelectorAll(':scope > button')].filter(V).map(b=>{const r=b.getBoundingClientRect(),sv=b.querySelector('svg'),sr=sv&&sv.getBoundingClientRect(),sp=[...b.querySelectorAll('span')].filter(V),l=sp.find(x=>names.includes(C(x.textContent)))||sp[sp.length-1]||b,lr=l.getBoundingClientRect(),cs=getComputedStyle(l);return{name:N(b.innerText),raw:C(b.innerText),x:r.x,y:r.y,w:r.width,h:r.height,icon:sr?{w:sr.width,h:sr.height}:null,label:{fontSize:parseFloat(cs.fontSize)||0,fontWeight:cs.fontWeight,h:lr.height}}});
+              return {nav:{x:nr.x,y:nr.y,w:nr.width,h:nr.height,center:nr.x+nr.width/2},items,innerWidth,scrollWidth:document.documentElement.scrollWidth};
+            });
+          }
+          async function filterMetric(page,labels){
+            return page.evaluate(labels=>{
+              const C=s=>String(s||'').replace(/\s+/g,' ').trim(),V=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'};
+              const marked=[...document.querySelectorAll('[data-ai3-filterbar="1"],#ai3-signal-filter')].filter(V);
+              let e=marked.find(x=>labels.filter(k=>C(x.innerText).includes(k)).length>=3);
+              if(!e){
+                for(const b of [...document.querySelectorAll('button')].filter(x=>V(x)&&C(x.innerText).includes('Cari'))){
+                  for(let p=b.parentElement,i=0;p&&i<9;p=p.parentElement,i++)if(labels.filter(k=>C(p.innerText).includes(k)).length>=3){e=p;break}
+                  if(e)break;
+                }
+              }
+              if(!e)return null;const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,text:C(e.innerText),scrollWidth:e.scrollWidth,clientWidth:e.clientWidth};
+            },labels);
+          }
+          async function clickTop(page,name){
+            const ok=await page.evaluate(name=>{
+              const C=s=>String(s||'').replace(/\s+/g,' ').trim(),V=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'};
+              const names=['Home','Fundamental','Signal Scan','Crypto','Renko'];
+              const navs=[...document.querySelectorAll('nav')].filter(n=>!n.closest('#desktop-sidebar')&&V(n)&&names.filter(x=>C(n.innerText).includes(x)).length>=4);navs.sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top);
+              const n=navs[0];if(!n)return false;const b=[...n.querySelectorAll(':scope > button')].find(x=>{const t=C(x.innerText);return V(x)&&(t===name||t.endsWith(' '+name))});if(!b)return false;b.click();return true;
+            },name);
+            if(ok)await page.waitForTimeout(3000);return ok;
+          }
+          function sig(m){return m?.items.map(i=>[Math.round(i.x*10)/10,Math.round(i.y*10)/10,Math.round(i.w*10)/10,Math.round(i.h*10)/10,Math.round((i.icon?.w||0)*10)/10,Math.round((i.icon?.h||0)*10)/10,Math.round(i.label.fontSize*10)/10])}
+          function delta(a,b){const x=sig(a),y=sig(b);if(!x||!y||x.length!==y.length)return 999;return Math.max(...x.flatMap((r,i)=>r.map((v,j)=>Math.abs(v-y[i][j]))))}
+          async function state(page){return page.evaluate(()=>({mode:localStorage.getItem('ot_backtest_view_mode'),text:String(document.body?.innerText||'').replace(/\s+/g,' ').slice(0,3500),url:location.href,scrollWidth:document.documentElement.scrollWidth,innerWidth}))}
+          async function shot(page,name){await page.screenshot({path:`${OUT}/${name}.png`,fullPage:false})}
+          async function run(device,viewport){
+            const ctx=await browser.newContext({viewport});await routeCandidate(ctx);const page=await ctx.newPage();
+            const rec={viewport,steps:[],pageErrors:[],consoleErrors:[]};
+            page.on('pageerror',e=>rec.pageErrors.push(e.message));
+            page.on('console',m=>{if(m.type()==='error'&&!/favicon|429|Failed to load resource|net::ERR_ABORTED/i.test(m.text()))rec.consoleErrors.push(m.text())});
+            await setHome(page);const homeNav=await visibleTop(page),homeFilt=await filterMetric(page,['Max Loss','Profit Factor','Win Rate','Risk Reward']);
+            rec.home={nav:homeNav,filter:homeFilt};await shot(page,device+'-home');
+            const expected=['Home','Fundamental','Signal Scan','Crypto','Renko'];
+            if(!homeNav)throw new Error(device+' HOME_NAV_MISSING');
+            if(JSON.stringify(homeNav.items.map(x=>x.name))!==JSON.stringify(expected))throw new Error(device+' HOME_LABELS '+JSON.stringify(homeNav.items.map(x=>x.name)));
+            if(homeNav.items.some(x=>x.name==='Hyperliquid'))throw new Error(device+' TOP_HYPERLIQUID');
+            const widths=homeNav.items.map(x=>x.w),icons=homeNav.items.map(x=>x.icon?.w||0),heights=homeNav.items.map(x=>x.h);
+            if(Math.max(...widths)-Math.min(...widths)>1.1)throw new Error(device+' WIDTH_DRIFT '+widths);
+            if(Math.max(...icons)-Math.min(...icons)>1.1)throw new Error(device+' ICON_DRIFT '+icons);
+            if(Math.max(...heights)-Math.min(...heights)>1.1)throw new Error(device+' HEIGHT_DRIFT '+heights);
+            if(Math.abs(homeNav.nav.center-viewport.width/2)>2)throw new Error(device+' NAV_NOT_VIEWPORT_CENTER '+homeNav.nav.center);
+            if(homeNav.scrollWidth>homeNav.innerWidth+2)throw new Error(device+' HOME_OVERFLOW');
+            if(!homeFilt)throw new Error(device+' HOME_FILTER_MISSING');
+            if(device==='desktop'&&(Math.abs(homeFilt.w-1170)>2||Math.abs(homeFilt.h-64)>2))throw new Error('HOME_FILTER_SIZE '+JSON.stringify(homeFilt));
+            if(device==='mobile'&&Math.abs(homeFilt.h-56)>2)throw new Error('HOME_FILTER_MOBILE_HEIGHT '+JSON.stringify(homeFilt));
+            for(const label of ['Crypto','Renko']){
+              await setHome(page);if(!await clickTop(page,label))throw new Error(device+' CLICK_'+label);
+              const s=await state(page);if(/Terjadi Kesalahan|Aplikasi mengalami error/.test(s.text))throw new Error(device+' '+label+'_REACT_ERROR');
+              const m=await visibleTop(page);if(!m)throw new Error(device+' '+label+'_NAV_MISSING');
+              const d=delta(homeNav,m);rec.steps.push({label,delta:d,state:s,nav:m});
+              if(d>1.6)throw new Error(device+' '+label+'_NAV_DRIFT '+d);
+              if(m.scrollWidth>m.innerWidth+2)throw new Error(device+' '+label+'_OVERFLOW');
+              const labels=label==='Crypto'?['Metode','Position','Market','Status']:['Metode','Pair','Market','OOS WR'];
+              const fm=await filterMetric(page,labels);rec.steps.at(-1).filter=fm;
+              if(device==='desktop'&&fm&&(Math.abs(fm.w-1170)>2||Math.abs(fm.h-64)>2))throw new Error(device+' '+label+'_FILTER_SIZE '+JSON.stringify(fm));
+              await shot(page,device+'-'+label.toLowerCase());
+            }
+            // Fundamental opens in root iframe; candidate HTML is intercepted.
+            await setHome(page);if(!await clickTop(page,'Fundamental'))throw new Error(device+' CLICK_FUNDAMENTAL');
+            await page.waitForSelector('#ai4-fundamental-root-view iframe',{timeout:20000});
+            const frame=page.frameLocator('#ai4-fundamental-root-view iframe');
+            await frame.locator('.mainNav').waitFor({state:'visible',timeout:20000});
+            const fm=await frame.locator('.mainNav').evaluate(n=>{const C=s=>String(s||'').replace(/\s+/g,' ').trim(),V=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'},nr=n.getBoundingClientRect();return{nav:{x:nr.x,y:nr.y,w:nr.width,h:nr.height,center:nr.x+nr.width/2},items:[...n.querySelectorAll(':scope > button')].filter(V).map(b=>{const r=b.getBoundingClientRect(),sv=b.querySelector('svg'),sr=sv&&sv.getBoundingClientRect(),l=b.querySelector('.mainNavLabel'),cs=l&&getComputedStyle(l);return{name:C(b.innerText),x:r.x,y:r.y,w:r.width,h:r.height,icon:sr?{w:sr.width,h:sr.height}:null,label:{fontSize:parseFloat(cs?.fontSize)||0}}})}});
+            const ff=await frame.locator('#fundSearchBar').evaluate(e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,scrollWidth:e.scrollWidth,clientWidth:e.clientWidth}});
+            rec.fundamental={nav:fm,filter:ff};await shot(page,device+'-fundamental');
+            if(JSON.stringify(fm.items.map(x=>x.name))!==JSON.stringify(expected))throw new Error(device+' FUND_LABELS '+JSON.stringify(fm.items.map(x=>x.name)));
+            if(Math.max(...fm.items.map(x=>x.w))-Math.min(...fm.items.map(x=>x.w))>1.1)throw new Error(device+' FUND_WIDTH_DRIFT');
+            if(Math.max(...fm.items.map(x=>x.icon?.w||0))-Math.min(...fm.items.map(x=>x.icon?.w||0))>1.1)throw new Error(device+' FUND_ICON_DRIFT');
+            if(Math.abs(fm.nav.center-viewport.width/2)>2)throw new Error(device+' FUND_CENTER '+fm.nav.center);
+            if(device==='desktop'&&(Math.abs(ff.w-1170)>2||Math.abs(ff.h-64)>2))throw new Error(device+' FUND_FILTER '+JSON.stringify(ff));
+            if(device==='mobile'&&(Math.abs(ff.h-56)>2||ff.w>viewport.width-4))throw new Error(device+' FUND_FILTER_MOBILE '+JSON.stringify(ff));
+            // Fundamental -> Signal Scan through its own visible nav.
+            const sigBtn=frame.getByRole('button',{name:'Signal Scan',exact:true});
+            await sigBtn.click();await page.waitForTimeout(5000);
+            let st=await state(page);rec.signal={enteredFromFundamental:st};
+            if(!/Market Scanner|Scanner Signal/.test(st.text))throw new Error(device+' SIGNAL_RENDER_FAIL');
+            await shot(page,device+'-signal');
+            const sf=await filterMetric(page,['Instruments','Timeframe','R:R','Mode']);
+            rec.signal.filter=sf;if(!sf)throw new Error(device+' SIGNAL_FILTER_MISSING');
+            if(device==='desktop'&&(Math.abs(sf.w-1170)>2||Math.abs(sf.h-64)>2))throw new Error(device+' SIGNAL_FILTER_SIZE '+JSON.stringify(sf));
+            if(device==='mobile'&&Math.abs(sf.h-56)>2)throw new Error(device+' SIGNAL_FILTER_MOBILE '+JSON.stringify(sf));
+            // Find the actual left-arrow control and click it; shell must convert it to Home.
+            const back=page.locator('button').filter({has:page.locator('svg.lucide-arrow-left,svg.lucide-chevron-left,svg[data-lucide="arrow-left"],svg[data-lucide="chevron-left"]')}).first();
+            rec.signal.backCandidates=await page.locator('button').evaluateAll(bs=>bs.filter(b=>{const r=b.getBoundingClientRect(),s=getComputedStyle(b);return r.top<90&&r.width>0&&r.height>0&&s.display!=='none'}).map(b=>({text:(b.innerText||'').trim(),aria:b.getAttribute('aria-label'),title:b.title,html:b.innerHTML.slice(0,260)})).slice(0,20));
+            if(await back.count()===0)throw new Error(device+' SIGNAL_BACK_ARROW_MISSING '+JSON.stringify(rec.signal.backCandidates));
+            await back.click();await page.waitForTimeout(5000);st=await state(page);rec.signal.afterBack=st;await shot(page,device+'-signal-back-home');
+            if(st.mode!=='home'&& !st.text.includes('Max Loss'))throw new Error(device+' SIGNAL_BACK_NOT_HOME '+JSON.stringify(st));
+            if(/Terjadi Kesalahan|Aplikasi mengalami error/.test(st.text))throw new Error(device+' BACK_REACT_ERROR');
+            // route cycles
+            const cycles=device==='desktop'?[['Crypto','Home','Renko','Home'],['Renko','Home','Crypto','Home']]:[['Renko','Home']];
+            rec.cycles=[];
+            for(const seq of cycles){
+              await setHome(page);const cr=[];
+              for(const label of seq){
+                if(!await clickTop(page,label))throw new Error(device+' CYCLE_CLICK_'+label);
+                const cs=await state(page);cr.push({label,state:cs});
+                if(/Terjadi Kesalahan|Aplikasi mengalami error/.test(cs.text))throw new Error(device+' CYCLE_ERROR_'+label);
+              }
+              rec.cycles.push(cr);
+            }
+            if(rec.pageErrors.length)throw new Error(device+' PAGE_ERRORS '+JSON.stringify(rec.pageErrors));
+            rec.ok=true;report.devices[device]=rec;await ctx.close();
+          }
+          try{
+            await run('desktop',{width:1600,height:1000});
+            await run('mobile',{width:390,height:844});
+            report.ok=report.devices.desktop?.ok===true&&report.devices.mobile?.ok===true;
+            report.acceptance=report.ok?'PASS':'FAIL';
+          }catch(e){report.error=e.stack||e.message;report.errors.push(e.message)}
+          await browser.close();
+          fs.writeFileSync(`${OUT}/report.json`,JSON.stringify(report,null,2));
+          if(!report.ok)process.exit(3);
+          JS
+          node /tmp/ai3candidate.mjs
+      - name: Commit evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"; test -s "$OUT/report.json"
+          git config user.name "CopyToLive AI3 Candidate QA"
+          git config user.email "ai3-candidate-qa@local.invalid"
+          git add "$OUT"
+          git commit -m "ai3 UI candidate acceptance: ${{ steps.req.outputs.id }}" || true
+          for n in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; sleep "$n"; continue; }
+            if git push origin HEAD:main; then exit 0; fi
+            sleep "$n"
+          done
+          exit 1
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.req.outputs.id }}
+          path: ${{ steps.req.outputs.out }}
+      - name: Enforce
+        if: always()
+        shell: bash
+        run: python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));raise SystemExit(0 if d.get("ok") else 1)' "${{ steps.req.outputs.out }}/report.json"

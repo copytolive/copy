@@ -108,7 +108,7 @@ jobs:
           async function shot(page,name){await page.screenshot({path:`${OUT}/${name}.png`,fullPage:false})}
           async function run(device,viewport){
             const ctx=await browser.newContext({viewport});await routeCandidate(ctx);const page=await ctx.newPage();
-            const rec={viewport,steps:[],pageErrors:[],consoleErrors:[]};
+            const rec={viewport,steps:[],pageErrors:[],consoleErrors:[]};report.devices[device]=rec;
             page.on('pageerror',e=>rec.pageErrors.push(e.message));
             page.on('console',m=>{if(m.type()==='error'&&!/favicon|429|Failed to load resource|net::ERR_ABORTED/i.test(m.text()))rec.consoleErrors.push(m.text())});
             await setHome(page);const homeNav=await visibleTop(page),homeFilt=await filterMetric(page,['Max Loss','Profit Factor','Win Rate','Risk Reward']);

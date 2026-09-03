@@ -1,4 +1,4 @@
-(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.4";
+(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.5";
 const K="ot_backtest_view_mode",H=["lucide-coins","lucide-orbit","lucide-circle-dollar-sign","lucide-trending-up"];
 const norm=s=>String(s||"").replace(/\s+/g," ").trim();
 const side=c=>Array.from(document.querySelectorAll("#desktop-sidebar nav button")).find(b=>b.querySelector("svg."+c))||null;
@@ -81,7 +81,7 @@ function normalizeTopNav(){
       css(b,"box-sizing","border-box");css(b,"flex","0 0 "+w+"px");css(b,"width",w+"px");css(b,"min-width",w+"px");css(b,"max-width",w+"px");
       css(b,"height",h+"px");css(b,"min-height",h+"px");css(b,"max-height",h+"px");css(b,"padding",mobile?"5px 2px 3px":"6px 2px 4px");css(b,"gap","3px");
       const svg=b.querySelector("svg");if(svg){css(svg,"width",icon+"px");css(svg,"height",icon+"px")}
-      const l=label(b);if(l){css(l,"font-size",font+"px");css(l,"font-weight","600");css(l,"line-height",mobile?"16.5px":"19.5px");css(l,"height","auto")}
+      const l=label(b);if(l){css(l,"display","block");css(l,"visibility","visible");css(l,"opacity","1");css(l,"font-size",font+"px");css(l,"font-weight","600");css(l,"line-height",mobile?"16.5px":"19.5px");css(l,"height","auto")}
     });
     /* Preserve the host shell's horizontal anchor. Equal slot geometry is locked here;
        cross-route drift is validated against Home instead of forcing viewport centering. */

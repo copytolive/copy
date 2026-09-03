@@ -1,0 +1,8 @@
+{
+  "id": "ai4-20260903-1000-vps-webhook-check",
+  "curl_rc": 0,
+  "http": 200,
+  "body": "<!DOCTYPE html>\n<html lang=\"id\" class=\"dark\">\n\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\"\n    content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewpo",
+  "marker_found": false,
+  "ok": false
+}

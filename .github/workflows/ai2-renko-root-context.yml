@@ -1,0 +1,81 @@
+name: AI2 Renko Root Nav Context
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai2-renko-root-context-requests/**"
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai2-renko-root-context-requests/.*\\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "out=ai2-renko-root-context-responses/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Read production root navigation context
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          OUT: ${{ steps.req.outputs.out }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ai2-renko-root-context-responses
+          python3 - <<'PY'
+import json,os,re,urllib.request,hashlib
+base='https://copytolive.com'
+def get(url):
+    q=urllib.request.Request(url,headers={'Cache-Control':'no-cache','User-Agent':'AI2-root-context'})
+    with urllib.request.urlopen(q,timeout=45) as r:return r.read()
+html=get(base+'/?ctx='+os.environ['ID']).decode('utf-8','replace')
+scripts=re.findall(r'<script[^>]+src=["\\']([^"\\']+)["\\']',html,re.I)
+roots=[s for s in scripts if '/assets/js/' in s and 'index-' in s]
+if not roots: raise SystemExit('active root not found')
+active=roots[-1]
+raw=get(base+(active if active.startswith('/') else '/'+active))
+src=raw.decode('utf-8','replace')
+needles=['Home','Fundamental','Signal Scan','Crypto','Hyperliquid','Renko','ot_backtest_view_mode','live-trading','AI2RenkoShell']
+hits=[]
+for needle in needles:
+    pos=0;n=0
+    while True:
+        p=src.find(needle,pos)
+        if p<0:break
+        n+=1
+        if n<=20:
+            hits.append({'needle':needle,'occurrence':n,'position':p,'context':src[max(0,p-1800):min(len(src),p+2600)]})
+        pos=p+len(needle)
+# chunks containing nav labels close together
+chunks=[]
+for m in re.finditer('Fundamental',src):
+    p=m.start(); chunk=src[max(0,p-5000):min(len(src),p+8000)]
+    score=sum(x in chunk for x in ['Home','Signal Scan','Crypto','Renko'])
+    if score>=4: chunks.append({'position':p,'context':chunk})
+    if len(chunks)>=12: break
+out={'id':os.environ['ID'],'active':active,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'hits':hits,'nav_chunks':chunks}
+open(os.environ['OUT'],'w').write(json.dumps(out,indent=2)+'\n')
+print(json.dumps({'active':active,'bytes':len(raw),'sha256':out['sha256'],'hits':len(hits),'nav_chunks':len(chunks)},indent=2))
+PY
+      - name: Commit response
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"; test -s "$OUT"
+          git config user.name "AI2 Renko Root Context"
+          git config user.email "ai2-renko-root-context@local.invalid"
+          git add "$OUT"; git commit -m "ai2 renko root context: ${{ steps.req.outputs.id }}" || true
+          for n in 1 2 3 4 5 6; do
+            git fetch origin main; git rebase origin/main || { git rebase --abort || true; sleep "$n"; continue; }
+            git push origin HEAD:main && exit 0
+            sleep "$n"
+          done
+          exit 1

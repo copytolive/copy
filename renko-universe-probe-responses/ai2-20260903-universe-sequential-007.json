@@ -1,0 +1,2554 @@
+{
+  "ok": false,
+  "id": "ai2-20260903-universe-sequential-007",
+  "universeStatus": 200,
+  "universeTotal": 163,
+  "categories": {
+    "crypto": 141,
+    "commodity": 7,
+    "index": 5,
+    "forex": 2,
+    "stock": 8
+  },
+  "success": 162,
+  "failedCount": 1,
+  "persistent404Count": 0,
+  "transientFailureCount": 1,
+  "persistent404": [],
+  "transientFailures": [
+    {
+      "symbol": "NEO",
+      "ok": false,
+      "status": 502,
+      "returned": 0,
+      "error": "HTTP Error 502: Bad Gateway",
+      "attempts": [
+        {
+          "n": 1,
+          "status": 502,
+          "returned": 0,
+          "seconds": 7.27,
+          "error": "HTTP Error 502: Bad Gateway"
+        },
+        {
+          "n": 2,
+          "status": 502,
+          "returned": 0,
+          "seconds": 0.287,
+          "error": "HTTP Error 502: Bad Gateway"
+        },
+        {
+          "n": 3,
+          "status": 502,
+          "returned": 0,
+          "seconds": 5.566,
+          "error": "HTTP Error 502: Bad Gateway"
+        },
+        {
+          "n": 4,
+          "status": 502,
+          "returned": 0,
+          "seconds": 11.033,
+          "error": "HTTP Error 502: Bad Gateway"
+        },
+        {
+          "n": 5,
+          "status": 502,
+          "returned": 0,
+          "seconds": 9.196,
+          "error": "HTTP Error 502: Bad Gateway"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "symbol": "BTC",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.721,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.922,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ATOM",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 2.504,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "DYDX",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.352,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SOL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.452,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "AVAX",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 1.345,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "BNB",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.324,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "APE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.379,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "OP",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.319,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "LTC",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.89,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ARB",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.292,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "DOGE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.595,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "INJ",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.29,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "KPEPE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.286,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "CRV",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.306,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "LDO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.29,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "LINK",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.738,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "STX",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.283,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "CFX",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.56,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "GMX",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.328,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SNX",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.33,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "XRP",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.39,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "BCH",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.516,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "AAVE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.74,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "COMP",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.292,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "WLD",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.32,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "UNI",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.608,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SEI",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.282,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "RUNE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.294,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "DOT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 2.997,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "BANANA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.304,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "TRB",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.313,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "KAS",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.289,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "BLUR",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.31,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "TIA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.312,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ADA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.267,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MINA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.501,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "POLYX",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.281,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "PENDLE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.316,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "FET",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.357,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "NEAR",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.652,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MEME",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.265,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ORDI",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.294,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "NEO",
+      "ok": false,
+      "status": 502,
+      "returned": 0,
+      "error": "HTTP Error 502: Bad Gateway",
+      "attempts": [
+        {
+          "n": 1,
+          "status": 502,
+          "returned": 0,
+          "seconds": 7.27,
+          "error": "HTTP Error 502: Bad Gateway"
+        },
+        {
+          "n": 2,
+          "status": 502,
+          "returned": 0,
+          "seconds": 0.287,
+          "error": "HTTP Error 502: Bad Gateway"
+        },
+        {
+          "n": 3,
+          "status": 502,
+          "returned": 0,
+          "seconds": 5.566,
+          "error": "HTTP Error 502: Bad Gateway"
+        },
+        {
+          "n": 4,
+          "status": 502,
+          "returned": 0,
+          "seconds": 11.033,
+          "error": "HTTP Error 502: Bad Gateway"
+        },
+        {
+          "n": 5,
+          "status": 502,
+          "returned": 0,
+          "seconds": 9.196,
+          "error": "HTTP Error 502: Bad Gateway"
+        }
+      ]
+    },
+    {
+      "symbol": "ZEN",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.456,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "FIL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.298,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "PYTH",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.296,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SUSHI",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 1.459,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "IMX",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.379,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "KBONK",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.286,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "GMT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.316,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SUPER",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.301,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "JUP",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.305,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "KLUNC",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.315,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "RSR",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.312,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "JTO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.31,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ACE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.321,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "WIF",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.294,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "CAKE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.301,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "PEOPLE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.34,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ENS",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.304,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ETC",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 1.208,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "XAI",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.324,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MANTA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.271,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ALT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.303,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ZETA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.312,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "DYM",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.303,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "W",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.3,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "STRK",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.302,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "TAO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.315,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "AR",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.301,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "KFLOKI",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.295,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "BOME",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.301,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ETHFI",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.286,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ENA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.308,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "TNSR",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.304,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SAGA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.305,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MERL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.372,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "HBAR",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.849,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "POPCAT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.302,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "EIGEN",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.549,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "REZ",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.347,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "NOT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.335,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "TURBO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.3,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "BRETT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.306,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "IO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.316,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ZK",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.307,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "RENDER",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.32,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "CELO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.32,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "KNEIRO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.394,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "GOAT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.312,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MOODENG",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.303,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "GRASS",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.391,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "PURR",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.305,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "PNUT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.565,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "XLM",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.841,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "IOTA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.282,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ALGO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 3.128,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "HYPE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.307,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ME",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.35,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MOVE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.426,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "VIRTUAL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.304,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "PENGU",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.298,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "USUAL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.318,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "FARTCOIN",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.353,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "AIXBT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.355,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "BIO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.325,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SPX",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.303,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "S",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.309,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MORPHO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.316,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MELANIA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.468,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "VVV",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.38,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "BERA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.33,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "KAITO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.283,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "NIL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.316,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "BABY",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.385,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "WCT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.318,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ZORA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.376,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "INIT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.44,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "NXPC",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.481,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "RESOLV",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.47,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "XPL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.335,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "WLFI",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.287,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "LINEA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.491,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SKY",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.311,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "AVNT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.369,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "STBL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.31,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "HEMI",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.376,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "APEX",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.318,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "2Z",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.355,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ZEC",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.398,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MON",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.36,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MET",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.376,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MEGA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.426,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "ICP",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.384,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "AERO",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.31,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "STABLE",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.382,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "LIT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.314,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "XMR",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.373,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "DASH",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 1.09,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SKR",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.358,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "GOLD",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 2.888,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SILVER",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 4.311,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "WTIOIL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 8.525,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "BRENTOIL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 4.141,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "NATGAS",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 2.714,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "COPPER",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 1.519,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "PLATINUM",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 1.088,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SP500",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 3.751,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "XYZ100",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 3.376,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "JP225",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 2.727,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "SMALL2K",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.656,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MAG7",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 0.576,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "EURUSD",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 1.15,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "USDJPY",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 502,
+          "returned": 0,
+          "seconds": 5.541,
+          "error": "HTTP Error 502: Bad Gateway"
+        },
+        {
+          "n": 2,
+          "status": 502,
+          "returned": 0,
+          "seconds": 0.308,
+          "error": "HTTP Error 502: Bad Gateway"
+        },
+        {
+          "n": 3,
+          "status": 200,
+          "returned": 200,
+          "seconds": 1.974,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "TSLA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 2.503,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "NVDA",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 4.519,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "AAPL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 2.725,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "GOOGL",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 3.006,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "AMZN",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 3.019,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "META",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 2.008,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "MSFT",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 1.762,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "symbol": "AMD",
+      "ok": true,
+      "status": 200,
+      "returned": 200,
+      "attempts": [
+        {
+          "n": 1,
+          "status": 200,
+          "returned": 200,
+          "seconds": 1.203,
+          "error": ""
+        }
+      ]
+    }
+  ]
+}

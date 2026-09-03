@@ -1,0 +1,35 @@
+{
+  "id": "ai2-20260903-renko-filter-public-007",
+  "ok": false,
+  "acceptance": "FAIL",
+  "checks": {
+    "labels": [
+      "Metode",
+      "Pair",
+      "Market",
+      "OOS WR"
+    ],
+    "crypto": {
+      "expected": "EIGEN",
+      "pair": "EIGEN",
+      "terminal": "EIGEN"
+    },
+    "oos55": {
+      "expected": "EIGEN",
+      "pair": "EIGEN",
+      "terminal": "EIGEN"
+    },
+    "manualPair": {
+      "selected": "GRASS",
+      "terminal": "GRASS"
+    },
+    "noncrypto": {
+      "expected": "GOLD",
+      "pair": "GOLD",
+      "terminal": "GOLD"
+    }
+  },
+  "errors": [],
+  "network": [],
+  "error": "Error: Uncaught\n    at ev (file:///tmp/test.mjs:7:146)\n    at async file:///tmp/test.mjs:40:16"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "ai5-20260903-direct-sync-002",
+  "status": 200,
+  "body": "<!DOCTYPE html>\n<html lang=\"id\" class=\"dark\">\n\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\"\n    content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover\" />\n\n  <!-- Leaflet Map -->\n  <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />\n  <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css\" />\n  <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet.markercluster@",
+  "ok": false
+}

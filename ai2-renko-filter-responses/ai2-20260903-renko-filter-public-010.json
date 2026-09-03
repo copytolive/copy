@@ -1,0 +1,37 @@
+{
+  "id": "ai2-20260903-renko-filter-public-010",
+  "ok": false,
+  "acceptance": "FAIL",
+  "checks": {
+    "labels": [
+      "Metode",
+      "Pair",
+      "Market",
+      "OOS WR"
+    ]
+  },
+  "errors": [],
+  "network": [
+    {
+      "status": 502,
+      "url": "https://copytolive.com/api/charting/hyperliquid/renko-universe"
+    },
+    {
+      "status": 502,
+      "url": "https://copytolive.com/api/charting/hyperliquid/stream/SOL"
+    },
+    {
+      "status": 502,
+      "url": "https://copytolive.com/api/charting/hyperliquid/indicator-catalog"
+    },
+    {
+      "status": 502,
+      "url": "https://copytolive.com/api/charting/hyperliquid/renko/SOL?limit=400&smaPeriod=10&sma=10"
+    },
+    {
+      "status": 502,
+      "url": "https://copytolive.com/api/charting/hyperliquid/renko-universe"
+    }
+  ],
+  "error": "Error: Uncaught (in promise) SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n    at ev (file:///tmp/test.mjs:7:146)\n    at async file:///tmp/test.mjs:20:11"
+}

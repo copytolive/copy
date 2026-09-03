@@ -1,0 +1,10 @@
+{
+  "id": "ai3-ui-candidate-006",
+  "acceptance": "FAIL",
+  "ok": false,
+  "devices": {},
+  "errors": [
+    "desktop Renko_NAV_DRIFT 32"
+  ],
+  "error": "Error: desktop Renko_NAV_DRIFT 32\n    at run (file:///home/runner/work/copy/copy/.ai3candidate.mjs:88:20)\n    at async file:///home/runner/work/copy/copy/.ai3candidate.mjs:141:3"
+}

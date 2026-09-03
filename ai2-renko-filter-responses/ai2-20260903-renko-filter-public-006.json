@@ -1,0 +1,95 @@
+{
+  "id": "ai2-20260903-renko-filter-public-006",
+  "ok": false,
+  "acceptance": "FAIL",
+  "checks": {},
+  "errors": [],
+  "network": [
+    {
+      "status": 502,
+      "url": "https://copytolive.com/api/charting/hyperliquid/stream/SOL"
+    }
+  ],
+  "diag": {
+    "href": "https://copytolive.com/",
+    "readyState": "complete",
+    "hasShell": true,
+    "selects": [
+      {
+        "aria": "",
+        "value": "renko-oos"
+      },
+      {
+        "aria": "Pair Renko",
+        "value": "SOL"
+      },
+      {
+        "aria": "Market Renko",
+        "value": "all"
+      },
+      {
+        "aria": "Filter OOS WR Renko",
+        "value": "all"
+      },
+      {
+        "aria": "Pair Hyperliquid",
+        "value": "SOL"
+      },
+      {
+        "aria": "Pair futures Hyperliquid",
+        "value": "SOL"
+      },
+      {
+        "aria": "",
+        "value": "RSI"
+      }
+    ],
+    "body": "All\nFilter\nAny\nMetode\nRenko OOS Auto\nPair\nEIGEN/USDC · OOS 76.3%\nGRASS/USDC · OOS 75.1%\nPURR/USDC · OOS 71.7%\nWLD/USDC · OOS 71.7%\nDASH/USDC · OOS 69.8%\nMORPHO/USDC · OOS 69.8%\nXPL/USDC · OOS 69.7%\nJTO/USDC · OOS 69.3%\nDOT/USDC · OOS 69.2%\nAAVE/USDC · OOS 69.0%\nAVAX/USDC · OOS 68.2%\nALGO/USDC · OOS 68.1%\nSPX/USDC · OOS 68.0%\nIO/USDC · OOS 67.6%\nNIL/USDC · OOS 67.5%\nSTABLE/USDC · OOS 66.8%\nHBAR/USDC · OOS 66.6%\nTNSR/USDC · OOS 66.6%\nADA/USDC · OOS 66.5%\nTIA/USDC · OOS 66.3%\nBIO/USDC · OOS 66.1%\nSOL/USDC · OOS 65.8%\nXAI/USDC · OOS 65.7%\nAPE/USDC · OOS 65.7%\nJUP/USDC · OOS 65.5%\nRESOLV/USDC · OOS 65.4%\nNEO/USDC · OOS 65.3%\nLINK/USDC · OOS 65.0%\nBANANA/USDC · OOS 64.9%\nXLM/USDC · OOS 64.9%\nACE/USDC · OOS 64.9%\nKAITO/USDC · OOS 64.6%\nATOM/USDC · OOS 64.5%\nLIT/USDC · OOS 64.1%\nBLUR/USDC · OOS 64.0%\nMON/USDC · OOS 63.9%\nETC/USDC · OOS 63.7%\nLDO/USDC · OOS 63.7%\nVVV/USDC · OOS 63.5%\nDYDX/USDC · OOS 63.3%\nALT/USDC · OOS 62.8%\nPYTH/USDC · OOS 62.7%\nENA/USDC · OOS 62.7%\nPOPCAT/USDC · OOS 62.6%\nSKR/USDC · OOS 62.4%\nSKY/USDC · OOS 62.4%\nPENDLE/USDC · OOS 62.2%\nCRV/USDC · OOS 62.1%\nNOT/USDC · OOS 61.8%\nFET/USDC · OOS 61.3%\nKLUNC/USDC · OOS 61.2%\nCELO/USDC · OOS 61.1%\nW/USDC · OOS 61.1%\nXRP/USDC · OOS 60.9%\nHEMI/USDC · OOS 60.7%\nETHFI/USDC · OOS 60.7%\nETH/USDC · OOS 60.6%\nMANTA/USDC · OOS 60.5%\nWIF/USDC · OOS 60.3%\nOP/USDC · OOS 60.1%\nBABY/USDC · OOS 60.1%\nDOGE/USDC · OOS 59.9%\nLTC/USDC · OOS 59.7%\nAERO/USDC · OOS 59.4%\nSTBL/USDC · OOS 59.0%\nSNX/USDC · OOS 59.0%\nPOLYX/USDC · OOS 59.0%\nAR/USDC · OOS 59.0%\nUNI/USDC · OOS 58.9%\nXMR/USDC · OOS 58.8%\nVIRTUAL/USDC · OOS 58.7%\nSUSHI/USDC · OOS 58.7%\nKNEIRO/USDC · OOS 58.7%\nMET/USDC · OOS 58.6%\nNXPC/USDC · OOS 58.4%\nNEAR/USDC · OOS 58.3%\nAVNT/USDC · OOS 58.2%\nORDI/USDC · OOS 58.2%\nPENGU/USDC · OOS 57.8%\nRSR/USDC · OOS 57.8%\nBNB/USDC · OOS 57.7%\nMERL/USDC · OOS 57.7%\nGMX/USDC · OOS 57.6%\nBCH/USDC · OOS 57.6%\nFIL/USDC · OOS 57.4%\nREZ/USDC · OOS 57.4%\nSEI/USDC · OOS 57.2%\nMOVE/USDC · OOS 57.1%\nBRETT/USDC · OOS 57.1%\nMEME/USDC · OOS 57.0%\nZORA/USDC · OOS 56.3%\nAIXBT/USDC · OOS 56.1%\nGOAT/USDC · OOS 56.1%\nRUNE/USDC · OOS 55.7%\nAPEX/USDC · OOS 55.6%\nTURBO/USDC · OOS 55.4%\nBOME/USDC · OOS 55.4%\nFARTCOIN/USDC · OOS 55.2%\nINIT/USDC · OOS 55.2%\nS/USDC · OOS 55.0%\nTRB/USDC · OOS 54.9%\nUSUAL/USDC · OOS 54.8%\nDYM/USDC · OOS 54.4%\nKAS/USDC · OOS 54.3%\nSTX/USDC · OOS 54.3%\n2Z/USDC · OOS 54.3%\nMELANIA/USDC · OOS 54.3%\nMINA/USDC · OOS 54.2%\nZETA/USDC · OOS 54.1%\nENS/USDC · OOS 54.0%\nARB/USDC · OOS 54.0%\nCFX/USDC · OOS 54.0%\nMEGA/USDC · OOS 53.9%\nRENDER/USDC · OOS 53.8%\nME/USDC · OOS 53.6%\nSTRK/USDC · OOS 53.5%\nCAKE/USDC · OOS 53.5%\nZK/USDC · OOS 53.2%\nZEN/USDC · OOS 53.0%\nKFLOKI/USDC · OOS 52.3%\nPNUT/USDC · OOS 52.3%\nMOODENG/USDC · OOS 52.1%\nKBONK/USDC · OOS 51.8%\nSUPER/USDC · OOS 51.7%\nGMT/USDC · OOS 51.7%\nINJ/USDC · OOS 51.6%\nTAO/USDC · OOS 51.5%\nIOTA/USDC · OOS 51.4%\nPEOPLE/USDC · OOS 51.2%\nSAGA/USDC · OOS 51.0%\nICP/USDC · OOS 50.8%\nKPEPE/USDC · OOS 50.7%\nHYPE/USDC · OOS 50.4%\nWLFI/USDC · OOS 50.2%\nZEC/USDC · OOS 50.1%\nBERA/USDC · OOS 49.6%\nIMX/USDC · OOS 49.3%\nBTC/USDC · OOS 49.3%\nWCT/USDC · OOS 46.9%\nCOMP/USDC · OOS 46.3%\nLINEA/USDC · OOS 46.0%\nGOLD/USD\nSILVER/USD\nWTI OIL/USD\nBRENT OIL/USD\nNATGAS/USD\nCOPPER/USD\nPLATINUM/USD\nS&P 500/USD\nNASDAQ 100/USD\nNIKKEI 225/USD\nRUSSELL 2000/USD\nMAG 7/USD\nEUR/USD\nUSD/JPY\nTSLA/USD\nNVDA/USD\nAAPL/USD\nGOOGL/USD\nAMZN/USD\nMETA/USD\nMSFT/USD\nAMD/USD\nMarket\nAny\nCrypto\nNon-Crypto\nOOS WR\nAny\n≥ 55%\n≥ 60%\n≥ 65%\nCari\nSOL/USDC · RENKO 0.20947\n🔒 SMA10 · entry lock\n\t\n\t\n\n\t\n\t\n🔒 Klik untuk aktifkan chart\n›\nCRYPTO 141\nNON-CRYPTO 22\nQUICK ENTRY\nRENKO SMA\nGOLD\nETC\nUNI\nAVAX\nXLM\nDOT\nBTC/USDC · OOS 49.3%\nETH/USDC · OOS 60.6%\nATOM/USDC · OOS 64.5%\nDYDX/USDC · OOS 63.3%\nSOL/USDC · OOS 65.8%\nAVAX/USDC · OOS 68.2%\nBNB/USDC · OOS 57.7%\nAPE/USDC · OOS 65.7%\nOP/USDC · OOS 60.1%\nLTC/USDC · OOS 59.7%\nARB/USDC · OOS 54.0%\nDOGE/USDC · OOS 59.9%\nINJ/USDC · OOS 51.6%\nKPEPE/USDC · OOS 50.7%\nCRV/USDC · OOS 62.1%\nLDO/USDC · OOS 63.7%\nLINK/USDC · OOS 65.0%\nSTX/USDC · OOS 54.3%\nCFX/USDC · OOS 54.0%\nGMX/USDC · OOS 57.6%\nSNX/USDC · OOS 59.0%\nXRP/USDC · OOS 60.9%\nBCH/USDC · OOS 57.6%\nAAVE/USDC · OOS 69.0%\nCOMP/USDC · OOS 46.3%\nWLD/USDC · OOS 71.7%\nUNI/USDC · OOS 58.9%\nSEI/USDC · OOS 57.2%\nRUNE/USDC · OOS 55.7%\nDOT/USDC · OOS 69.2%\nBANANA/USDC · OOS 64.9%\nTRB/USDC · OOS 54.9%\nKAS/USDC · OOS 54.3%\nBLUR/USDC · OOS 64.0%\nTIA/USDC · OOS 66.3%\nADA/USDC · OOS 66.5%\nMINA/USDC · OOS 54.2%\nPOLYX/USDC · OOS 59.0%\nPENDLE/USDC · OOS 62.2%\nFET/USDC · OOS 61.3%\nNEAR/USDC · OOS 58.3%\nMEME/USDC · OOS 57.0%\nORDI/USDC · OOS 58.2%\nNEO/USDC · OOS 65.3%\nZEN/USDC · OOS 53.0%\nFIL/USDC · OOS 57.4%\nPYTH/USDC · OOS 62.7%\nSUSHI/USDC · OOS 58.7%\nIMX/USDC · OOS 49.3%\nKBONK/USDC · OOS 51.8%\nGMT/USDC · OOS 51.7%\nSUPER/USDC · OOS 51.7%\nJUP/USDC · OOS 65.5%\nKLUNC/USDC · OOS 61.2%\nRSR/USDC · OOS 57.8%\nJTO/USDC · OOS 69.3%\nACE/USDC · OOS 64.9%\nWIF/USDC · OOS 60.3%\nCAKE/USDC · OOS 53.5%\nPEOPLE/USDC · OOS 51.2%\nENS/USDC · OOS 54.0%\nETC/USDC · OOS 63.7%\nXAI/USDC · OOS 65.7%\nMANTA/USDC · OOS 60.5%\nALT/USDC · OOS 62.8%\nZETA/USDC · OOS 54.1",
+    "scripts": [
+      "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+      "https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js",
+      "https://accounts.google.com/gsi/client",
+      "https://cdn.tailwindcss.com/",
+      "https://copytolive.com/assets/js/index-renko-final-06dfdeeb33b1.js?v=20260903-ai2-renko-filter-110-ai5-v7",
+      "https://copytolive.com/assets/js/ai3_public_shell_v1.js?v=20260903-12",
+      "https://copytolive.com/assets/js/ai4_fundamental_router_v1.js?v=20260903-11",
+      "https://copytolive.com/assets/js/ai5_signal_scan_runtime_v1.js?v=20260903-3",
+      "https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925"
+    ],
+    "resources": [
+      "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
+      "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css",
+      "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css",
+      "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+      "https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css",
+      "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap",
+      "https://accounts.google.com/gsi/client",
+      "https://cdn.tailwindcss.com/",
+      "https://copytolive.com/assets/js/dashboard-WZpp2Gui.js",
+      "https://copytolive.com/assets/js/index-renko-final-06dfdeeb33b1.js?v=20260903-ai2-renko-filter-110-ai5-v7",
+      "https://copytolive.com/assets/js/vendor-rXCDSp0G.js",
+      "https://copytolive.com/assets/js/market-DD_HSfzQ.js",
+      "https://copytolive.com/assets/js/charting-C4jAt7iT.js",
+      "https://copytolive.com/assets/css/index-Dam86hTI.css",
+      "https://copytolive.com/assets/js/trading-BeRNyRbU.js",
+      "https://copytolive.com/assets/js/ai3_public_shell_v1.js?v=20260903-12",
+      "https://copytolive.com/assets/js/ai4_fundamental_router_v1.js?v=20260903-11",
+      "https://copytolive.com/assets/js/ai5_signal_scan_runtime_v1.js?v=20260903-3",
+      "https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925",
+      "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap",
+      "https://copytolive.com/assets/js/SolRenkoTerminal-final-06dfdeeb33b1.js?v=20260903-ai2-renko-filter-110",
+      "https://copytolive.com/api/charting/hyperliquid/renko-universe",
+      "https://copytolive.com/cdn-cgi/rum?",
+      "https://copytolive.com/favicon.ico",
+      "https://copytolive.com/favicon-32x32.png",
+      "https://copytolive.com/favicon-16x16.png",
+      "https://copytolive.com/api/charting/hyperliquid/renko-universe",
+      "https://copytolive.com/api/charting/hyperliquid/indicator-catalog",
+      "https://copytolive.com/api/charting/hyperliquid/renko/SOL?limit=400&smaPeriod=10&sma=10",
+      "https://copytolive.com/api/charting/hyperliquid/stream/SOL",
+      "https://copytolive.com/api/charting/hyperliquid/stream/SOL"
+    ]
+  },
+  "error": "Error: RENKO_FILTER_SHELL_NOT_READY {\"href\":\"https://copytolive.com/\",\"readyState\":\"complete\",\"hasShell\":true,\"selects\":[{\"aria\":\"\",\"value\":\"renko-oos\"},{\"aria\":\"Pair Renko\",\"value\":\"SOL\"},{\"aria\":\"Market Renko\",\"value\":\"all\"},{\"aria\":\"Filter OOS WR Renko\",\"value\":\"all\"},{\"aria\":\"Pair Hyperliquid\",\"value\":\"SOL\"},{\"aria\":\"Pair futures Hyperliquid\",\"value\":\"SOL\"},{\"aria\":\"\",\"value\":\"RSI\"}],\"body\":\"All\\nFilter\\nAny\\nMetode\\nRenko OOS Auto\\nPair\\nEIGEN/USDC · OOS 76.3%\\nGRASS/USDC · OOS 75.1%\\nPURR/USDC · OOS 71.7%\\nWLD/USDC · OOS 71.7%\\nDASH/USDC · OOS 69.8%\\nMORPHO/USDC · OOS 69.8%\\nXPL/USDC · OOS 69.7%\\nJTO/USDC · OOS 69.3%\\nDOT/USDC · OOS 69.2%\\nAAVE/USDC · OOS 69.0%\\nAVAX/USDC · OOS 68.2%\\nALGO/USDC · OOS 68.1%\\nSPX/USDC · OOS 68.0%\\nIO/USDC · OOS 67.6%\\nNIL/USDC · OOS 67.5%\\nSTABLE/USDC · OOS 66.8%\\nHBAR/USDC · OOS 66.6%\\nTNSR/USDC · OOS 66.6%\\nADA/USDC · OOS 66.5%\\nTIA/USDC · OOS 66.3%\\nBIO/USDC · OOS 66.1%\\nSOL/USDC · OOS 65.8%\\nXAI/USDC · OOS 65.7%\\nAPE/USDC · OOS 65.7%\\nJUP/USDC · OOS 65.5%\\nRESOLV/USDC · OOS 65.4%\\nNEO/USDC · OOS 65.3%\\nLINK/USDC · OOS 65.0%\\nBANANA/USDC · OOS 64.9%\\nXLM/USDC · OOS 64.9%\\nACE/USDC · OOS 64.9%\\nKAITO/USDC · OOS 64.6%\\nATOM/USDC · OOS 64.5%\\nLIT/USDC · OOS 64.1%\\nBLUR/USDC · OOS 64.0%\\nMON/USDC · OOS 63.9%\\nETC/USDC · OOS 63.7%\\nLDO/USDC · OOS 63.7%\\nVVV/USDC · OOS 63.5%\\nDYDX/USDC · OOS 63.3%\\nALT/USDC · OOS 62.8%\\nPYTH/USDC · OOS 62.7%\\nENA/USDC · OOS 62.7%\\nPOPCAT/USDC · OOS 62.6%\\nSKR/USDC · OOS 62.4%\\nSKY/USDC · OOS 62.4%\\nPENDLE/USDC · OOS 62.2%\\nCRV/USDC · OOS 62.1%\\nNOT/USDC · OOS 61.8%\\nFET/USDC · OOS 61.3%\\nKLUNC/USDC · OOS 61.2%\\nCELO/USDC · OOS 61.1%\\nW/USDC · OOS 61.1%\\nXRP/USDC · OOS 60.9%\\nHEMI/USDC · OOS 60.7%\\nETHFI/USDC · OOS 60.7%\\nETH/USDC · OOS 60.6%\\nMANTA/USDC · OOS 60.5%\\nWIF/USDC · OOS 60.3%\\nOP/USDC · OOS 60.1%\\nBABY/USDC · OOS 60.1%\\nDOGE/USDC · OOS 59.9%\\nLTC/USDC · OOS 59.7%\\nAERO/USDC · OOS 59.4%\\nSTBL/USDC · OOS 59.0%\\nSNX/USDC · OOS 59.0%\\nPOLYX/USDC · OOS 59.0%\\nAR/USDC · OOS 59.0%\\nUNI/USDC · OOS 58.9%\\nXMR/USDC · OOS 58.8%\\nVIRTUAL/USDC · OOS 58.7%\\nSUSHI/USDC · OOS 58.7%\\nKNEIRO/USDC · OOS 58.7%\\nMET/USDC · OOS 58.6%\\nNXPC/USDC · OOS 58.4%\\nNEAR/USDC · OOS 58.3%\\nAVNT/USDC · OOS 58.2%\\nORDI/USDC · OOS 58.2%\\nPENGU/USDC · OOS 57.8%\\nRSR/USDC · OOS 57.8%\\nBNB/USDC · OOS 57.7%\\nMERL/USDC · OOS 57.7%\\nGMX/USDC · OOS 57.6%\\nBCH/USDC · OOS 57.6%\\nFIL/USDC · OOS 57.4%\\nREZ/USDC · OOS 57.4%\\nSEI/USDC · OOS 57.2%\\nMOVE/USDC · OOS 57.1%\\nBRETT/USDC · OOS 57.1%\\nMEME/USDC · OOS 57.0%\\nZORA/USDC · OOS 56.3%\\nAIXBT/USDC · OOS 56.1%\\nGOAT/USDC · OOS 56.1%\\nRUNE/USDC · OOS 55.7%\\nAPEX/USDC · OOS 55.6%\\nTURBO/USDC · OOS 55.4%\\nBOME/USDC · OOS 55.4%\\nFARTCOIN/USDC · OOS 55.2%\\nINIT/USDC · OOS 55.2%\\nS/USDC · OOS 55.0%\\nTRB/USDC · OOS 54.9%\\nUSUAL/USDC · OOS 54.8%\\nDYM/USDC · OOS 54.4%\\nKAS/USDC · OOS 54.3%\\nSTX/USDC · OOS 54.3%\\n2Z/USDC · OOS 54.3%\\nMELANIA/USDC · OOS 54.3%\\nMINA/USDC · OOS 54.2%\\nZETA/USDC · OOS 54.1%\\nENS/USDC · OOS 54.0%\\nARB/USDC · OOS 54.0%\\nCFX/USDC · OOS 54.0%\\nMEGA/USDC · OOS 53.9%\\nRENDER/USDC · OOS 53.8%\\nME/USDC · OOS 53.6%\\nSTRK/USDC · OOS 53.5%\\nCAKE/USDC · OOS 53.5%\\nZK/USDC · OOS 53.2%\\nZEN/USDC · OOS 53.0%\\nKFLOKI/USDC · OOS 52.3%\\nPNUT/USDC · OOS 52.3%\\nMOODENG/USDC · OOS 52.1%\\nKBONK/USDC · OOS 51.8%\\nSUPER/USDC · OOS 51.7%\\nGMT/USDC · OOS 51.7%\\nINJ/USDC · OOS 51.6%\\nTAO/USDC · OOS 51.5%\\nIOTA/USDC · OOS 51.4%\\nPEOPLE/USDC · OOS 51.2%\\nSAGA/USDC · OOS 51.0%\\nICP/USDC · OOS 50.8%\\nKPEPE/USDC · OOS 50.7%\\nHYPE/USDC · OOS 50.4%\\nWLFI/USDC · OOS 50.2%\\nZEC/USDC · OOS 50.1%\\nBERA/USDC · OOS 49.6%\\nIMX/USDC · OOS 49.3%\\nBTC/USDC · OOS 49.3%\\nWCT/USDC · OOS 46.9%\\nCOMP/USDC · OOS 46.3%\\nLINEA/USDC · OOS 46.0%\\nGOLD/USD\\nSILVER/USD\\nWTI OIL/USD\\nBRENT OIL/USD\\nNATGAS/USD\\nCOPPER/USD\\nPLATINUM/USD\\nS&P 500/USD\\nNASDAQ 100/USD\\nNIKKEI 225/USD\\nRUSSELL 2000/USD\\nMAG 7/USD\\nEUR/USD\\nUSD/JPY\\nTSLA/USD\\nNVDA/USD\\nAAPL/USD\\nGOOGL/USD\\nAMZN/USD\\nMETA/USD\\nMSFT/USD\\nAMD/USD\\nMarket\\nAny\\nCrypto\\nNon-Crypto\\nOOS WR\\nAny\\n≥ 55%\\n≥ 60%\\n≥ 65%\\nCari\\nSOL/USDC · RENKO 0.20947\\n🔒 SMA10 · entry lock\\n\\t\\n\\t\\n\\n\\t\\n\\t\\n🔒 Klik untuk aktifkan chart\\n›\\nCRYPTO 141\\nNON-CRYPTO 22\\nQUICK ENTRY\\nRENKO SMA\\nGOLD\\nETC\\nUNI\\nAVAX\\nXLM\\nDOT\\nBTC/USDC · OOS 49.3%\\nETH/USDC · OOS 60.6%\\nATOM/USDC · OOS 64.5%\\nDYDX/USDC · OOS 63.3%\\nSOL/USDC · OOS 65.8%\\nAVAX/USDC · OOS 68.2%\\nBNB/USDC · OOS 57.7%\\nAPE/USDC · OOS 65.7%\\nOP/USDC · OOS 60.1%\\nLTC/USDC · OOS 59.7%\\nARB/USDC · OOS 54.0%\\nDOGE/USDC · OOS 59.9%\\nINJ/USDC · OOS 51.6%\\nKPEPE/USDC · OOS 50.7%\\nCRV/USDC · OOS 62.1%\\nLDO/USDC · OOS 63.7%\\nLINK/USDC · OOS 65.0%\\nSTX/USDC · OOS 54.3%\\nCFX/USDC · OOS 54.0%\\nGMX/USDC · OOS 57.6%\\nSNX/USDC · OOS 59.0%\\nXRP/USDC · OOS 60.9%\\nBCH/USDC · OOS 57.6%\\nAAVE/USDC · OOS 69.0%\\nCOMP/USDC · OOS 46.3%\\nWLD/USDC · OOS 71.7%\\nUNI/USDC · OOS 58.9%\\nSEI/USDC · OOS 57.2%\\nRUNE/USDC · OOS 55.7%\\nDOT/USDC · OOS 69.2%\\nBANANA/USDC · OOS 64.9%\\nTRB/USDC · OOS 54.9%\\nKAS/USDC · OOS 54.3%\\nBLUR/USDC · OOS 64.0%\\nTIA/USDC · OOS 66.3%\\nADA/USDC · OOS 66.5%\\nMINA/USDC · OOS 54.2%\\nPOLYX/USDC · OOS 59.0%\\nPENDLE/USDC · OOS 62.2%\\nFET/USDC · OOS 61.3%\\nNEAR/USDC · OOS 58.3%\\nMEME/USDC · OOS 57.0%\\nORDI/USDC · OOS 58.2%\\nNEO/USDC · OOS 65.3%\\nZEN/USDC · OOS 53.0%\\nFIL/USDC · OOS 57.4%\\nPYTH/USDC · OOS 62.7%\\nSUSHI/USDC · OOS 58.7%\\nIMX/USDC · OOS 49.3%\\nKBONK/USDC · OOS 51.8%\\nGMT/USDC · OOS 51.7%\\nSUPER/USDC · OOS 51.7%\\nJUP/USDC · OOS 65.5%\\nKLUNC/USDC · OOS 61.2%\\nRSR/USDC · OOS 57.8%\\nJTO/USDC · OOS 69.3%\\nACE/USDC · OOS 64.9%\\nWIF/USDC · OOS 60.3%\\nCAKE/USDC · OOS 53.5%\\nPEOPLE/USDC · OOS 51.2%\\nENS/USDC · OOS 54.0%\\nETC/USDC · OOS 63.7%\\nXAI/USDC · OOS 65.7%\\nMANTA/USDC · OOS 60.5%\\nALT/USDC · OOS 62.8%\\nZETA/USDC · OOS 54.1\",\"scripts\":[\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\",\"https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js\",\"https://accounts.google.com/gsi/client\",\"https://cdn.tailwindcss.com/\",\"https://copytolive.com/assets/js/index-renko-final-06dfdeeb33b1.js?v=20260903-ai2-renko-filter-110-ai5-v7\",\"https://copytolive.com/assets/js/ai3_public_shell_v1.js?v=20260903-12\",\"https://copytolive.com/assets/js/ai4_fundamental_router_v1.js?v=20260903-11\",\"https://copytolive.com/assets/js/ai5_signal_scan_runtime_v1.js?v=20260903-3\",\"https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925\"],\"resources\":[\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\",\"https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css\",\"https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css\",\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\",\"https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js\",\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css\",\"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap\",\"https://accounts.google.com/gsi/client\",\"https://cdn.tailwindcss.com/\",\"https://copytolive.com/assets/js/dashboard-WZpp2Gui.js\",\"https://copytolive.com/assets/js/index-renko-final-06dfdeeb33b1.js?v=20260903-ai2-renko-filter-110-ai5-v7\",\"https://copytolive.com/assets/js/vendor-rXCDSp0G.js\",\"https://copytolive.com/assets/js/market-DD_HSfzQ.js\",\"https://copytolive.com/assets/js/charting-C4jAt7iT.js\",\"https://copytolive.com/assets/css/index-Dam86hTI.css\",\"https://copytolive.com/assets/js/trading-BeRNyRbU.js\",\"https://copytolive.com/assets/js/ai3_public_shell_v1.js?v=20260903-12\",\"https://copytolive.com/assets/js/ai4_fundamental_router_v1.js?v=20260903-11\",\"https://copytolive.com/assets/js/ai5_signal_scan_runtime_v1.js?v=20260903-3\",\"https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925\",\"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap\",\"https://copytolive.com/assets/js/SolRenkoTerminal-final-06dfdeeb33b1.js?v=20260903-ai2-renko-filter-110\",\"https://copytolive.com/api/charting/hyperliquid/renko-universe\",\"https://copytolive.com/cdn-cgi/rum?\",\"https://copytolive.com/favicon.ico\",\"https://copytolive.com/favicon-32x32.png\",\"https://copytolive.com/favicon-16x16.png\",\"https://copytolive.com/api/charting/hyperliquid/renko-universe\",\"https://copytolive.com/api/charting/hyperliquid/indicator-catalog\",\"https://copytolive.com/api/charting/hyperliquid/renko/SOL?limit=400&smaPeriod=10&sma=10\",\"https://copytolive.com/api/charting/hyperliquid/stream/SOL\",\"https://copytolive.com/api/charting/hyperliquid/stream/SOL\"]}\n    at file:///tmp/test.mjs:17:483"
+}

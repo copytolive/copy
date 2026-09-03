@@ -1,0 +1,30 @@
+{
+  "id": "ai5-20260903-v8-static-002",
+  "checks": {
+    "marker": true,
+    "single_filter_bar_source": true,
+    "semi_auto_copy": true,
+    "prefilter_stage_request": true,
+    "deep_stage_request": true,
+    "deep_lock": true,
+    "prefilter_lock": true,
+    "stale_protection": true,
+    "manual_deep": true,
+    "static_chart": true,
+    "no_canvas": true,
+    "no_mutation_observer": true,
+    "no_resize_observer": true,
+    "no_animation_loop": true,
+    "no_poll_interval": true,
+    "no_hyperliquid_ui_groups": true,
+    "no_forex_ui_groups": true,
+    "group_labels": true,
+    "responsive_filter_wrap": true,
+    "perp_dom_chunk_40": true,
+    "max_selected_40": true,
+    "auto_prefilter_cap": true
+  },
+  "failed": [],
+  "ok": true,
+  "bytes": 24496
+}

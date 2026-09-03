@@ -1,0 +1,114 @@
+{
+  "id": "ai2-20260903-warm-neo-002",
+  "ok": false,
+  "symbols": {
+    "NEO": {
+      "ok": false,
+      "attempts": [
+        {
+          "status": 502,
+          "seconds": 9.448,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 1,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 0.332,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 2,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 7.104,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 3,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 7.117,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 4,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 6.104,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 5,
+          "returned": 0
+        },
+        {
+          "status": 502,
+          "seconds": 10.001,
+          "error": "HTTP Error 502: Bad Gateway",
+          "n": 6,
+          "returned": 0
+        }
+      ]
+    }
+  },
+  "failed": [
+    "NEO"
+  ],
+  "endpoints": {
+    "universe": [
+      {
+        "n": 1,
+        "status": 502,
+        "seconds": 0.296,
+        "error": "HTTP Error 502: Bad Gateway"
+      },
+      {
+        "n": 2,
+        "status": 502,
+        "seconds": 0.277,
+        "error": "HTTP Error 502: Bad Gateway"
+      },
+      {
+        "n": 3,
+        "status": 200,
+        "seconds": 4.317,
+        "error": ""
+      }
+    ],
+    "indicator": [
+      {
+        "n": 1,
+        "status": 200,
+        "seconds": 0.293,
+        "error": ""
+      }
+    ],
+    "sol": [
+      {
+        "n": 1,
+        "status": 200,
+        "seconds": 3.418,
+        "error": ""
+      }
+    ],
+    "stream": [
+      {
+        "n": 1,
+        "status": 0,
+        "seconds": 148.705,
+        "error": "IncompleteRead(36186 bytes read)"
+      },
+      {
+        "n": 2,
+        "status": 502,
+        "seconds": 0.299,
+        "error": "HTTP Error 502: Bad Gateway"
+      },
+      {
+        "n": 3,
+        "status": 0,
+        "seconds": 7.059,
+        "error": "IncompleteRead(308 bytes read)"
+      }
+    ]
+  }
+}

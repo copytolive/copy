@@ -1,0 +1,369 @@
+{
+  "id": "ai3-ui-candidate-007",
+  "acceptance": "FAIL",
+  "ok": false,
+  "devices": {
+    "desktop": {
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "steps": [
+        {
+          "label": "Crypto",
+          "delta": 0,
+          "state": {
+            "mode": "home",
+            "text": "CTL Copy To Live Home Fundamental Signal Scan Crypto Hyperliquid Perps dashboard ACCOUNT Account Home Fundamental Signal Scan ₿ Crypto Renko All Filter Any Metode Breakout ⌄ Position Any ⌄ Market Any ⌄ Status Any ⌄ Cari 🚀 Multi-TF Hyperliquid Screener· BREAKOUT AREA 177 Hyperliquid perp | ditampilkan 9 | diperbarui 12:26:57 AM | refresh UI 60s 🎯 Signal Mode 🔬 Pro Mode · HL ONLY 60+ 70+ 80+ TF·ANY M15 M30 H1 H4 D1 3 actionable (3 long · 0 short) BTC NEUTRAL conf 15% 24h -0.23% ↑ PENDING BUY (Weak) 0.31% away BSV HL PERP Bitcoin SV $16.09 +3.06% 68 ENTRY 16.1410 SL 15.8183 −2.0% TP1 2R 16.7865 +4.0% TP2 3R 17.1092 R:R 1:2.0 H1 breakout 2/5 TF str 69 2/5 TF aligned ↑ · vol×8.5 · squeeze release 💎 · fresh 🔥 · confluence ⭐×3 | Risk $10 -> ~500 notional 📋 Copy 🧪 Paper View → ⚠️ Trading involves substantial risk of loss. AI signals are for informational purposes only, not financial advice. Past performance does not guarantee future results. \\n",
+            "url": "https://copytolive.com/?ai3candidate=ai3-ui-candidate-007&home=1788403842388",
+            "scrollWidth": 1600,
+            "innerWidth": 1600
+          },
+          "nav": {
+            "nav": {
+              "x": 832,
+              "y": 41,
+              "w": 456,
+              "h": 66,
+              "center": 1060
+            },
+            "items": [
+              {
+                "name": "Home",
+                "raw": "Home",
+                "x": 832,
+                "y": 41,
+                "w": 88,
+                "h": 66,
+                "icon": {
+                  "w": 32,
+                  "h": 32
+                },
+                "label": {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "h": 19.5
+                }
+              },
+              {
+                "name": "Fundamental",
+                "raw": "Fundamental",
+                "x": 924,
+                "y": 41,
+                "w": 88,
+                "h": 66,
+                "icon": {
+                  "w": 32,
+                  "h": 32
+                },
+                "label": {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "h": 19.5
+                }
+              },
+              {
+                "name": "Signal Scan",
+                "raw": "Signal Scan",
+                "x": 1016,
+                "y": 41,
+                "w": 88,
+                "h": 66,
+                "icon": {
+                  "w": 32,
+                  "h": 32
+                },
+                "label": {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "h": 19.5
+                }
+              },
+              {
+                "name": "Crypto",
+                "raw": "₿ Crypto",
+                "x": 1108,
+                "y": 41,
+                "w": 88,
+                "h": 66,
+                "icon": {
+                  "w": 32,
+                  "h": 32
+                },
+                "label": {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "h": 19.5
+                }
+              },
+              {
+                "name": "Renko",
+                "raw": "Renko",
+                "x": 1200,
+                "y": 41,
+                "w": 88,
+                "h": 66,
+                "icon": {
+                  "w": 32,
+                  "h": 32
+                },
+                "label": {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "h": 19.5
+                }
+              }
+            ],
+            "innerWidth": 1600,
+            "scrollWidth": 1600
+          },
+          "filter": {
+            "x": 247,
+            "y": 88,
+            "w": 1170,
+            "h": 64,
+            "text": "Metode Breakout ⌄ Position Any ⌄ Market Any ⌄ Status Any ⌄ Cari",
+            "scrollWidth": 1168,
+            "clientWidth": 1168
+          }
+        },
+        {
+          "label": "Renko",
+          "delta": 32,
+          "state": {
+            "mode": "renko",
+            "text": "Home Fundamental Signal Scan ₿ Crypto Renko All Filter Any Metode Renko OOS Auto Pair EIGEN/USDC · OOS 76.3% GRASS/USDC · OOS 75.1% PURR/USDC · OOS 71.7% WLD/USDC · OOS 71.7% DASH/USDC · OOS 69.8% MORPHO/USDC · OOS 69.8% XPL/USDC · OOS 69.7% JTO/USDC · OOS 69.3% DOT/USDC · OOS 69.2% AAVE/USDC · OOS 69.0% AVAX/USDC · OOS 68.2% ALGO/USDC · OOS 68.1% SPX/USDC · OOS 68.0% IO/USDC · OOS 67.6% NIL/USDC · OOS 67.5% STABLE/USDC · OOS 66.8% HBAR/USDC · OOS 66.6% TNSR/USDC · OOS 66.6% ADA/USDC · OOS 66.5% TIA/USDC · OOS 66.3% BIO/USDC · OOS 66.1% SOL/USDC · OOS 65.8% XAI/USDC · OOS 65.7% APE/USDC · OOS 65.7% JUP/USDC · OOS 65.5% RESOLV/USDC · OOS 65.4% NEO/USDC · OOS 65.3% LINK/USDC · OOS 65.0% BANANA/USDC · OOS 64.9% XLM/USDC · OOS 64.9% ACE/USDC · OOS 64.9% KAITO/USDC · OOS 64.6% ATOM/USDC · OOS 64.5% LIT/USDC · OOS 64.1% BLUR/USDC · OOS 64.0% MON/USDC · OOS 63.9% ETC/USDC · OOS 63.7% LDO/USDC · OOS 63.7% VVV/USDC · OOS 63.5% DYDX/USDC · OOS 63.3% ALT/USDC · OOS 62.8% PYTH/USDC · OOS 62.7% ENA/USDC · OOS 62.7% POPCAT/USDC · OOS 62.6% SKR/USDC · OOS 62.4% SKY/USDC · OOS 62.4% PENDLE/USDC · OOS 62.2% CRV/USDC · OOS 62.1% NOT/USDC · OOS 61.8% FET/USDC · OOS 61.3% KLUNC/USDC · OOS 61.2% CELO/USDC · OOS 61.1% W/USDC · OOS 61.1% XRP/USDC · OOS 60.9% HEMI/USDC · OOS 60.7% ETHFI/USDC · OOS 60.7% ETH/USDC · OOS 60.6% MANTA/USDC · OOS 60.5% WIF/USDC · OOS 60.3% OP/USDC · OOS 60.1% BABY/USDC · OOS 60.1% DOGE/USDC · OOS 59.9% LTC/USDC · OOS 59.7% AERO/USDC · OOS 59.4% STBL/USDC · OOS 59.0% SNX/USDC · OOS 59.0% POLYX/USDC · OOS 59.0% AR/USDC · OOS 59.0% UNI/USDC · OOS 58.9% XMR/USDC · OOS 58.8% VIRTUAL/USDC · OOS 58.7% SUSHI/USDC · OOS 58.7% KNEIRO/USDC · OOS 58.7% MET/USDC · OOS 58.6% NXPC/USDC · OOS 58.4% NEAR/USDC · OOS 58.3% AVNT/USDC · OOS 58.2% ORDI/USDC · OOS 58.2% PENGU/USDC · OOS 57.8% RSR/USDC · OOS 57.8% BNB/USDC · OOS 57.7% MERL/USDC · OOS 57.7% GMX/USDC · OOS 57.6% BCH/USDC · OOS 57.6% FIL/USDC · OOS 57.4% REZ/USDC · OOS 57.4% SEI/USDC · OOS 57.2% MOVE/USDC · OOS 57.1% BRETT/USDC · OOS 57.1% MEME/USDC · OOS 57.0% ZORA/USDC · OOS 56.3% AIXBT/USDC · OOS 56.1% GOAT/USDC · OOS 56.1% RUNE/USDC · OOS 55.7% APEX/USDC · OOS 55.6% TURBO/USDC · OOS 55.4% BOME/USDC · OOS 55.4% FARTCOIN/USDC · OOS 55.2% INIT/USDC · OOS 55.2% S/USDC · OOS 55.0% TRB/USDC · OOS 54.9% USUAL/USDC · OOS 54.8% DYM/USDC · OOS 54.4% KAS/USDC · OOS 54.3% STX/USDC · OOS 54.3% 2Z/USDC · OOS 54.3% MELANIA/USDC · OOS 54.3% MINA/USDC · OOS 54.2% ZETA/USDC · OOS 54.1% ENS/USDC · OOS 54.0% ARB/USDC · OOS 54.0% CFX/USDC · OOS 54.0% MEGA/USDC · OOS 53.9% RENDER/USDC · OOS 53.8% ME/USDC · OOS 53.6% STRK/USDC · OOS 53.5% CAKE/USDC · OOS 53.5% ZK/USDC · OOS 53.2% ZEN/USDC · OOS 53.0% KFLOKI/USDC · OOS 52.3% PNUT/USDC · OOS 52.3% MOODENG/USDC · OOS 52.1% KBONK/USDC · OOS 51.8% SUPER/USDC · OOS 51.7% GMT/USDC · OOS 51.7% INJ/USDC · OOS 51.6% TAO/USDC · OOS 51.5% IOTA/USDC · OOS 51.4% PEOPLE/USDC · OOS 51.2% SAGA/USDC · OOS 51.0% ICP/USDC · OOS 50.8% KPEPE/USDC · OOS 50.7% HYPE/USDC · OOS 50.4% WLFI/USDC · OOS 50.2% ZEC/USDC · OOS 50.1% BERA/USDC · OOS 49.6% IMX/USDC · OOS 49.3% BTC/USDC · OOS 49.3% WCT/USDC · OOS 46.9% COMP/USDC · OOS 46.3% LINEA/USDC · OOS 46.0% GOLD/USD SILVER/USD WTI OIL/USD BRENT OIL/USD NATGAS/USD COPPER/USD PLATINUM/USD S&P 500/USD NASDAQ 100/USD NIKKEI 225/USD RUSSELL 2000/USD MAG 7/USD EUR/USD USD/JPY TSLA/USD NVDA/USD AAPL/USD GOOGL/USD AMZN/USD META/USD MSFT/USD AMD/USD Market Any Crypto Non-Crypto OOS WR Any ≥ 55% ≥ 60% ≥ 65% Cari SOL/USDC · RENKO 0.20947 🔒 SMA10 · en",
+            "url": "https://copytolive.com/",
+            "scrollWidth": 1600,
+            "innerWidth": 1600
+          },
+          "nav": {
+            "nav": {
+              "x": 800,
+              "y": 40,
+              "w": 456,
+              "h": 66,
+              "center": 1028
+            },
+            "items": [
+              {
+                "name": "Home",
+                "raw": "Home",
+                "x": 800,
+                "y": 40,
+                "w": 88,
+                "h": 66,
+                "icon": {
+                  "w": 32,
+                  "h": 32
+                },
+                "label": {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "h": 19.5
+                }
+              },
+              {
+                "name": "Fundamental",
+                "raw": "Fundamental",
+                "x": 892,
+                "y": 40,
+                "w": 88,
+                "h": 66,
+                "icon": {
+                  "w": 32,
+                  "h": 32
+                },
+                "label": {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "h": 19.5
+                }
+              },
+              {
+                "name": "Signal Scan",
+                "raw": "Signal Scan",
+                "x": 984,
+                "y": 40,
+                "w": 88,
+                "h": 66,
+                "icon": {
+                  "w": 32,
+                  "h": 32
+                },
+                "label": {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "h": 19.5
+                }
+              },
+              {
+                "name": "Crypto",
+                "raw": "₿ Crypto",
+                "x": 1076,
+                "y": 40,
+                "w": 88,
+                "h": 66,
+                "icon": {
+                  "w": 32,
+                  "h": 32
+                },
+                "label": {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "h": 19.5
+                }
+              },
+              {
+                "name": "Renko",
+                "raw": "Renko",
+                "x": 1168,
+                "y": 40,
+                "w": 88,
+                "h": 66,
+                "icon": {
+                  "w": 32,
+                  "h": 32
+                },
+                "label": {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                  "h": 19.5
+                }
+              }
+            ],
+            "innerWidth": 1600,
+            "scrollWidth": 1600
+          }
+        }
+      ],
+      "pageErrors": [
+        "Invalid language tag: en-US@posix",
+        "Invalid language tag: en-US@posix",
+        "Invalid language tag: en-US@posix",
+        "Invalid language tag: en-US@posix",
+        "Invalid language tag: en-US@posix",
+        "Invalid language tag: en-US@posix",
+        "Invalid language tag: en-US@posix",
+        "Invalid language tag: en-US@posix",
+        "Invalid language tag: en-US@posix",
+        "Invalid language tag: en-US@posix",
+        "Invalid language tag: en-US@posix"
+      ],
+      "consoleErrors": [],
+      "home": {
+        "nav": {
+          "nav": {
+            "x": 832,
+            "y": 41,
+            "w": 456,
+            "h": 66,
+            "center": 1060
+          },
+          "items": [
+            {
+              "name": "Home",
+              "raw": "Home",
+              "x": 832,
+              "y": 41,
+              "w": 88,
+              "h": 66,
+              "icon": {
+                "w": 32,
+                "h": 32
+              },
+              "label": {
+                "fontSize": 13,
+                "fontWeight": "600",
+                "h": 19.5
+              }
+            },
+            {
+              "name": "Fundamental",
+              "raw": "Fundamental",
+              "x": 924,
+              "y": 41,
+              "w": 88,
+              "h": 66,
+              "icon": {
+                "w": 32,
+                "h": 32
+              },
+              "label": {
+                "fontSize": 13,
+                "fontWeight": "600",
+                "h": 19.5
+              }
+            },
+            {
+              "name": "Signal Scan",
+              "raw": "Signal Scan",
+              "x": 1016,
+              "y": 41,
+              "w": 88,
+              "h": 66,
+              "icon": {
+                "w": 32,
+                "h": 32
+              },
+              "label": {
+                "fontSize": 13,
+                "fontWeight": "600",
+                "h": 19.5
+              }
+            },
+            {
+              "name": "Crypto",
+              "raw": "₿ Crypto",
+              "x": 1108,
+              "y": 41,
+              "w": 88,
+              "h": 66,
+              "icon": {
+                "w": 32,
+                "h": 32
+              },
+              "label": {
+                "fontSize": 13,
+                "fontWeight": "600",
+                "h": 19.5
+              }
+            },
+            {
+              "name": "Renko",
+              "raw": "Renko",
+              "x": 1200,
+              "y": 41,
+              "w": 88,
+              "h": 66,
+              "icon": {
+                "w": 32,
+                "h": 32
+              },
+              "label": {
+                "fontSize": 13,
+                "fontWeight": "600",
+                "h": 19.5
+              }
+            }
+          ],
+          "innerWidth": 1600,
+          "scrollWidth": 1600
+        },
+        "filter": {
+          "x": 247,
+          "y": 94,
+          "w": 1170,
+          "h": 64,
+          "text": "Max Loss Any Profit Factor Any Win Rate Any Risk Reward Any Cari",
+          "scrollWidth": 1168,
+          "clientWidth": 1168
+        }
+      }
+    }
+  },
+  "errors": [
+    "desktop Renko_NAV_DRIFT 32"
+  ],
+  "error": "Error: desktop Renko_NAV_DRIFT 32\n    at run (file:///home/runner/work/copy/copy/.ai3candidate.mjs:88:20)\n    at async file:///home/runner/work/copy/copy/.ai3candidate.mjs:141:3"
+}

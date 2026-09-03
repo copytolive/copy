@@ -1,0 +1,17 @@
+{
+  "id": "ai5-20260903-live-v8-002",
+  "root_status": 200,
+  "v8_status": 200,
+  "v7_status": 200,
+  "main_status": 200,
+  "main_asset": "assets/js/index-renko-final-06dfdeeb33b1.js?v=20260903-ai2-renko-filter-110-ai5-v7",
+  "v8_marker": false,
+  "v8_semi_auto": false,
+  "v8_no_hyper_labels": true,
+  "main_imports_v8": false,
+  "main_imports_v7": true,
+  "v8_content_type": "text/html;",
+  "stage_prefilter_status": 200,
+  "stage_prefilter_body": "{\"signals\":[],\"total_signals\":0,\"pairs_scanned\":1,\"errors\":[{\"pair\":\"BTC\",\"kind\":\"no_consensus\",\"error\":\"No consensus signal\",\"debug_votes\":[{\"engine\":\"smart_money\",\"direction\":\"SHORT\",\"confidence\":45.8,\"weight\":0.1838536060279871,\"details\":{\"agreement_ratio\":0,\"analyzers_run\":0,\"long_count\":0,\"short_count\":0,\"hold_count\":0},\"reasons\":[\"SM Consensus: SHORT (50%)\"],\"error\":null},{\"engine\":\"freqai\",\"direction\":\"SHORT\",\"confidence\":93.9,\"weight\":0.2027889225951659,\"details\":{\"model\":\"lightgbm\",\"train_accuracy\":100.0,\"test_accuracy\":80.9,\"backtest_wr\":100.0,\"backtest_return\":0.0},\"reasons\":[\"FreqAI lightgbm: TestAcc=80.9%\",\"BT WR=100.0%, Return=0.0%\"],\"error\":null},{\"engine\":\"vectorbt\",\"direction\":\"LONG\",\"confidence\":31.3,\"weight\":0.12992465016146393,\"details\":{\"strategy\":\"ema_cross\",\"win_rate\":37.5,\"total_return\":15.39,\"trades\":8,\"sharpe\":1.137,\"profit_factor\":4.59},\"reasons\":[\"VBT EMA Cross: WR=37.5%, Return=15.4%\",\"PF=4.59, Sharpe=1.14\"],\"error\":null},{\"engine\":\"qlib\",\"direction\":\"SHORT\",\"confidence\":90.8,\"weight\":0.17700362070652703,\"details\":{\"model\":\"ensemble_stacking\",\"test_accuracy\":80.9,\"backtest_return\":0.0,\"trades\":0},\"reasons\":[\"Qlib Ensemble: Acc=80.9%\",\"Return=0.0%\"],\"error\":null},{\"engine\":\"finrl\",\"direction\":\"HOLD\",\"confidence\":4.8,\"weight\":0.09171151776103335,\"details\":{\"agent\":\"q_learning\",\"total_reward\":-69.95,\"sharpe_est\":1.315,\"win_rate\":50.8,\"drl_action\":\"HOLD\"},\"reasons\":[\"FinRL q_learning: HOLD (reward=-69.9)\",\"WR=51%, Sharpe\u22481.31\"],\"error\":null},{\"engine\":\"alpha101\",\"direction\":\"LONG\",\"confidence\":91.7,\"weight\":0.10735884137391134,\"details\":{\"consensus\":\"BULLISH\",\"score\":17.23,\"bullish_count\":5,\"bearish_count\":5,\"alphas_computed\":33},\"reasons\":[\"Alpha101: BULLISH (score=17.23)\",\"Bullish: 5, Bearish: 5\"],\"error\":null},{\"engine\":\"pybroker\",\"direction\":\"SHORT\",\"confidence\":91.2,\"weight\":0.10735884137391134,\"details\":{\"avg_accuracy\":68.68,\"trend\":\"improving\",\"folds\":3,\"total_trades\":15},\"reasons\":[\"PyBroker WF: Acc=68.7%, Trend=improving\"],\"error\":n",
+  "ok": false
+}

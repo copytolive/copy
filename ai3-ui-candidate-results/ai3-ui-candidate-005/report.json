@@ -1,0 +1,10 @@
+{
+  "id": "ai3-ui-candidate-005",
+  "acceptance": "FAIL",
+  "ok": false,
+  "devices": {},
+  "errors": [
+    "desktop NAV_NOT_VIEWPORT_CENTER 929.997314453125"
+  ],
+  "error": "Error: desktop NAV_NOT_VIEWPORT_CENTER 929.997314453125\n    at run (file:///home/runner/work/copy/copy/.ai3candidate.mjs:79:60)\n    at async file:///home/runner/work/copy/copy/.ai3candidate.mjs:143:3"
+}

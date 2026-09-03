@@ -1,0 +1,14 @@
+{
+  "id": "ai5-20260903-live-v8-001",
+  "root_status": 200,
+  "v8_status": 200,
+  "v7_status": 200,
+  "main_status": 200,
+  "main_asset": "assets/js/index-renko-final-06dfdeeb33b1.js?v=20260903-ai2-renko-filter-110-ai5-v7",
+  "v8_marker": false,
+  "v8_semi_auto": false,
+  "v8_no_hyper_labels": true,
+  "main_imports_v8": false,
+  "main_imports_v7": true,
+  "ok": false
+}

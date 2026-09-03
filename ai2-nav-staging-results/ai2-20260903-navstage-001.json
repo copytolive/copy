@@ -1,0 +1,65 @@
+{
+  "id": "ai2-20260903-navstage-001",
+  "ok": false,
+  "views": {
+    "desktop": {
+      "found": true,
+      "names": [
+        "Home",
+        "Fundamental",
+        "Signal Scan",
+        "Crypto",
+        "Hyperliquid",
+        "Renko"
+      ],
+      "buttons": [
+        {
+          "text": "Home",
+          "aria": "Home",
+          "x": 434,
+          "w": 51
+        },
+        {
+          "text": "Fundamental",
+          "aria": "Fundamental",
+          "x": 513,
+          "w": 96
+        },
+        {
+          "text": "Signal Scan",
+          "aria": "Signal Scan",
+          "x": 637,
+          "w": 88
+        },
+        {
+          "text": "Crypto",
+          "aria": "Crypto",
+          "x": 753,
+          "w": 57
+        },
+        {
+          "text": "Hyperliquid",
+          "aria": "Hyperliquid",
+          "x": 838,
+          "w": 87
+        },
+        {
+          "text": "Renko",
+          "aria": "",
+          "x": 953,
+          "w": 53
+        }
+      ],
+      "adjacent": true,
+      "shell": true
+    },
+    "mobile": {
+      "found": true,
+      "names": [],
+      "buttons": [],
+      "adjacent": false,
+      "shell": true
+    }
+  },
+  "error": "Error: NAV_STAGE_mobile {\"found\":true,\"names\":[],\"buttons\":[],\"adjacent\":false,\"shell\":true}\n    at file:///tmp/test.mjs:20:46"
+}

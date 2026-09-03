@@ -1,0 +1,87 @@
+name: AI5 Live V8 Probe
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai5-live-v8-probe/**"
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai5-live-v8-probe/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "out=ai5-live-v8-results/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Probe public production
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          OUT: ${{ steps.req.outputs.out }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUT")"
+          V8_STATUS="$(curl -L -sS -o /tmp/v8.js -w '%{http_code}' --connect-timeout 10 --max-time 30 "https://copytolive.com/assets/js/MarketScanner-ai5Signal-v8.js?probe=$GITHUB_RUN_ID")"
+          V7_STATUS="$(curl -L -sS -o /tmp/v7.js -w '%{http_code}' --connect-timeout 10 --max-time 30 "https://copytolive.com/assets/js/MarketScanner-ai5HLPerf-v7.js?probe=$GITHUB_RUN_ID")"
+          ROOT_STATUS="$(curl -L -sS -o /tmp/root.html -w '%{http_code}' --connect-timeout 10 --max-time 30 "https://copytolive.com/?probe=$GITHUB_RUN_ID")"
+          MAIN="$(grep -oE 'assets/js/index-renko-final-[A-Za-z0-9_.?=-]+\.js[^" ]*|assets/js/index-renko-final-[^" ]+\.js[^" ]*' /tmp/root.html | head -n1 || true)"
+          if [ -z "$MAIN" ]; then
+            MAIN="$(grep -oE 'assets/js/index-[^" ]+\.js[^" ]*' /tmp/root.html | head -n1 || true)"
+          fi
+          MAIN_STATUS=0
+          : >/tmp/main.js
+          if [ -n "$MAIN" ]; then
+            MAIN_URL="https://copytolive.com/${MAIN#./}"
+            MAIN_STATUS="$(curl -L -sS -o /tmp/main.js -w '%{http_code}' --connect-timeout 10 --max-time 30 "$MAIN_URL&probe=$GITHUB_RUN_ID" || true)"
+          fi
+          python3 - "$OUT" "$ID" "$ROOT_STATUS" "$V8_STATUS" "$V7_STATUS" "$MAIN_STATUS" "$MAIN" <<'PY'
+          import json,sys,re
+          out,id_,root,v8,v7,main_status,main=sys.argv[1:8]
+          def txt(p):
+              try:return open(p,encoding="utf-8",errors="replace").read()
+              except:return ""
+          a=txt("/tmp/v8.js"); b=txt("/tmp/v7.js"); m=txt("/tmp/main.js")
+          d={
+            "id":id_,
+            "root_status":int(root or 0),
+            "v8_status":int(v8 or 0),
+            "v7_status":int(v7 or 0),
+            "main_status":int(main_status or 0),
+            "main_asset":main,
+            "v8_marker":"data-ai5-signal-v8" in a,
+            "v8_semi_auto":"Auto Filter + Auto Prefilter" in a and "Deep Scan" in a,
+            "v8_no_hyper_labels":"Hyperliquid Major" not in a and "Hyperliquid Perpetuals" not in a,
+            "main_imports_v8":"MarketScanner-ai5Signal-v8.js" in m,
+            "main_imports_v7":"MarketScanner-ai5HLPerf-v7.js" in m,
+          }
+          d["ok"]=d["root_status"]==200 and d["v8_status"]==200 and d["v8_marker"] and d["v8_semi_auto"] and d["v8_no_hyper_labels"] and d["main_imports_v8"]
+          open(out,"w").write(json.dumps(d,indent=2)+"\n")
+          print(json.dumps(d))
+          PY
+      - name: Commit result
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"
+          test -s "$OUT"
+          git config user.name "CopyToLive AI5 Live Probe"
+          git config user.email "copytolive-ai5-live@local.invalid"
+          git add "$OUT"
+          git commit -m "ai5 live v8 probe: ${{ steps.req.outputs.id }}" || true
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Enforce
+        if: always()
+        shell: bash
+        run: |
+          python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); raise SystemExit(0 if d.get("ok") else 1)' "${{ steps.req.outputs.out }}"

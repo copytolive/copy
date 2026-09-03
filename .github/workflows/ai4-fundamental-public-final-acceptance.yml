@@ -1,0 +1,186 @@
+name: AI4 Fundamental Public Final Acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai4-fundamental-public-acceptance-requests/**"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai4-fundamental-public-acceptance-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install chromium --with-deps >/dev/null
+
+      - name: Final browser acceptance
+        env:
+          ID: ${{ steps.req.outputs.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > .ai4-public-final.mjs <<'JS'
+          import { chromium } from 'playwright';
+
+          const result={id:process.env.ID,acceptance:'FAIL',ok:false,checks:{}};
+          const browser=await chromium.launch({headless:true});
+          const expectedNav=['Home','Fundamental','Signal Scan','Crypto','Hyperliquid','Renko'];
+          const expectedTabs=['Overview','Valuation','Growth','Profitability','Financials','Health','Ownership','Insiders','Filings','Estimates','Compare'];
+
+          async function visibleExact(page,text){
+            const loc=page.getByText(text,{exact:true});
+            const count=await loc.count();
+            for(let i=0;i<count;i++) if(await loc.nth(i).isVisible()) return loc.nth(i);
+            throw new Error('visible exact text not found: '+text);
+          }
+
+          async function runViewport(name,viewport,full){
+            const ctx=await browser.newContext({viewport});
+            const page=await ctx.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+            page.on('console',m=>{
+              if(m.type()==='error'&&!/favicon|429|Failed to load resource/i.test(m.text())) errors.push('console: '+m.text());
+            });
+            const rec={ok:false,viewport};
+            try{
+              const response=await page.goto('https://copytolive.com/?ai4public='+encodeURIComponent(process.env.ID)+'-'+name,{waitUntil:'domcontentloaded',timeout:60000});
+              rec.rootStatus=response?.status()||0;
+              await page.waitForTimeout(1400);
+
+              const fundamental=await visibleExact(page,'Fundamental');
+              await fundamental.click({timeout:15000});
+              await page.waitForSelector('#ai4-fundamental-root-view iframe',{timeout:30000});
+              let frame=page.frameLocator('#ai4-fundamental-root-view iframe');
+              await frame.locator('.symbol').waitFor({state:'visible',timeout:60000});
+
+              rec.rootUrl=page.url()==='https://copytolive.com/';
+              rec.symbol=(await frame.locator('.symbol').first().innerText()).trim();
+              rec.nav=await frame.locator('[data-main-nav]').allInnerTexts();
+              rec.navOk=expectedNav.every(x=>rec.nav.includes(x));
+              rec.filters=await frame.locator('.fundFilterLabel').allInnerTexts();
+              rec.filtersOk=['P/E','ROE','Debt / Equity','Revenue Growth'].every(x=>rec.filters.includes(x));
+              rec.tabs=await frame.locator('.tab').allInnerTexts();
+              rec.tabsOk=expectedTabs.every(x=>rec.tabs.includes(x));
+              rec.iconCount=await frame.locator('.mainNavIcon svg').count();
+
+              rec.geometry=await frame.locator('header').evaluate(h=>{
+                const nav=h.querySelector('.mainNavRow')?.getBoundingClientRect();
+                const filters=h.querySelector('.fundSearchBar')?.getBoundingClientRect();
+                const tools=h.querySelector('.top')?.getBoundingClientRect();
+                const cari=h.querySelector('#fundSearchBtn')?.getBoundingClientRect();
+                const active=h.querySelector('[data-main-nav="fundamental"]');
+                return {
+                  active:!!active?.classList.contains('active'),
+                  navBottom:nav?.bottom||0,
+                  filterTop:filters?.top||0,
+                  filterBottom:filters?.bottom||0,
+                  toolsTop:tools?.top||0,
+                  filterRadius:filters?parseFloat(getComputedStyle(h.querySelector('.fundSearchBar')).borderTopLeftRadius):0,
+                  cariRadius:cari?parseFloat(getComputedStyle(h.querySelector('#fundSearchBtn')).borderTopLeftRadius):0,
+                  cariWidth:cari?.width||0
+                };
+              });
+              rec.visualOk=rec.iconCount===6&&rec.geometry.active&&rec.geometry.filterTop>=rec.geometry.navBottom-3&&rec.geometry.toolsTop>=rec.geometry.filterBottom-3&&rec.geometry.filterRadius>=24&&rec.geometry.cariRadius>=20&&rec.geometry.cariWidth>=100;
+
+              if(full){
+                rec.api=await page.evaluate(async()=>{
+                  const r=await fetch('/api/fundamental/screener',{headers:{Accept:'application/json'}});
+                  const j=await r.json();
+                  const rows=j.rows||[];
+                  const n=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
+                  return {
+                    ok:r.ok&&j.ok===true,
+                    total:rows.length,
+                    filtered:rows.filter(x=>n(x.trailingPE)!=null&&n(x.trailingPE)>0&&n(x.trailingPE)<=50&&n(x.roe)!=null&&n(x.roe)>=0.05).length
+                  };
+                });
+
+                await frame.locator('#fundSearchBtn').click();
+                await frame.locator('#screenBody').waitFor({state:'attached',timeout:90000});
+                await page.waitForTimeout(250);
+                rec.anyRows=await frame.locator('#screenBody tr').count();
+                rec.anyCriteria=(await frame.locator('.screenerFilters').innerText()).replace(/\s+/g,' ').trim();
+                rec.anyOk=rec.api.ok&&rec.api.total===247&&rec.anyRows===247&&['P/E Any','ROE Any','D/E Any','Growth Any'].every(x=>rec.anyCriteria.includes(x));
+
+                await frame.locator('#topMaxPE').selectOption('50');
+                await frame.locator('#topMinROE').selectOption('5');
+                await frame.locator('#topMaxDE').selectOption('');
+                await frame.locator('#topMinGrowth').selectOption('');
+                await frame.locator('#fundSearchBtn').click();
+                await frame.locator('#screenBody').waitFor({state:'attached',timeout:90000});
+                await page.waitForTimeout(250);
+                rec.filteredRows=await frame.locator('#screenBody tr').count();
+                rec.filteredCriteria=(await frame.locator('.screenerFilters').innerText()).replace(/\s+/g,' ').trim();
+                rec.filteredOk=rec.api.filtered===47&&rec.filteredRows===47&&rec.filteredCriteria.includes('P/E ≤ 50')&&rec.filteredCriteria.includes('ROE ≥ 5%');
+
+                await frame.locator('[data-main-nav="home"]').click({timeout:15000});
+                await page.waitForTimeout(350);
+                rec.homeState=await page.evaluate(()=>({overlay:!!document.getElementById('ai4-fundamental-root-view'),url:location.href}));
+                rec.homeOk=!rec.homeState.overlay&&rec.homeState.url==='https://copytolive.com/';
+
+                const fundamental2=await visibleExact(page,'Fundamental');
+                await fundamental2.click({timeout:15000});
+                await page.waitForSelector('#ai4-fundamental-root-view iframe',{timeout:30000});
+                frame=page.frameLocator('#ai4-fundamental-root-view iframe');
+                await frame.locator('.symbol').waitFor({state:'visible',timeout:60000});
+                await frame.locator('[data-main-nav="signal-scan"]').click({timeout:15000});
+                await page.waitForTimeout(1200);
+                rec.signalState=await page.evaluate(()=>({
+                  overlay:!!document.getElementById('ai4-fundamental-root-view'),
+                  mode:localStorage.getItem('ot_backtest_view_mode'),
+                  url:location.href
+                }));
+                rec.signalOk=!rec.signalState.overlay&&rec.signalState.mode==='scanner-signal'&&rec.signalState.url==='https://copytolive.com/';
+              }else{
+                rec.anyOk=true;rec.filteredOk=true;rec.homeOk=true;rec.signalOk=true;
+              }
+
+              const size=await page.evaluate(()=>({sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth}));
+              rec.noOverflow=size.sw<=size.cw+8;
+              rec.errors=errors;
+              rec.ok=rec.rootStatus===200&&rec.rootUrl&&rec.symbol==='AAPL'&&rec.navOk&&rec.filtersOk&&rec.tabsOk&&rec.visualOk&&rec.anyOk&&rec.filteredOk&&rec.homeOk&&rec.signalOk&&rec.noOverflow&&!errors.some(x=>x.startsWith('pageerror:'));
+            }catch(e){
+              rec.error=e.stack||e.message;
+              rec.errors=errors;
+              rec.url=page.url();
+            }
+            await ctx.close();
+            return rec;
+          }
+
+          result.checks.desktop=await runViewport('desktop',{width:1440,height:900},true);
+          result.checks.mobile=await runViewport('mobile',{width:390,height:844},false);
+
+          try{
+            const checks=await fetch('https://copytolive.com/api/fundamental/health',{headers:{Accept:'application/json'}});
+            const data=await checks.json();
+            result.health={status:checks.status,ok:checks.ok&&data.ok===true};
+          }catch(e){result.health={ok:false,error:e.message}}
+
+          result.ok=result.checks.desktop.ok&&result.checks.mobile.ok&&result.health.ok;
+          result.acceptance=result.ok?'PASS':'FAIL';
+          console.log('AI4_FINAL_ACCEPTANCE_JSON='+JSON.stringify(result));
+          await browser.close();
+          if(!result.ok)process.exit(2);
+          JS
+          node ./.ai4-public-final.mjs

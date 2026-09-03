@@ -10,18 +10,19 @@ permissions:
   contents: write
 
 concurrency:
-  group: ai6-crypto-real-pending
+  group: ai6-crypto-real-pending-v2
   cancel-in-progress: false
 
 jobs:
   integrate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       SSH_HOST: ${{ secrets.COPYTOLIVE_SSH_HOST }}
       SSH_USER: ${{ secrets.COPYTOLIVE_SSH_USER }}
       SSH_KEY: ${{ secrets.COPYTOLIVE_SSH_KEY }}
       SSH_PORT_SECRET: ${{ secrets.COPYTOLIVE_SSH_PORT }}
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,517 +33,125 @@ jobs:
         run: |
           set -euo pipefail
           FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai6-real-pending-requests/.*\.json$' | tail -n1)"
-          ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          test -n "$FILE"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
           echo "id=$ID" >> "$GITHUB_OUTPUT"
           echo "out=ai6-real-pending-results/$ID.json" >> "$GITHUB_OUTPUT"
-          echo "port=${SSH_PORT_SECRET:-22}" >> "$GITHUB_OUTPUT"
 
-      - name: Configure SSH
+      - name: Configure production SSH
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${SSH_HOST:-}" && test -n "${SSH_USER:-}" && test -n "${SSH_KEY:-}"
-          install -d -m 700 ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/ai6
-          chmod 600 ~/.ssh/ai6
-          ssh-keyscan -p "${SSH_PORT_SECRET:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          test -n "$SSH_HOST" && test -n "$SSH_USER" && test -n "$SSH_KEY"
+          if [ -z "$SSH_PORT_SECRET" ]; then SSH_PORT_SECRET=22; fi
+          echo "SSH_PORT_SECRET=$SSH_PORT_SECRET" >> "$GITHUB_ENV"
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/ai6-live-pending"
+          chmod 600 "$HOME/.ssh/ai6-live-pending"
+          ssh-keyscan -p "$SSH_PORT_SECRET" -H "$SSH_HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null
 
-      - name: Integrate real pending
-        id: integrate
-        shell: bash
-        env:
-          ID: ${{ steps.req.outputs.id }}
-          PORT: ${{ steps.req.outputs.port }}
-        run: |
-          set -euo pipefail
-          cat >/tmp/ai6-remote.sh <<'REMOTE'
-          #!/usr/bin/env bash
-          set -euo pipefail
-          ID="$1"
-          BR=/home/opentrue-platform/backend
-          WR=/var/www/copytolive
-          BOT="$BR/bot-trading/bot_trading_api.py"
-          BAK="/var/backups/copytolive-control/$ID"
-          mkdir -p "$BAK/backend/bot-trading" "$BAK/web/assets/js"
-          test -s "$BOT"
-          BEFORE="$(sha256sum "$BOT"|awk '{print $1}')"
-          cp -a "$BOT" "$BAK/backend/bot-trading/bot_trading_api.py"
-          mapfile -t SFILES < <(find "$WR/assets/js" -maxdepth 1 -type f -name 'CryptoMultiTFScreener*.js' -print|sort)
-          test "${#SFILES[@]}" -gt 0
-          for f in "${SFILES[@]}"; do cp -a "$f" "$BAK/web/assets/js/$(basename "$f")"; done
-
-          rollback(){
-            set +e
-            cp -a "$BAK/backend/bot-trading/bot_trading_api.py" "$BOT"
-            for b in "$BAK"/web/assets/js/CryptoMultiTFScreener*.js; do
-              [ -f "$b" ] && cp -a "$b" "$WR/assets/js/$(basename "$b")"
-            done
-            p="$(pgrep -f '[b]ot_trading_api.py' || true)"; [ -z "$p" ] || kill $p
-            sleep 2
-            PY=/usr/bin/python3
-            [ -x "$BR/bot-trading/venv/bin/python" ] && PY="$BR/bot-trading/venv/bin/python"
-            nohup "$PY" "$BOT" >/tmp/bot_trading_api_ai6_rollback.log 2>&1 &
-            echo ROLLBACK=PASS
-          }
-          trap rollback ERR
-
-          python3 - "$BOT" <<'PY'
-          from pathlib import Path
-          import sys
-          p=Path(sys.argv[1]); s=p.read_text("utf-8")
-          START="# AI6_REAL_PENDING_V1_START"; END="# AI6_REAL_PENDING_V1_END"
-          block=r'''
-          # AI6_REAL_PENDING_V1_START
-          AI6_PENDING_POLL_SECONDS = 4
-          AI6_PENDING_MIN_NOTIONAL_USD = 10.01
-
-          def _ai6_pending_init():
-              db=get_db()
-              try:
-                  db.execute("""CREATE TABLE IF NOT EXISTS screener_pending_orders(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    wallet_address TEXT NOT NULL,
-                    signal_id TEXT NOT NULL,
-                    symbol TEXT NOT NULL,
-                    hl_coin TEXT NOT NULL,
-                    side TEXT NOT NULL,
-                    entry REAL NOT NULL,
-                    sl REAL NOT NULL,
-                    tp1 REAL NOT NULL,
-                    tp2 REAL DEFAULT 0,
-                    tp3 REAL DEFAULT 0,
-                    risk_usdt REAL NOT NULL,
-                    qty REAL DEFAULT 0,
-                    entry_oid TEXT,
-                    entry_cloid TEXT,
-                    sl_oid TEXT,
-                    tp_oid TEXT,
-                    status TEXT NOT NULL DEFAULT 'SUBMITTING',
-                    expires_at_ms INTEGER,
-                    last_error TEXT,
-                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE(wallet_address,signal_id)
-                  )""")
-                  db.execute("CREATE INDEX IF NOT EXISTS idx_screener_pending_status ON screener_pending_orders(status)")
-                  db.commit()
-              finally: db.close()
-
-          def _ai6_tf_ms(tf):
-              return {"1m":60000,"3m":180000,"5m":300000,"15m":900000,"30m":1800000,
-                      "1h":3600000,"2h":7200000,"4h":14400000,"8h":28800000,
-                      "12h":43200000,"1d":86400000}.get(str(tf or "").lower(),3600000)
-
-          def _ai6_user(wallet="",hint=""):
-              db=get_db()
-              try:
-                  row=None; wallet=str(wallet or "").strip().lower()
-                  if wallet:
-                      row=db.execute("""SELECT id,wallet_address,api_wallet_address,api_private_key_encrypted,
-                        status,subscription_status,trial_end FROM users
-                        WHERE lower(wallet_address)=lower(?) OR lower(coalesce(api_wallet_address,''))=lower(?) LIMIT 1""",
-                        (wallet,wallet)).fetchone()
-                  if row is None and hint and str(hint).lower()!="anonymous":
-                      row=db.execute("""SELECT id,wallet_address,api_wallet_address,api_private_key_encrypted,
-                        status,subscription_status,trial_end FROM users WHERE CAST(id AS TEXT)=? LIMIT 1""",(str(hint),)).fetchone()
-                  return row
-              finally: db.close()
-
-          def _ai6_user_ok(u):
-              if not u: return False,"Wallet/API key belum terdaftar"
-              if u["status"]!="active": return False,"Wallet belum aktif"
-              if u["subscription_status"] not in ("active","trial"): return False,"Subscription wallet tidak aktif"
-              if u["subscription_status"]=="trial" and u["trial_end"]:
-                  try:
-                      if datetime.fromisoformat(u["trial_end"]) < datetime.utcnow(): return False,"Trial wallet sudah berakhir"
-                  except Exception: pass
-              return True,""
-
-          def _ai6_stack(wallet,key):
-              from hyperliquid.exchange import Exchange
-              from hyperliquid.info import Info
-              from hyperliquid.utils import constants
-              from eth_account import Account
-              a=Account.from_key(key)
-              info=Info(constants.MAINNET_API_URL,skip_ws=True,perp_dexs=BUILDER_DEXES)
-              ex=Exchange(a,constants.MAINNET_API_URL,account_address=wallet); ex.info=info
-              return ex,info
-
-          def _ai6_base(c): return str(c or "").split(":",1)[-1].upper()
-
-          def _ai6_pos(info,wallet,coin):
-              dex=coin.split(":",1)[0] if ":" in coin else ""
-              st=info.user_state(wallet,dex); want=_ai6_base(coin)
-              for x in st.get("assetPositions",[]) or []:
-                  q=x.get("position",{}) or {}; qc=str(q.get("coin") or "")
-                  try: z=float(q.get("szi") or 0)
-                  except Exception: z=0
-                  if z and (qc==coin or _ai6_base(qc)==want):
-                      return {"coin":qc or coin,"szi":z,"size":abs(z),"side":"BUY" if z>0 else "SELL"}
-              return None
-
-          def _ai6_orders(info,wallet,coin):
-              dex=coin.split(":",1)[0] if ":" in coin else ""; want=_ai6_base(coin)
-              try: a=info.frontend_open_orders(wallet,dex) or []
-              except Exception: a=[]
-              return [o for o in a if str(o.get("coin") or "")==coin or _ai6_base(o.get("coin"))==want]
-
-          def _ai6_oid(result):
-              sts=(((result or {}).get("response") or {}).get("data") or {}).get("statuses") or []
-              for st in sts:
-                  if not isinstance(st,dict): continue
-                  for k in ("resting","filled"):
-                      x=st.get(k)
-                      if isinstance(x,dict) and x.get("oid") is not None: return str(x["oid"])
-              return ""
-
-          def _ai6_err(result):
-              sts=(((result or {}).get("response") or {}).get("data") or {}).get("statuses") or []
-              for st in sts:
-                  if isinstance(st,dict) and st.get("error"): return str(st["error"])
-              return ""
-
-          def _ai6_upd(rid,status=None,**kw):
-              db=get_db()
-              try:
-                  sets=[]; vals=[]
-                  if status is not None: sets.append("status=?"); vals.append(status)
-                  for k,v in kw.items():
-                      if k in ("qty","entry_oid","entry_cloid","sl_oid","tp_oid","last_error"):
-                          sets.append(k+"=?"); vals.append(v)
-                  sets.append("updated_at=CURRENT_TIMESTAMP"); vals.append(rid)
-                  db.execute("UPDATE screener_pending_orders SET "+",".join(sets)+" WHERE id=?",vals); db.commit()
-              finally: db.close()
-
-          def _ai6_row(rid):
-              db=get_db()
-              try: return db.execute("SELECT * FROM screener_pending_orders WHERE id=?",(rid,)).fetchone()
-              finally: db.close()
-
-          def _ai6_protect(row,ex,info,pos):
-              side=str(row["side"]); close_buy=(side=="SELL"); size=float(pos["size"])
-              sl=float(row["sl"]); tp=float(row["tp1"]); orders=_ai6_orders(info,row["wallet_address"],row["hl_coin"])
-              tol=max(abs(float(row["entry"]))*1e-7,1e-10)
-              so=str(row["sl_oid"] or ""); to=str(row["tp_oid"] or "")
-              for o in orders:
-                  if not o.get("reduceOnly"): continue
-                  try: px=float(o.get("triggerPx") or 0)
-                  except Exception: px=0
-                  typ=str(o.get("orderType") or "").lower()
-                  if abs(px-sl)<=tol and "stop" in typ: so=str(o.get("oid") or so)
-                  if abs(px-tp)<=tol and "take profit" in typ: to=str(o.get("oid") or to)
-              req=[]; kinds=[]
-              if not to:
-                  req.append({"coin":row["hl_coin"],"is_buy":close_buy,"sz":size,"limit_px":tp,
-                    "order_type":{"trigger":{"triggerPx":tp,"isMarket":True,"tpsl":"tp"}},"reduce_only":True}); kinds.append("tp")
-              if not so:
-                  req.append({"coin":row["hl_coin"],"is_buy":close_buy,"sz":size,"limit_px":sl,
-                    "order_type":{"trigger":{"triggerPx":sl,"isMarket":True,"tpsl":"sl"}},"reduce_only":True}); kinds.append("sl")
-              if req:
-                  res=ex.bulk_orders(req,grouping="positionTpsl"); er=_ai6_err(res)
-                  if er: raise RuntimeError(er)
-                  sts=(((res or {}).get("response") or {}).get("data") or {}).get("statuses") or []
-                  for kind,st in zip(kinds,sts):
-                      oid=""
-                      if isinstance(st,dict): oid=str((st.get("resting") or {}).get("oid") or (st.get("filled") or {}).get("oid") or "")
-                      if kind=="tp" and oid: to=oid
-                      if kind=="sl" and oid: so=oid
-              _ai6_upd(row["id"],"PROTECTED",sl_oid=so,tp_oid=to,last_error="")
-
-          @app.route("/api/bot-trading/pending-open",methods=["POST"])
-          def ai6_pending_open():
-              d=request.json or {}; sig=d.get("signal") if isinstance(d.get("signal"),dict) else d
-              if d.get("confirm_real") is not True:
-                  return jsonify({"status":"error","error":"confirm_real=true wajib untuk order uang-real"}),400
-              u=_ai6_user(d.get("wallet",""),request.headers.get("X-User-Id","")); ok,why=_ai6_user_ok(u)
-              if not ok: return jsonify({"status":"error","error":why}),404 if not u else 403
-              wallet=str(u["wallet_address"]).strip().lower()
-              symbol=str(sig.get("symbol") or "").strip().upper()
-              if symbol and "/" not in symbol: symbol+="/USD"
-              symbol=symbol.replace("/USDC","/USD").replace("/USDT","/USD")
-              coin=str(sig.get("hl_coin") or sig.get("hlCoin") or d.get("hl_coin") or d.get("hlCoin") or ENGINE_TO_HL.get(symbol) or "").strip()
-              rawside=str(sig.get("side") or sig.get("direction") or "").upper()
-              side="BUY" if rawside in ("BUY","LONG") else ("SELL" if rawside in ("SELL","SHORT") else "")
-              try:
-                  entry=float(sig.get("entry")); sl=float(sig.get("sl")); tp1=float(sig.get("tp1"))
-                  tp2=float(sig.get("tp2") or 0); tp3=float(sig.get("tp3") or 0); risk=float(d.get("risk_usdt") or 10)
-              except Exception: return jsonify({"status":"error","error":"Entry/SL/TP/risk tidak valid"}),400
-              sid=str(sig.get("signal_id") or d.get("signal_id") or d.get("idempotency_key") or "").strip()[:220]
-              now=int(time.time()*1000)
-              try: exp=int(sig.get("expires_at_ms") or d.get("expires_at_ms") or 0)
-              except Exception: exp=0
-              if not exp: exp=now+4*_ai6_tf_ms(sig.get("tf") or sig.get("timeframe") or "1h")
-              if not (symbol and coin and side and sid and entry>0 and sl>0 and tp1>0 and risk>0):
-                  return jsonify({"status":"error","error":"Signal pending tidak lengkap"}),400
-              if exp<=now: return jsonify({"status":"error","error":"Signal sudah expired"}),409
-              if side=="BUY" and not (sl<entry<tp1 and (not tp2 or tp1<tp2) and (not tp3 or (tp2 or tp1)<tp3)):
-                  return jsonify({"status":"error","error":"Urutan LONG Entry/SL/TP tidak valid"}),400
-              if side=="SELL" and not (tp1<entry<sl and (not tp2 or tp2<tp1) and (not tp3 or tp3<(tp2 or tp1))):
-                  return jsonify({"status":"error","error":"Urutan SHORT Entry/SL/TP tidak valid"}),400
-
-              db=get_db()
-              try:
-                  old=db.execute("SELECT * FROM screener_pending_orders WHERE lower(wallet_address)=lower(?) AND signal_id=? LIMIT 1",(wallet,sid)).fetchone()
-                  if old:
-                      return jsonify({"status":str(old["status"]).lower(),"duplicate":True,"real":True,"orderId":old["entry_oid"] or "","signalId":sid}),200
-                  cur=db.execute("""INSERT INTO screener_pending_orders
-                    (user_id,wallet_address,signal_id,symbol,hl_coin,side,entry,sl,tp1,tp2,tp3,risk_usdt,status,expires_at_ms)
-                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",(u["id"],wallet,sid,symbol,coin,side,entry,sl,tp1,tp2,tp3,risk,"SUBMITTING",exp))
-                  rid=cur.lastrowid; db.commit()
-              finally: db.close()
-              try:
-                  key=decrypt_key(u["api_private_key_encrypted"]); ex,info=_ai6_stack(wallet,key)
-                  if coin not in getattr(info,"coin_to_asset",{}): raise RuntimeError("Pair Hyperliquid tidak ditemukan: "+coin)
-                  dex=coin.split(":",1)[0] if ":" in coin else ""; mids=info.all_mids(dex=dex)
-                  mid=float(mids.get(coin) or mids.get(_ai6_base(coin)) or 0)
-                  if not mid>0: raise RuntimeError("Mid price Hyperliquid tidak tersedia")
-                  if side=="BUY" and mid>=entry:
-                      _ai6_upd(rid,"STALE",last_error="entry already crossed"); return jsonify({"status":"stale","error":"Harga sudah melewati entry LONG","mid":mid}),409
-                  if side=="SELL" and mid<=entry:
-                      _ai6_upd(rid,"STALE",last_error="entry already crossed"); return jsonify({"status":"stale","error":"Harga sudah melewati entry SHORT","mid":mid}),409
-                  if _ai6_pos(info,wallet,coin):
-                      _ai6_upd(rid,"BLOCKED",last_error="existing live position"); return jsonify({"status":"blocked","error":"Sudah ada posisi REAL pada pair ini"}),409
-                  if any(not o.get("reduceOnly") for o in _ai6_orders(info,wallet,coin)):
-                      _ai6_upd(rid,"BLOCKED",last_error="existing pending"); return jsonify({"status":"blocked","error":"Sudah ada pending entry REAL pada pair ini"}),409
-
-                  import math
-                  aid=info.coin_to_asset[coin]; dec=int(info.asset_to_sz_decimals.get(aid,4)); step=10**(-dec) if dec>0 else 1
-                  unit=abs(entry-sl); desired=risk/unit; qty=math.floor(desired/step)*step
-                  if qty<=0: raise RuntimeError("Risk terlalu kecil untuk minimum size Hyperliquid")
-                  if qty*entry<AI6_PENDING_MIN_NOTIONAL_USD:
-                      qmin=math.ceil((AI6_PENDING_MIN_NOTIONAL_USD/entry)/step)*step
-                      if qmin*unit>risk*1.02: raise RuntimeError("Minimum notional Hyperliquid akan melebihi risk limit")
-                      qty=qmin
-                  qty=round(qty,dec); actual=qty*unit
-                  if actual>risk*1.02: raise RuntimeError("Size setelah precision melebihi risk limit")
-                  lev=int(HL_MAX_LEVERAGE.get(coin,HL_MAX_LEVERAGE.get(symbol,5)) or 5)
-                  try: ex.update_leverage(lev,coin,is_cross=False)
-                  except Exception as le: logger.warning("AI6 leverage %s: %s",coin,le)
-                  from hyperliquid.utils.types import Cloid
-                  cr="0x"+hashlib.sha256((wallet+"|"+sid+"|ENTRY").encode()).hexdigest()[:32]; cl=Cloid.from_str(cr)
-                  buy=side=="BUY"; lim=ex._slippage_price(coin,buy,0.03,entry)
-                  res=ex.order(coin,buy,qty,lim,{"trigger":{"triggerPx":entry,"isMarket":True,"tpsl":"sl"}},reduce_only=False,cloid=cl)
-                  er=_ai6_err(res)
-                  if er: raise RuntimeError(er)
-                  oid=_ai6_oid(res)
-                  if not oid:
-                      try:
-                          q=info.query_order_by_cloid(wallet,cl); oid=str(((q or {}).get("order") or {}).get("oid") or "")
-                      except Exception: pass
-                  if not oid: raise RuntimeError("Hyperliquid tidak mengembalikan order id")
-                  sts=(((res or {}).get("response") or {}).get("data") or {}).get("statuses") or []
-                  st="FILLED" if any(isinstance(x,dict) and x.get("filled") for x in sts) else "PENDING"
-                  _ai6_upd(rid,st,qty=qty,entry_oid=oid,entry_cloid=cr,last_error="")
-                  logger.info("AI6 REAL pending %s %s %s entry=%s qty=%s oid=%s",wallet[:10],coin,side,entry,qty,oid)
-                  return jsonify({"status":st.lower(),"real":True,"broker":"hyperliquid","orderId":oid,"signalId":sid,
-                                  "hlCoin":coin,"side":side,"entry":entry,"qty":qty,"riskUsdt":risk,
-                                  "actualRiskUsdt":actual,"expiresAtMs":exp}),201
-              except Exception as e:
-                  recovered=""
-                  try:
-                      q=info.query_order_by_cloid(wallet,cl); recovered=str(((q or {}).get("order") or {}).get("oid") or "")
-                  except Exception: pass
-                  if recovered:
-                      _ai6_upd(rid,"PENDING",qty=locals().get("qty",0),entry_oid=recovered,entry_cloid=locals().get("cr",""),last_error="recovered")
-                      return jsonify({"status":"pending","real":True,"recovered":True,"orderId":recovered,"signalId":sid}),201
-                  _ai6_upd(rid,"FAILED",last_error=str(e)[:1000])
-                  return jsonify({"status":"error","error":str(e)}),400
-
-          def _ai6_pending_supervisor():
-              logger.info("AI6 screener pending supervisor started")
-              while True:
-                  try:
-                      db=get_db()
-                      try: rows=db.execute("SELECT * FROM screener_pending_orders WHERE status IN ('SUBMITTING','PENDING','FILLED','PROTECTED') ORDER BY id LIMIT 200").fetchall()
-                      finally: db.close()
-                      for row in rows:
-                          try:
-                              u=_ai6_user(row["wallet_address"],str(row["user_id"])); ok,_=_ai6_user_ok(u)
-                              if not ok: continue
-                              wallet=str(u["wallet_address"]).lower(); key=decrypt_key(u["api_private_key_encrypted"]); ex,info=_ai6_stack(wallet,key)
-                              pos=_ai6_pos(info,wallet,row["hl_coin"]); orders=_ai6_orders(info,wallet,row["hl_coin"]); oid=str(row["entry_oid"] or "")
-                              live=any((not o.get("reduceOnly")) and str(o.get("oid") or "")==oid for o in orders); now=int(time.time()*1000)
-                              if row["status"] in ("SUBMITTING","PENDING"):
-                                  if live:
-                                      if row["expires_at_ms"] and now>=int(row["expires_at_ms"]):
-                                          ex.cancel(row["hl_coin"],int(oid)); _ai6_upd(row["id"],"EXPIRED",last_error="")
-                                      continue
-                                  if pos and pos["side"]==row["side"]:
-                                      _ai6_upd(row["id"],"FILLED",last_error=""); _ai6_protect(_ai6_row(row["id"]),ex,info,pos); continue
-                                  if oid:
-                                      filled=False
-                                      try: filled=any(str(f.get("oid") or "")==oid for f in (info.user_fills(wallet) or []))
-                                      except Exception: pass
-                                      _ai6_upd(row["id"],"CLOSED" if filled else ("EXPIRED" if row["expires_at_ms"] and now>=int(row["expires_at_ms"]) else "CANCELED"),last_error="")
-                                  continue
-                              if row["status"] in ("FILLED","PROTECTED"):
-                                  if not pos or pos["side"]!=row["side"]: _ai6_upd(row["id"],"CLOSED",last_error=""); continue
-                                  _ai6_protect(row,ex,info,pos)
-                          except Exception as e:
-                              try: _ai6_upd(row["id"],row["status"],last_error=str(e)[:1000])
-                              except Exception: pass
-                              logger.warning("AI6 pending supervisor row=%s error=%s",row["id"],e)
-                  except Exception as e: logger.error("AI6 pending supervisor cycle error: %s",e)
-                  time.sleep(AI6_PENDING_POLL_SECONDS)
-          _ai6_pending_init()
-          # AI6_REAL_PENDING_V1_END
-          '''
-          if START in s:
-              a=s.index(START); b=s.index(END,a)+len(END); s=s[:a]+block.strip()+"\n"+s[b:]
-          else:
-              anchor='@app.route("/api/bot-trading/health", methods=["GET"])'
-              if anchor not in s: anchor='if __name__ == "__main__":'
-              if anchor not in s: raise SystemExit("backend anchor missing")
-              s=s.replace(anchor,block.strip()+"\n\n"+anchor,1)
-          if "AI6_PENDING_SUPERVISOR_START" not in s:
-              needle="    subscription_mgr.start()"; i=s.rfind(needle)
-              if i<0: raise SystemExit("supervisor start anchor missing")
-              j=i+len(needle)
-              starter='\n    # AI6_PENDING_SUPERVISOR_START\n    threading.Thread(target=_ai6_pending_supervisor,name="ai6-screener-pending",daemon=True).start()\n    # AI6_PENDING_SUPERVISOR_END'
-              s=s[:j]+starter+s[j:]
-          p.write_text(s,"utf-8")
-          PY
-          python3 -m py_compile "$BOT"
-
-          python3 - "$WR" <<'PY'
-          from pathlib import Path
-          import re,sys
-          root=Path(sys.argv[1]); changed=[]; routed=[]
-          files=sorted((root/"assets/js").glob("CryptoMultiTFScreener*.js"))
-          for p in files:
-              s=p.read_text("utf-8")
-              if "/trading/execution/manual-deploy" in s:
-                  s=s.replace("/trading/execution/manual-deploy","/api/bot-trading/pending-open")
-              pos=s.find("/api/bot-trading/pending-open")
-              if pos<0: continue
-              routed.append(p.name)
-              tail=s[pos:pos+2600]
-              if "confirm_real" not in tail:
-                  m=re.search(r'body:JSON\.stringify\(([A-Za-z_$][A-Za-z0-9_$]*)\)',tail)
-                  if not m: raise SystemExit("payload injection not found: "+p.name)
-                  v=m.group(1)
-                  wallet='(function(){try{var u=JSON.parse(localStorage.getItem("session_user")||"{}");return (window.activeHyperliquidWallet&&window.activeHyperliquidWallet())||window._userWallet||(u.email&&localStorage.getItem("ot_wallet_"+u.email))||""}catch(e){return window._userWallet||""}})()'
-                  new='body:JSON.stringify(Object.assign({},'+v+',{confirm_real:true,wallet:'+wallet+'}))'
-                  a=pos+m.start(); b=pos+m.end(); s=s[:a]+new+s[b:]
-              for a,b in {
-                "Paper ·":"HL Pending ·","✓ Paper":"✓ Pending","🧪 Paper":"⚡ HL Pending",
-                "Deployed (paper):":"Pending Hyperliquid:",
-                "Paper deploy via broker (live disabled until owner approves vault + canary)":"REAL Hyperliquid pending order · broker-side trigger"
-              }.items():
-                  s=s.replace(a,b)
-              p.write_text(s,"utf-8"); changed.append(p.name)
-          if not routed: raise SystemExit("no screener asset routed to REAL pending")
-          refs=[]
-          sources=[root/"index.html"]+list((root/"assets/js").glob("*.js"))
-          for name in routed:
-              for q in sources:
-                  if q.name==name: continue
-                  try:
-                      if name in q.read_text("utf-8",errors="ignore"): refs.append(name); break
-                  except Exception: pass
-          if not refs: raise SystemExit("no active screener reference found")
-          for name in refs:
-              t=(root/"assets/js"/name).read_text("utf-8")
-              if "/api/bot-trading/pending-open" not in t or "confirm_real" not in t:
-                  raise SystemExit("active screener not wired: "+name)
-          print("PATCHED_SCREENER="+",".join(changed))
-          print("ACTIVE_SCREENER="+",".join(refs))
-          PY
-
-          for f in "${SFILES[@]}"; do node --check "$f" >/dev/null; done
-          grep -q 'AI6_REAL_PENDING_V1_START' "$BOT"
-          grep -q '_ai6_pending_supervisor' "$BOT"
-          grep -q 'frontendOpenOrders' "$WR/compounding_live.html"
-          ! grep -RIl --include='CryptoMultiTFScreener*.js' '/trading/execution/manual-deploy' "$WR/assets/js" >/tmp/ai6-old.txt
-          CNT="$(grep -RIl --include='CryptoMultiTFScreener*.js' '/api/bot-trading/pending-open' "$WR/assets/js"|wc -l|tr -d ' ')"
-          test "$CNT" -gt 0
-
-          OLD="$(pgrep -f '[b]ot_trading_api.py'|head -n1||true)"
-          PY=/usr/bin/python3
-          if [ -n "$OLD" ] && [ -e "/proc/$OLD/exe" ]; then PY="$(readlink -f "/proc/$OLD/exe"||echo /usr/bin/python3)";
-          elif [ -x "$BR/bot-trading/venv/bin/python" ]; then PY="$BR/bot-trading/venv/bin/python"; fi
-          P="$(pgrep -f '[b]ot_trading_api.py'||true)"; [ -z "$P" ] || kill $P
-          sleep 2
-          if ! pgrep -f '[b]ot_trading_api.py' >/dev/null; then nohup "$PY" "$BOT" >/tmp/bot_trading_api_ai6.log 2>&1 & fi
-          ok=0
-          for i in $(seq 1 30); do
-            curl -fsS --max-time 5 http://127.0.0.1:11175/api/bot-trading/health >/tmp/ai6-health.json 2>/dev/null && { ok=1; break; }
-            sleep 1
-          done
-          test "$ok" = 1
-
-          CODE="$(curl -sS -o /tmp/ai6-invalid.json -w '%{http_code}' --max-time 10 -H 'Content-Type: application/json' \
-            -X POST http://127.0.0.1:11175/api/bot-trading/pending-open \
-            --data '{"confirm_real":true,"wallet":"invalid","signal":{"symbol":"BTC/USD","hl_coin":"BTC","side":"LONG","entry":1,"sl":0.9,"tp1":1.2,"tf":"1h"},"risk_usdt":10,"idempotency_key":"ai6-safe-invalid"}')"
-          case "$CODE" in 400|403|404) ;; *) echo unsafe_probe=$CODE; exit 42;; esac
-
-          PH="$(curl -sS -o /tmp/ai6-public-health.json -w '%{http_code}' --max-time 15 https://copytolive.com/api/bot-trading/health||true)"
-          test "$PH" = 200
-          PUB=0
-          F="$(grep -RIl --include='CryptoMultiTFScreener*.js' '/api/bot-trading/pending-open' "$WR/assets/js"|head -n1)"
-          N="$(basename "$F")"
-          for i in $(seq 1 12); do
-            curl -fsS --max-time 20 "https://copytolive.com/assets/js/$N?ai6=$ID-$i" -o /tmp/ai6-public.js \
-              && grep -q '/api/bot-trading/pending-open' /tmp/ai6-public.js && { PUB=1; break; }
-            sleep 2
-          done
-          test "$PUB" = 1
-
-          AFTER="$(sha256sum "$BOT"|awk '{print $1}')"
-          echo ACCEPTANCE=PASS
-          echo BACKEND_BEFORE_SHA=$BEFORE
-          echo BACKEND_AFTER_SHA=$AFTER
-          echo SCREENER_PENDING_ASSETS=$CNT
-          echo PUBLIC_HEALTH=$PH
-          echo INVALID_ORDER_PROBE_HTTP=$CODE
-          echo BACKUP=$BAK
-          trap - ERR
-          REMOTE
-
-          set +e
-          ssh -i ~/.ssh/ai6 -p "$PORT" -o BatchMode=yes "$SSH_USER@$SSH_HOST" "bash -s -- '$ID'" </tmp/ai6-remote.sh >/tmp/ai6-run.log 2>&1
-          RC=$?
-          set -e
-          cat /tmp/ai6-run.log
-          echo "rc=$RC" >> "$GITHUB_OUTPUT"
-
-      - name: Record result
-        if: always()
+      - name: Deploy hardened V2 and accept without real order
         shell: bash
         env:
           ID: ${{ steps.req.outputs.id }}
           OUT: ${{ steps.req.outputs.out }}
-          RC: ${{ steps.integrate.outputs.rc }}
         run: |
           set -euo pipefail
           mkdir -p "$(dirname "$OUT")"
-          python3 - "$OUT" "$ID" "${RC:-99}" /tmp/ai6-run.log <<'PY'
-          import json,sys
-          from pathlib import Path
-          out,id_,rc,lp=sys.argv[1:5]
-          t=Path(lp).read_text("utf-8",errors="ignore") if Path(lp).exists() else ""
-          keep={}
-          for ln in t.splitlines():
-              if "=" in ln:
-                  k,v=ln.split("=",1)
-                  if k in {"ACCEPTANCE","BACKEND_BEFORE_SHA","BACKEND_AFTER_SHA","SCREENER_PENDING_ASSETS","PUBLIC_HEALTH",
-                           "INVALID_ORDER_PROBE_HTTP","BACKUP","PATCHED_SCREENER","ACTIVE_SCREENER","ROLLBACK"}: keep[k]=v
-          ok=rc=="0" and keep.get("ACCEPTANCE")=="PASS"
-          Path(out).write_text(json.dumps({"id":id_,"ok":ok,"acceptance":"PASS" if ok else "FAIL","return_code":int(rc),**keep,"log_tail":t[-7000:]},indent=2)+"\n")
-          PY
-          git config user.name "CopyToLive AI6 Real Pending"
-          git config user.email "copytolive-ai6@local.invalid"
-          git add "$OUT"
-          git commit -m "ai6 real pending: $ID" || true
-          for i in 1 2 3 4 5; do
-            git pull --rebase origin main || { git rebase --abort || true; sleep "$i"; continue; }
-            git push origin HEAD:main && break
-            sleep "$i"
-          done
+          REMOTE="/tmp/copytolive-ai6-$ID-$GITHUB_RUN_ID"
+          cat >/tmp/ai6-v2-remote-run.sh <<'REMOTE_SCRIPT'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          ID="$1"
+          DEP=/tmp/ai6-live-pending-v3-deploy.json
+          ACC=/tmp/ai6-live-pending-v3-accept.json
+          RB=/tmp/ai6-live-pending-v3-rollback.json
+          rm -f "$DEP" "$ACC" "$RB" /tmp/ai6-v2-deploy.err /tmp/ai6-v2-accept.err /tmp/ai6-v2-rollback.err
 
-      - name: Enforce
+          set +e
+          AI6_REQUEST_ID="$ID" python3 deploy.py >"$DEP" 2>/tmp/ai6-v2-deploy.err
+          DRC=$?
+          set -e
+          if [ "$DRC" -ne 0 ]; then
+            python3 - "$DEP" /tmp/ai6-v2-deploy.err <<'PY'
+          import json,pathlib,sys
+          dp,ep=map(pathlib.Path,sys.argv[1:3])
+          try:d=json.loads(dp.read_text()) if dp.exists() and dp.stat().st_size else {}
+          except Exception:d={}
+          print(json.dumps({"ok":False,"acceptance":"FAIL","stage":"deploy","deploy":d,"stderr":ep.read_text()[-5000:] if ep.exists() else "","real_order_submitted_during_acceptance":False}))
+          PY
+            exit 20
+          fi
+
+          python3 -m json.tool "$DEP" >/dev/null
+          set +e
+          python3 accept.py >"$ACC" 2>/tmp/ai6-v2-accept.err
+          ARC=$?
+          set -e
+          if [ "$ARC" -ne 0 ]; then
+            set +e
+            AI6_DEPLOY_JSON="$DEP" python3 rollback.py >"$RB" 2>/tmp/ai6-v2-rollback.err
+            RRC=$?
+            set -e
+            python3 - "$DEP" "$ACC" "$RB" /tmp/ai6-v2-accept.err /tmp/ai6-v2-rollback.err "$RRC" <<'PY'
+          import json,pathlib,sys
+          dp,ap,rp,ae,re,rrc=sys.argv[1:7]
+          def load(p):
+              p=pathlib.Path(p)
+              try:return json.loads(p.read_text()) if p.exists() and p.stat().st_size else {}
+              except Exception:return {}
+          print(json.dumps({"ok":False,"acceptance":"FAIL","stage":"acceptance","deploy":load(dp),"acceptance_result":load(ap),"rollback":load(rp),"accept_stderr":pathlib.Path(ae).read_text()[-5000:] if pathlib.Path(ae).exists() else "","rollback_stderr":pathlib.Path(re).read_text()[-5000:] if pathlib.Path(re).exists() else "","rollback_rc":int(rrc),"real_order_submitted_during_acceptance":False}))
+          PY
+            exit 21
+          fi
+
+          python3 - "$DEP" "$ACC" <<'PY'
+          import json,pathlib,sys
+          d=json.loads(pathlib.Path(sys.argv[1]).read_text())
+          a=json.loads(pathlib.Path(sys.argv[2]).read_text())
+          ok=bool(d.get("ok")) and bool(a.get("ok")) and a.get("acceptance")=="PASS"
+          print(json.dumps({"ok":ok,"acceptance":"PASS" if ok else "FAIL","stage":"complete","deploy":d,"acceptance_result":a,"real_order_submitted_during_acceptance":False}))
+          raise SystemExit(0 if ok else 22)
+          PY
+          REMOTE_SCRIPT
+          chmod +x /tmp/ai6-v2-remote-run.sh
+
+          ssh -i "$HOME/.ssh/ai6-live-pending" -p "$SSH_PORT_SECRET" -o BatchMode=yes "$SSH_USER@$SSH_HOST" "mkdir -p '$REMOTE'"
+          scp -q -i "$HOME/.ssh/ai6-live-pending" -P "$SSH_PORT_SECRET" ai6-live-pending-v3/deploy.py ai6-live-pending-v3/accept.py ai6-live-pending-v3/rollback.py /tmp/ai6-v2-remote-run.sh "$SSH_USER@$SSH_HOST:$REMOTE/"
+
+          set +e
+          ssh -i "$HOME/.ssh/ai6-live-pending" -p "$SSH_PORT_SECRET" -o BatchMode=yes "$SSH_USER@$SSH_HOST" "cd '$REMOTE' && bash ai6-v2-remote-run.sh '$ID'" >"$OUT"
+          RC=$?
+          set -e
+          ssh -i "$HOME/.ssh/ai6-live-pending" -p "$SSH_PORT_SECRET" -o BatchMode=yes "$SSH_USER@$SSH_HOST" "rm -rf '$REMOTE'" >/dev/null 2>&1 || true
+
+          test -s "$OUT"
+          python3 -m json.tool "$OUT" >/dev/null
+          if [ "$RC" -ne 0 ]; then cat "$OUT"; exit "$RC"; fi
+
+      - name: Commit production receipt
         if: always()
         shell: bash
+        env:
+          OUT: ${{ steps.req.outputs.out }}
         run: |
-          python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); raise SystemExit(0 if d.get("ok") else 1)' "${{ steps.req.outputs.out }}"
+          set -euo pipefail
+          test -s "$OUT"
+          git config user.name "CopyToLive AI6 Real Pending V2"
+          git config user.email "copytolive-ai6@local.invalid"
+          git add "$OUT"
+          git commit -m "ai6 real pending v2: ${{ steps.req.outputs.id }}" || true
+          for n in 1 2 3 4 5 6; do
+            git pull --rebase origin main || { git rebase --abort || true; sleep "$n"; continue; }
+            git push origin HEAD:main && exit 0
+            sleep "$n"
+          done
+          exit 1
+
+      - name: Enforce PASS
+        if: always()
+        shell: bash
+        env:
+          OUT: ${{ steps.req.outputs.out }}
+        run: |
+          python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));raise SystemExit(0 if d.get("ok") and d.get("acceptance")=="PASS" and not d.get("real_order_submitted_during_acceptance") else 1)' "$OUT"

@@ -1,0 +1,218 @@
+name: AI4 Fundamental Candidate QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai4-fundamental-candidate-qa-requests/**"
+
+permissions:
+  contents: write
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai4-fundamental-candidate-qa-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "out=qa/fundamental/$ID/report.json" >> "$GITHUB_OUTPUT"
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install chromium --with-deps >/dev/null
+
+      - name: Start local candidate server
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/ai4-candidate-http.log 2>&1 &
+          echo $! >/tmp/ai4-candidate-http.pid
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:8000/qa/fundamental/ai4-candidate-remove-duplicate/fundamental.html >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/ai4-candidate-http.log
+          exit 1
+
+      - name: Browser QA candidate
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          OUT: ${{ steps.req.outputs.out }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUT")"
+          cat > .ai4-candidate-qa.mjs <<'JS'
+          import fs from 'fs';
+          import { chromium } from 'playwright';
+
+          const id=process.env.ID;
+          const outPath=process.env.OUT;
+          const candidate='http://127.0.0.1:8000/qa/fundamental/ai4-candidate-remove-duplicate/fundamental.html?embedded=1&qa='+encodeURIComponent(id);
+          const upstream='https://copytolive.com';
+          const report={id,acceptance:'FAIL',ok:false,candidate,devices:{}};
+          const browser=await chromium.launch({headless:true});
+
+          async function run(device,viewport){
+            const ctx=await browser.newContext({viewport});
+            await ctx.route('**/api/fundamental/**',async route=>{
+              try{
+                const u=new URL(route.request().url());
+                const resp=await ctx.request.get(upstream+u.pathname+u.search,{timeout:90000,headers:{Accept:'application/json'}});
+                const body=await resp.body();
+                const headers=resp.headers();
+                await route.fulfill({
+                  status:resp.status(),
+                  headers:{'content-type':headers['content-type']||'application/json','cache-control':'no-store'},
+                  body
+                });
+              }catch(e){
+                await route.fulfill({status:502,contentType:'application/json',body:JSON.stringify({ok:false,error:String(e)})});
+              }
+            });
+            const page=await ctx.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+            page.on('console',m=>{if(m.type()==='error'&&!/favicon|429|Failed to load resource/i.test(m.text()))errors.push('console: '+m.text())});
+            const rec={viewport,ok:false};
+            try{
+              const r=await page.goto(candidate,{waitUntil:'domcontentloaded',timeout:60000});
+              rec.http=r?.status();
+              await page.locator('.symbol').waitFor({state:'visible',timeout:90000});
+              rec.symbol=(await page.locator('.symbol').first().innerText()).trim();
+              rec.nav=await page.locator('[data-main-nav]').allInnerTexts();
+              rec.topFilterBars=await page.locator('#fundSearchBar').count();
+              rec.topSearchButtons=await page.locator('#fundSearchBtn').count();
+              rec.topFilterFields=await page.locator('#topMaxPE,#topMinROE,#topMaxDE,#topMinGrowth').count();
+              rec.secondaryPresetControls=await page.locator('[data-preset],.screenerFilters .preset').count();
+              rec.secondaryFilterRows=await page.locator('.screenerFilters').count();
+
+              // Search must work.
+              await page.locator('#search').fill('MSFT');
+              await page.locator('#results.show').waitFor({state:'visible',timeout:30000});
+              rec.searchResults=await page.locator('#results .result').count();
+              await page.locator('#search').fill('');
+              await page.locator('#results').evaluate(el=>el.classList.remove('show'));
+
+              // All 11 tabs must render.
+              const tabs=['Overview','Valuation','Growth','Profitability','Financials','Health','Ownership','Insiders','Filings','Estimates','Compare'];
+              rec.tabs=[];
+              for(const t of tabs){
+                const b=page.locator('.tab').filter({hasText:t}).first();
+                await b.click();
+                await page.locator('.tab.active').filter({hasText:t}).waitFor({state:'visible',timeout:15000});
+                rec.tabs.push(t);
+              }
+
+              // Stress the old async null-DOM race: launch Compare, then remove compareResult immediately.
+              const ci=page.locator('#compareInput');
+              if(await ci.count()){
+                await ci.fill('AAPL,MSFT');
+                await page.locator('#compareBtn').click();
+                await page.locator('.tab').filter({hasText:'Overview'}).first().click();
+                await page.waitForTimeout(900);
+              }
+
+              // Screener default universe.
+              await page.getByRole('button',{name:'Screener',exact:true}).click();
+              await page.locator('#screenBody').waitFor({state:'attached',timeout:90000});
+              rec.defaultRows=await page.locator('#screenBody tr').count();
+              rec.secondaryPresetControlsAfter=await page.locator('[data-preset],.screenerFilters .preset').count();
+              rec.secondaryFilterRowsAfter=await page.locator('.screenerFilters').count();
+              rec.activeFilterSummary=await page.getByText(/Active filters:/).count();
+
+              // Numeric search bar semantics.
+              await page.locator('#topMaxPE').selectOption('50');
+              await page.locator('#topMinROE').selectOption('5');
+              await page.locator('#topMaxDE').selectOption('');
+              await page.locator('#topMinGrowth').selectOption('');
+              await page.locator('#fundSearchBtn').click();
+              await page.locator('#screenBody').waitFor({state:'attached',timeout:90000});
+              await page.waitForTimeout(50);
+              rec.filteredRows=await page.locator('#screenBody tr').count();
+
+              // Watchlist survives mode switch.
+              await page.getByRole('button',{name:'Stock Research',exact:true}).click();
+              await page.locator('.symbol').waitFor({state:'visible',timeout:90000});
+              const wb=page.locator('#watchBtn');
+              if(await wb.count()){
+                const txt=(await wb.innerText()).trim();
+                if(!/In Watchlist/.test(txt))await wb.click();
+              }
+              await page.getByRole('button',{name:'Watchlist',exact:true}).click();
+              await page.getByText('WATCHLIST',{exact:true}).waitFor({state:'visible',timeout:15000});
+              rec.watchlistHasAAPL=(await page.getByText('AAPL',{exact:true}).count())>0;
+
+              const overflow=await page.evaluate(()=>({sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth}));
+              rec.overflow=overflow.sw>overflow.cw+8;
+              rec.errors=errors;
+
+              rec.ok=rec.http===200&&rec.symbol==='AAPL'&&
+                rec.nav.length===6&&['Home','Fundamental','Signal Scan','Crypto','Hyperliquid','Renko'].every(x=>rec.nav.includes(x))&&
+                rec.topFilterBars===1&&rec.topSearchButtons===1&&rec.topFilterFields===4&&
+                rec.secondaryPresetControls===0&&rec.secondaryFilterRows===0&&
+                rec.secondaryPresetControlsAfter===0&&rec.secondaryFilterRowsAfter===0&&
+                rec.activeFilterSummary===1&&rec.searchResults>0&&rec.tabs.length===11&&
+                rec.defaultRows===247&&rec.filteredRows===47&&rec.watchlistHasAAPL&&
+                (device==='desktop'||!rec.overflow)&&
+                !errors.some(x=>x.startsWith('pageerror:'));
+            }catch(e){
+              rec.error=e.stack||e.message;
+              rec.errors=errors;
+            }
+            report.devices[device]=rec;
+            await ctx.close();
+          }
+
+          await run('desktop',{width:1440,height:900});
+          await run('mobile',{width:390,height:844});
+          await browser.close();
+          report.ok=report.devices.desktop?.ok===true&&report.devices.mobile?.ok===true;
+          report.acceptance=report.ok?'PASS':'FAIL';
+          fs.writeFileSync(outPath,JSON.stringify(report,null,2));
+          console.log(JSON.stringify(report,null,2));
+          if(!report.ok)process.exit(3);
+          JS
+          node ./.ai4-candidate-qa.mjs
+
+      - name: Commit report
+        if: always()
+        shell: bash
+        env:
+          OUT: ${{ steps.req.outputs.out }}
+        run: |
+          set -euo pipefail
+          test -s "$OUT"
+          git config user.name "AI4 Fundamental Candidate QA"
+          git config user.email "ai4-candidate-qa@local.invalid"
+          git add "$OUT"
+          git commit -m "ai4 Fundamental candidate QA: ${{ steps.req.outputs.id }}" || true
+          for n in 1 2 3 4 5 6; do
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; sleep "$n"; continue; }
+            git push origin HEAD:main && exit 0
+            sleep "$n"
+          done
+          exit 1
+
+      - name: Enforce PASS
+        if: always()
+        shell: bash
+        env:
+          OUT: ${{ steps.req.outputs.out }}
+        run: |
+          python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));raise SystemExit(0 if d.get("acceptance")=="PASS" else 1)' "$OUT"

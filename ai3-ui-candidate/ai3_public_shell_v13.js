@@ -1,4 +1,4 @@
-(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.2";
+(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.3";
 const K="ot_backtest_view_mode",H=["lucide-coins","lucide-orbit","lucide-circle-dollar-sign","lucide-trending-up"];
 const norm=s=>String(s||"").replace(/\s+/g," ").trim();
 const side=c=>Array.from(document.querySelectorAll("#desktop-sidebar nav button")).find(b=>b.querySelector("svg."+c))||null;
@@ -71,12 +71,10 @@ function cleanupTopHyper(){
 }
 function normalizeTopNav(){
   const mobile=window.innerWidth<768,w=mobile?76:88,g=mobile?0:4,h=mobile?59:66,icon=mobile?28:32,font=mobile?11:13,total=w*5+g*4;
-  const sb=document.querySelector("#desktop-sidebar"),sr=sb&&sb.getBoundingClientRect(),ss=sb&&getComputedStyle(sb);
-  const sideW=!mobile&&sr&&sr.width>0&&ss.display!=="none"&&ss.visibility!=="hidden"?sr.width:0;
   Array.from(document.querySelectorAll('nav[data-ai3-primary="1"]')).forEach(nav=>{
     css(nav,"gap",g+"px");css(nav,"width",total+"px");css(nav,"min-width",total+"px");css(nav,"max-width",total+"px");
     css(nav,"justify-content","center");css(nav,"align-items","center");css(nav,"overflow","visible");css(nav,"padding-left","0px");css(nav,"padding-right","0px");
-    css(nav,"transform",sideW?"translateX("+(-sideW/2)+"px)":"none");
+    css(nav,"transform","none");
     const keys=["home","fundamental","signal","crypto","renko"];
     keys.forEach((k,o)=>{
       const b=nav.querySelector(':scope > button[data-ai3-nav-key="'+k+'"]');if(!b)return;
@@ -85,6 +83,8 @@ function normalizeTopNav(){
       const svg=b.querySelector("svg");if(svg){css(svg,"width",icon+"px");css(svg,"height",icon+"px")}
       const l=label(b);if(l){css(l,"font-size",font+"px");css(l,"font-weight","600");css(l,"line-height",mobile?"16.5px":"19.5px");css(l,"height","auto")}
     });
+    const nr=nav.getBoundingClientRect(),dx=(window.innerWidth/2)-(nr.left+nr.width/2);
+    css(nav,"transform",Math.abs(dx)>0.5?"translateX("+dx+"px)":"none");
   });
 }
 function fitFilterBars(){

@@ -61,12 +61,6 @@ jobs:
           raw=p.read_bytes()
           current=hashlib.sha256(raw).hexdigest()
           text=raw.decode("utf-8")
-          old=""" '<div class="screenerFilters">'+['All','Value','Quality','Growth','Dividend','Compounder','Low Debt','Complete Data'].map(x=>'<button class="preset '+(state.screenPreset===x?'active':'')+'" data-preset="'+x+'">'+x+'</button>').join('')+
- '<span class="pill ok">Numeric filters: '+(state.screenNumeric.maxPE==null?'P/E Any':'P/E ≤ '+esc(state.screenNumeric.maxPE))+' · '+(state.screenNumeric.minROE==null?'ROE Any':'ROE ≥ '+esc(state.screenNumeric.minROE)+'%')+' · '+(state.screenNumeric.maxDE==null?'D/E Any':'D/E ≤ '+esc(state.screenNumeric.maxDE))+' · '+(state.screenNumeric.minGrowth==null?'Growth Any':'Growth ≥ '+esc(state.screenNumeric.minGrowth)+'%')+'</span></div>'+
-"""
-          new=""" '<div class="sourcebar"><span class="pill ok">Active filters: '+(state.screenNumeric.maxPE==null?'P/E Any':'P/E ≤ '+esc(state.screenNumeric.maxPE))+' · '+(state.screenNumeric.minROE==null?'ROE Any':'ROE ≥ '+esc(state.screenNumeric.minROE)+'%')+' · '+(state.screenNumeric.maxDE==null?'D/E Any':'D/E ≤ '+esc(state.screenNumeric.maxDE))+' · '+(state.screenNumeric.minGrowth==null?'Growth Any':'Growth ≥ '+esc(state.screenNumeric.minGrowth)+'%')+'</span></div>'+
-"""
-          bind=" document.querySelectorAll('[data-preset]').forEach(btn=>btn.onclick=()=>{state.screenPreset=btn.dataset.preset;renderScreener()});\n"
           expected=os.environ["EXPECTED"]
           already=("data-preset=" not in text and '<div class="screenerFilters">' not in text and 'Active filters:' in text)
           if current != expected and not already:
@@ -75,10 +69,16 @@ jobs:
           if already:
               print(f"PATCH_ALREADY_PRESENT sha256={current}")
               raise SystemExit(0)
-          if text.count(old)!=1:
-              print("PATCH_ANCHOR_COUNT", text.count(old), file=sys.stderr)
+          start_anchor=" '<div class=\"screenerFilters\">'+['All','Value','Quality','Growth','Dividend','Compounder','Low Debt','Complete Data']"
+          end_anchor=" '<div class=\"tableWrap\">"
+          start=text.find(start_anchor)
+          end=text.find(end_anchor,start)
+          if start<0 or end<0:
+              print(f"PATCH_ANCHOR_MISSING start={start} end={end}", file=sys.stderr)
               raise SystemExit(21)
-          text=text.replace(old,new,1)
+          replacement=" '<div class=\"sourcebar\"><span class=\"pill ok\">Active filters: '+(state.screenNumeric.maxPE==null?'P/E Any':'P/E ≤ '+esc(state.screenNumeric.maxPE))+' · '+(state.screenNumeric.minROE==null?'ROE Any':'ROE ≥ '+esc(state.screenNumeric.minROE)+'%')+' · '+(state.screenNumeric.maxDE==null?'D/E Any':'D/E ≤ '+esc(state.screenNumeric.maxDE))+' · '+(state.screenNumeric.minGrowth==null?'Growth Any':'Growth ≥ '+esc(state.screenNumeric.minGrowth)+'%')+'</span></div>'+\n"
+          text=text[:start]+replacement+text[end:]
+          bind=" document.querySelectorAll('[data-preset]').forEach(btn=>btn.onclick=()=>{state.screenPreset=btn.dataset.preset;renderScreener()});\n"
           text=text.replace(bind,"",1)
           if text.count('id="fundSearchBar"')!=1 or text.count('id="fundSearchBtn"')!=1:
               print("TOP_FILTER_DUPLICATE_AFTER_PATCH", file=sys.stderr)

@@ -1,0 +1,96 @@
+{
+  "id": "ai4-20260903-0948-candidate-remove-duplicate-racefix",
+  "acceptance": "PASS",
+  "ok": true,
+  "candidate": "http://127.0.0.1:8000/qa/fundamental/ai4-candidate-remove-duplicate/fundamental.html?embedded=1&qa=ai4-20260903-0948-candidate-remove-duplicate-racefix",
+  "devices": {
+    "desktop": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "ok": true,
+      "http": 200,
+      "symbol": "AAPL",
+      "nav": [
+        "Home",
+        "Fundamental",
+        "Signal Scan",
+        "Crypto",
+        "Hyperliquid",
+        "Renko"
+      ],
+      "topFilterBars": 1,
+      "topSearchButtons": 1,
+      "topFilterFields": 4,
+      "secondaryPresetControls": 0,
+      "secondaryFilterRows": 0,
+      "searchResults": 1,
+      "tabs": [
+        "Overview",
+        "Valuation",
+        "Growth",
+        "Profitability",
+        "Financials",
+        "Health",
+        "Ownership",
+        "Insiders",
+        "Filings",
+        "Estimates",
+        "Compare"
+      ],
+      "defaultRows": 247,
+      "secondaryPresetControlsAfter": 0,
+      "secondaryFilterRowsAfter": 0,
+      "activeFilterSummary": 1,
+      "filteredRows": 47,
+      "watchlistHasAAPL": true,
+      "overflow": false,
+      "errors": []
+    },
+    "mobile": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "ok": true,
+      "http": 200,
+      "symbol": "AAPL",
+      "nav": [
+        "Home",
+        "Fundamental",
+        "Signal Scan",
+        "Crypto",
+        "Hyperliquid",
+        "Renko"
+      ],
+      "topFilterBars": 1,
+      "topSearchButtons": 1,
+      "topFilterFields": 4,
+      "secondaryPresetControls": 0,
+      "secondaryFilterRows": 0,
+      "searchResults": 1,
+      "tabs": [
+        "Overview",
+        "Valuation",
+        "Growth",
+        "Profitability",
+        "Financials",
+        "Health",
+        "Ownership",
+        "Insiders",
+        "Filings",
+        "Estimates",
+        "Compare"
+      ],
+      "defaultRows": 247,
+      "secondaryPresetControlsAfter": 0,
+      "secondaryFilterRowsAfter": 0,
+      "activeFilterSummary": 1,
+      "filteredRows": 47,
+      "watchlistHasAAPL": true,
+      "overflow": false,
+      "errors": []
+    }
+  }
+}

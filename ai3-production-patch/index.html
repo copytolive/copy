@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+  <!-- Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Google Fonts: Inter + JetBrains Mono (Binance Style) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- âââ SEO META TAGS âââ -->
+  <title>OpenTrue â Platform Properti, Trading & Marketplace Indonesia</title>
+  <meta name="description"
+    content="Platform terpercaya untuk jual beli properti, trading saham & crypto, dan marketplace Indonesia. Simulasi KPR, auto trade AI, dan escrow payment. Daftar gratis!" />
+  <meta name="keywords"
+    content="properti Indonesia, trading saham, auto trade, crypto, forex, tanah kavling, KPR, investasi, marketplace, opentrue" />
+  <meta name="author" content="OpenTrue" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <link rel="canonical" href="https://opentrue.org" />
+
+  <!-- Geo targeting -->
+  <meta name="geo.region" content="ID" />
+  <meta name="geo.placename" content="Indonesia" />
+  <meta name="language" content="Indonesian" />
+  <meta name="content-language" content="id" />
+
+  <!-- âââ OPEN GRAPH (Facebook, LinkedIn, WhatsApp) âââ -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="OpenTrue" />
+  <meta property="og:title" content="OpenTrue â Platform Properti, Trading & Marketplace Indonesia" />
+  <meta property="og:description"
+    content="Jual beli properti, trading saham & crypto, dan marketplace terpercaya. Simulasi KPR, auto trade AI, dan escrow payment." />
+  <meta property="og:image" content="https://opentrue.org/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="OpenTrue - Platform Properti, Trading & Marketplace Indonesia" />
+  <meta property="og:url" content="https://opentrue.org" />
+  <meta property="og:locale" content="id_ID" />
+  <meta property="og:locale:alternate" content="en_US" />
+
+  <!-- âââ TWITTER CARD âââ -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="OpenTrue â Platform Properti, Trading & Marketplace" />
+  <meta name="twitter:description"
+    content="Platform terpercaya untuk properti, auto trade AI, dan marketplace Indonesia." />
+  <meta name="twitter:image" content="https://opentrue.org/og-image.png" />
+  <meta name="twitter:site" content="@opentrue" />
+  <meta name="twitter:creator" content="@opentrue" />
+
+  <!-- âââ FAVICONS âââ -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <!-- build: webhook-auto-deploy 2026-05-23 v2 -->
+
+  <!-- âââ PWA & THEME âââ -->
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="OpenTrue" />
+  <meta name="full-screen" content="yes" />
+  <meta name="browsermode" content="application" />
+  <meta name="msapplication-TileColor" content="#000000" />
+
+  <!-- âââ GOOGLE IDENTITY SERVICES (Social Login) âââ -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <script>
+    // Temporary compatibility: this app still uses Tailwind utility classes before
+    // a local PostCSS migration lands. Hide the CDN production advisory so real
+    // runtime issues stay visible in the console.
+    (function () {
+      const originalWarn = console.warn.bind(console);
+      console.warn = function (...args) {
+        const msg = String(args[0] || '');
+        if (msg.includes('cdn.tailwindcss.com should not be used in production')) return;
+        originalWarn(...args);
+      };
+    })();
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            // Binance Design System
+            'bn-body': '#0B0E11',
+            'bn-card': '#1E2329',
+            'bn-input': '#2B3139',
+            'bn-border': '#2B3139',
+            'bn-accent': '#F0B90B',
+            'bn-text': '#EAECEF',
+            'bn-text2': '#848E9C',
+            'bn-text3': '#5E6673',
+            'bn-green': '#0ECB81',
+            'bn-red': '#F6465D',
+            background: '#0B0E11',
+            surface: '#1E2329',
+            primary: '#EAECEF',
+            secondary: '#848E9C',
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          borderRadius: {
+            'bn-sm': '4px',
+            'bn-md': '8px',
+            'bn-lg': '12px',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* âââ TAILWIND COLOR REMAPPING (must be inline to override Tailwind CDN) âââ */
+    /* Background remapping */
+    .bg-black { background-color: #0B0E11 !important; }
+    .bg-zinc-950, .bg-\[\#050505\], .bg-\[\#09090b\], .bg-\[\#0a0a0a\] { background-color: #0B0E11 !important; }
+    .bg-zinc-900, .bg-zinc-900\/60, .bg-zinc-900\/80 { background-color: #1E2329 !important; }
+    .bg-zinc-800, .bg-zinc-800\/50, .bg-zinc-800\/80 { background-color: #2B3139 !important; }
+    .bg-zinc-700 { background-color: #384049 !important; }
+    .bg-white { background-color: #1E2329 !important; color: #EAECEF !important; }
+    .bg-gray-50, .bg-gray-100, .bg-zinc-50, .bg-slate-50 { background-color: #0B0E11 !important; }
+    .bg-gray-100, .bg-zinc-100 { background-color: rgba(43, 49, 57, 0.5) !important; }
+    .bg-gray-200, .bg-zinc-200 { background-color: #2B3139 !important; }
+
+    /* Border remapping */
+    .border-zinc-900 { border-color: #1E2329 !important; }
+    .border-zinc-800, .border-zinc-800\/60, .border-zinc-800\/50 { border-color: #2B3139 !important; }
+    .border-zinc-700 { border-color: #384049 !important; }
+    .border-white\/10, .border-white\/5, .border-white\/20, .border-white\/30 { border-color: rgba(43, 49, 57, 0.8) !important; }
+    .border-gray-100, .border-gray-200, .border-gray-300, .border-zinc-100 { border-color: #2B3139 !important; }
+
+    /* Text remapping */
+    .text-white { color: #EAECEF !important; }
+    .text-zinc-400, .text-zinc-500 { color: #848E9C !important; }
+    .text-zinc-600 { color: #5E6673 !important; }
+    .text-zinc-700 { color: #474D57 !important; }
+    .text-gray-400 { color: #848E9C !important; }
+    .text-gray-500, .text-gray-600 { color: #5E6673 !important; }
+    .text-gray-700, .text-gray-800, .text-gray-900 { color: #EAECEF !important; }
+    .text-gray-300 { color: #848E9C !important; }
+
+    /* Emerald â Binance Accent/Green */
+    .bg-emerald-600, .bg-emerald-500, .bg-green-600, .bg-green-500 { background-color: #F0B90B !important; color: #0B0E11 !important; }
+    .bg-green-100, .bg-green-50, .bg-emerald-100, .bg-emerald-50 { background-color: rgba(240, 185, 11, 0.08) !important; }
+    .text-emerald-400, .text-emerald-500, .text-green-400 { color: #0ECB81 !important; }
+    .text-emerald-600, .text-emerald-700, .text-green-600, .text-green-700, .text-green-500 { color: #F0B90B !important; }
+    .text-green-300, .text-emerald-300 { color: #0ECB81 !important; }
+    .border-emerald-500\/20, .border-emerald-500\/10 { border-color: rgba(14, 203, 129, 0.2) !important; }
+
+    /* Blue â Binance Accent */
+    .from-blue-600, .from-blue-500 { --tw-gradient-from: #F0B90B !important; }
+    .to-indigo-600, .to-indigo-500, .to-emerald-600, .to-emerald-500 { --tw-gradient-to: #D4A50A !important; }
+    .bg-blue-500\/20, .bg-blue-500\/10, .bg-blue-600 { background-color: rgba(240, 185, 11, 0.1) !important; }
+    .text-blue-400, .text-blue-500, .text-blue-600 { color: #F0B90B !important; }
+    .border-blue-500 { border-color: #F0B90B !important; }
+    .bg-gradient-to-r.from-blue-600.to-indigo-600 { background: #F0B90B !important; color: #0B0E11 !important; }
+    .bg-gradient-to-r.from-green-600.to-emerald-600 { background: #F0B90B !important; color: #0B0E11 !important; }
+    .bg-gradient-to-tr.from-green-600.to-emerald-500 { background: #F0B90B !important; color: #0B0E11 !important; }
+    .bg-gradient-to-r.from-green-600.to-emerald-500 { background: #F0B90B !important; color: #0B0E11 !important; }
+    .bg-gradient-to-r.from-green-950\/95, .bg-gradient-to-r.from-green-950\/60 { background: rgba(11, 14, 17, 0.9) !important; }
+
+    /* Hover states */
+    .hover\:text-green-500:hover, .hover\:text-green-400:hover, .hover\:text-green-600:hover { color: #F0B90B !important; }
+    .hover\:bg-green-600:hover, .hover\:bg-emerald-600:hover { background-color: #F0B90B !important; color: #0B0E11 !important; }
+    .hover\:bg-green-50:hover { background-color: rgba(240, 185, 11, 0.08) !important; }
+    .hover\:bg-zinc-100:hover, .hover\:bg-gray-100:hover { background-color: #2B3139 !important; }
+    .hover\:bg-zinc-700:hover { background-color: #363C45 !important; }
+    .hover\:bg-zinc-800:hover { background-color: #363C45 !important; }
+    .group-hover\:text-green-600 { color: #F0B90B !important; }
+    .group-hover\:bg-green-600 { background-color: #F0B90B !important; }
+    .group-hover\:bg-green-50 { background-color: rgba(240, 185, 11, 0.08) !important; }
+
+    /* Shadows */
+    .shadow-green-500\/30 { --tw-shadow-color: rgba(240, 185, 11, 0.2) !important; }
+    .shadow-green-500\/20 { --tw-shadow-color: rgba(240, 185, 11, 0.2) !important; }
+    .shadow-blue-600\/20 { --tw-shadow-color: rgba(240, 185, 11, 0.15) !important; }
+
+    /* Ring / Focus */
+    .ring-white\/10 { --tw-ring-color: rgba(43, 49, 57, 0.8) !important; }
+    .focus\:border-blue-500:focus { border-color: #F0B90B !important; }
+
+    /* Bg clip text with gradients */
+    .bg-gradient-to-r.from-green-400.to-emerald-300 { --tw-gradient-from: #F0B90B !important; --tw-gradient-to: #0ECB81 !important; }
+    .text-transparent.bg-clip-text { -webkit-background-clip: text !important; background-clip: text !important; }
+
+    /* Placeholder colors */
+    .placeholder\:text-zinc-500::placeholder, .placeholder-bn-text3::placeholder { color: #5E6673 !important; }
+
+    /* âââ FORCE LANDING PAGE DARK âââ */
+    nav.bg-white, nav.bg-transparent { background: #0B0E11 !important; }
+    section.bg-white, section.bg-zinc-50 { background: #0B0E11 !important; }
+    footer.bg-zinc-950 { background: #1E2329 !important; }
+
+    /* Fix white card/mobile mockup sections to dark */
+    .text-gray-900 { color: #EAECEF !important; }
+    .text-gray-800 { color: #EAECEF !important; }
+    .text-zinc-900 { color: #EAECEF !important; }
+  </style>
+
+
+  <!-- âââ STRUCTURED DATA (JSON-LD) âââ -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "OpenTrue",
+      "url": "https://opentrue.org",
+      "description": "Platform terpercaya untuk jual beli properti, auto trade AI, dan marketplace Indonesia",
+      "applicationCategory": ["FinanceApplication", "BusinessApplication", "ShoppingApplication"],
+      "operatingSystem": "Web",
+      "inLanguage": "id",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "IDR"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "OpenTrue",
+        "url": "https://opentrue.org"
+      },
+      "featureList": [
+        "Jual Beli Properti",
+        "Auto Trade AI",
+        "Signal Trading",
+        "Backtest Strategi",
+        "Marketplace",
+        "Simulasi KPR"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "name": "OpenTrue",
+      "url": "https://opentrue.org",
+      "logo": "https://opentrue.org/android-chrome-512x512.png",
+      "sameAs": [
+        "https://twitter.com/opentrue",
+        "https://facebook.com/opentrue",
+        "https://linkedin.com/company/opentrue"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "availableLanguage": ["Indonesian", "English"]
+      }
+    },
+    {
+      "@type": "WebSite",
+      "url": "https://opentrue.org",
+      "name": "OpenTrue",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://opentrue.org/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>
+
+  <script>
+    // Analytics placeholder: intentionally no external pixels until real IDs are configured.
+    window.trackEvent = function () {};
+  </script>
+
+  <script type="importmap">
+{
+  "imports": {
+    "/assets/js/SolRenkoTerminal-BeL2R3qB.js": "/assets/js/SolRenkoTerminal-BeL2R3qB.js?v=ai-root-renko-finish-cachefresh-20260903-0750",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.39.0",
+    "chart.js/": "https://esm.sh/chart.js@^4.5.1/",
+    "chartjs-adapter-date-fns": "https://esm.sh/chartjs-adapter-date-fns@^3.0.0",
+    "chart.js": "https://esm.sh/chart.js@^4.5.1",
+    "react-chartjs-2": "https://esm.sh/react-chartjs-2@^5.3.1",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "path": "https://esm.sh/path@^0.12.7",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.3"
+  }
+}
+</script>
+          <script id="copytolive-renko-root-bootstrap">
+    (function(){
+      try {
+        var q = new URLSearchParams(window.location.search || '');
+        var queryRenko = q.get('view') === 'renko';
+        var bootRaw = '';
+        try { bootRaw = sessionStorage.getItem('copytolive_renko_boot') || ''; } catch (_) {}
+        if (!queryRenko && !bootRaw) return;
+        var symbol = String(q.get('symbol') || '').toUpperCase()
+          .replace('/USD','').replace('/USDC','').replace('/USDT','').trim();
+        var smaRaw = Number(q.get('smaPeriod') || q.get('sma') || 0);
+        if (bootRaw) {
+          try {
+            var boot = JSON.parse(bootRaw);
+            if (boot && boot.symbol) symbol = String(boot.symbol).toUpperCase()
+              .replace('/USD','').replace('/USDC','').replace('/USDT','').trim();
+            if (boot && Number(boot.smaPeriod) >= 2) smaRaw = Number(boot.smaPeriod);
+          } catch (_) {}
+          try { sessionStorage.removeItem('copytolive_renko_boot'); } catch (_) {}
+        }
+        if (!symbol) symbol = 'SOL';
+        var sma = Number.isFinite(smaRaw) && smaRaw >= 2 ? Math.round(smaRaw) : 10;
+        try { localStorage.setItem('copytolive_renko_symbol', symbol); } catch (_) {}
+        try { localStorage.setItem('copytolive_renko_sma', String(sma)); } catch (_) {}
+        try { localStorage.setItem('ot_backtest_view_mode', 'renko'); } catch (_) {}
+        var prev = history.state && typeof history.state === 'object' ? history.state : {};
+        history.replaceState(Object.assign({}, prev, {copytoliveRenko:true}), '', '/');
+      } catch (_) {}
+    })();
+  </script>
+<script type="module" crossorigin src="/assets/js/index-renko-final-06dfdeeb33b1.js?v=20260903-ai2-renko-filter-110-ai5-v7"></script>
+  <link rel="modulepreload" crossorigin href="/assets/js/dashboard-WZpp2Gui.js">
+  <link rel="modulepreload" crossorigin href="/assets/js/vendor-rXCDSp0G.js">
+  <link rel="modulepreload" crossorigin href="/assets/js/market-DD_HSfzQ.js">
+  <link rel="modulepreload" crossorigin href="/assets/js/charting-C4jAt7iT.js">
+  <link rel="modulepreload" crossorigin href="/assets/js/trading-BeRNyRbU.js">
+  <link rel="stylesheet" crossorigin href="/assets/css/index-Dam86hTI.css">
+  <meta name="copytolive-ai3-nav-continuity" content="20260903-13">
+</head>
+
+<body class="bg-bn-body text-bn-text antialiased h-screen w-screen overflow-hidden selection:bg-bn-accent selection:text-bn-body font-sans">
+  <div id="root"></div>
+  <script defer src="/assets/js/ai3_public_shell_v1.js?v=20260903-13"></script>\n  <script defer src="/assets/js/ai4_fundamental_router_v1.js?v=20260903-11"></script>
+  <script defer src="/assets/js/ai5_signal_scan_runtime_v1.js?v=20260903-3"></script>
+</body>
+
+</html>

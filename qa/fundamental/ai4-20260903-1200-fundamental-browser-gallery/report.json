@@ -1,0 +1,296 @@
+{
+  "id": "ai4-20260903-1200-fundamental-browser-gallery",
+  "captureDelayMs": 0,
+  "acceptance": "FAIL",
+  "ok": false,
+  "devices": {
+    "desktop": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "ok": false,
+      "rootUrl": true,
+      "symbol": "AAPL",
+      "nav": [
+        "Home",
+        "Fundamental",
+        "Signal Scan",
+        "Crypto",
+        "Hyperliquid",
+        "Renko"
+      ],
+      "filterLabels": [
+        "P/E",
+        "ROE",
+        "Debt / Equity",
+        "Revenue Growth"
+      ],
+      "topFilterBars": 1,
+      "topSearchButtons": 1,
+      "topFilterFields": 4,
+      "headerGeometry": {
+        "overlap": false,
+        "nav": {
+          "top": 12,
+          "bottom": 118
+        },
+        "filters": {
+          "top": 118,
+          "bottom": 211
+        },
+        "tools": {
+          "top": 211,
+          "bottom": 261
+        }
+      },
+      "rootOverflow": false,
+      "frameOverflow": false,
+      "searchResults": 1,
+      "defaultRows": 247,
+      "secondaryPresetControls": 8,
+      "secondaryFilterRows": 1,
+      "filteredRows": 47,
+      "watchlistHasAAPL": true,
+      "errors": [
+        "pageerror: Cannot set properties of null (setting 'innerHTML')"
+      ]
+    },
+    "mobile": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "ok": false,
+      "rootUrl": true,
+      "symbol": "AAPL",
+      "nav": [
+        "Home",
+        "Fundamental",
+        "Signal Scan",
+        "Crypto",
+        "Hyperliquid",
+        "Renko"
+      ],
+      "filterLabels": [
+        "P/E",
+        "ROE",
+        "Debt / Equity",
+        "Revenue Growth"
+      ],
+      "topFilterBars": 1,
+      "topSearchButtons": 1,
+      "topFilterFields": 4,
+      "headerGeometry": {
+        "overlap": false,
+        "nav": {
+          "top": 0,
+          "bottom": 83
+        },
+        "filters": {
+          "top": 83,
+          "bottom": 162
+        },
+        "tools": {
+          "top": 162,
+          "bottom": 273
+        }
+      },
+      "rootOverflow": false,
+      "frameOverflow": false,
+      "searchResults": 1,
+      "defaultRows": 247,
+      "secondaryPresetControls": 8,
+      "secondaryFilterRows": 1,
+      "filteredRows": 47,
+      "watchlistHasAAPL": true,
+      "errors": [
+        "pageerror: Cannot set properties of null (setting 'innerHTML')"
+      ]
+    }
+  },
+  "screenshots": [
+    {
+      "device": "desktop",
+      "feature": "00-search-results",
+      "file": "desktop-00-search-results.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "01-overview",
+      "file": "desktop-01-overview.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "02-valuation",
+      "file": "desktop-02-valuation.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "03-growth",
+      "file": "desktop-03-growth.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "04-profitability",
+      "file": "desktop-04-profitability.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "05-financials",
+      "file": "desktop-05-financials.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "06-health",
+      "file": "desktop-06-health.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "07-ownership",
+      "file": "desktop-07-ownership.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "08-insiders",
+      "file": "desktop-08-insiders.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "09-filings",
+      "file": "desktop-09-filings.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "10-estimates",
+      "file": "desktop-10-estimates.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "11-compare",
+      "file": "desktop-11-compare.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "12-screener-default",
+      "file": "desktop-12-screener-default.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "13-screener-filtered-pe50-roe5",
+      "file": "desktop-13-screener-filtered-pe50-roe5.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "desktop",
+      "feature": "14-watchlist",
+      "file": "desktop-14-watchlist.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "00-search-results",
+      "file": "mobile-00-search-results.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "01-overview",
+      "file": "mobile-01-overview.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "02-valuation",
+      "file": "mobile-02-valuation.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "03-growth",
+      "file": "mobile-03-growth.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "04-profitability",
+      "file": "mobile-04-profitability.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "05-financials",
+      "file": "mobile-05-financials.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "06-health",
+      "file": "mobile-06-health.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "07-ownership",
+      "file": "mobile-07-ownership.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "08-insiders",
+      "file": "mobile-08-insiders.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "09-filings",
+      "file": "mobile-09-filings.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "10-estimates",
+      "file": "mobile-10-estimates.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "11-compare",
+      "file": "mobile-11-compare.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "12-screener-default",
+      "file": "mobile-12-screener-default.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "13-screener-filtered-pe50-roe5",
+      "file": "mobile-13-screener-filtered-pe50-roe5.png",
+      "captureDelayMs": 0
+    },
+    {
+      "device": "mobile",
+      "feature": "14-watchlist",
+      "file": "mobile-14-watchlist.png",
+      "captureDelayMs": 0
+    }
+  ],
+  "screenshotCount": 30,
+  "expectedScreenshotCount": 30
+}

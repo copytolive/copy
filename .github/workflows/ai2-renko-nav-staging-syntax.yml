@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - "ai2-staging/ai3_public_shell_v1.navfix.js"
+      - ".github/workflows/ai2-renko-nav-staging-syntax.yml"
 permissions:
   contents: read
 jobs:

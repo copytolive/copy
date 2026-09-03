@@ -1,0 +1,39 @@
+{
+  "id": "ai3-nav-continuity-20260903-13",
+  "source_snapshot": "ai3-20260903-prod-assets-final-002",
+  "production_before": {
+    "index_sha256": "3dd6a084dbc0665dd2f21a055918b2ec30f66cde6586ee21ad613e088e853969",
+    "shell_sha256": "dd2408c3072af3522dce26bf3906fba75e16a05ffab3f9ee6777927735698941",
+    "fundamental_sha256": "dc478ea19688b23cc8168385194fc14e7ca3d972f1ffef193a3c4d1cb4182d01"
+  },
+  "target": {
+    "top_nav": [
+      "Home",
+      "Fundamental",
+      "Signal Scan",
+      "Crypto",
+      "Renko"
+    ],
+    "hyperliquid": "sidebar-only",
+    "desktop_button": "88x66",
+    "desktop_icon": "32x32",
+    "mobile_button": "76x66",
+    "mobile_icon": "28x28",
+    "desktop_filter": "max 1170x64",
+    "mobile_filter_height": 56,
+    "signal_back": "Home",
+    "history": "copytoliveView state"
+  },
+  "checks": {
+    "topHyperNonDestructive": true,
+    "normalize": true,
+    "exactFilter": true,
+    "back": true,
+    "fundNoHyper": true,
+    "fundFive": true,
+    "fund1170": true,
+    "fund64": true,
+    "fundMobile380": true,
+    "index13": true
+  }
+}

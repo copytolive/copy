@@ -1,4 +1,4 @@
-(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.1";
+(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.2";
 const K="ot_backtest_view_mode",H=["lucide-coins","lucide-orbit","lucide-circle-dollar-sign","lucide-trending-up"];
 const norm=s=>String(s||"").replace(/\s+/g," ").trim();
 const side=c=>Array.from(document.querySelectorAll("#desktop-sidebar nav button")).find(b=>b.querySelector("svg."+c))||null;
@@ -44,8 +44,11 @@ function primary(nav){
   nav.dataset.ai3Primary="1";
   const hl=label(h);if(hl)hl.textContent="Home";h.title="Home";h.setAttribute("aria-label","Home");
   const cl=label(c);if(cl)cl.textContent="Crypto";c.title="Crypto";c.setAttribute("aria-label","Crypto");
-  let s=nav.querySelector(':scope > button[data-ai3="signal"]');
+  const signalButtons=Array.from(nav.querySelectorAll(":scope > button")).filter(b=>{const t=norm(b.innerText);return t==="Signal Scan"||t.endsWith(" Signal Scan")});
+  let s=signalButtons.find(b=>b.getAttribute("aria-hidden")!=="true")||signalButtons[0]||nav.querySelector(':scope > button[data-ai3="signal"]');
   if(!s){s=add(nav,f,"signal","Signal Scan",sig,()=>direct("scanner-signal"));nav.appendChild(s)}
+  s.dataset.ai3="signal";s.title="Signal Scan";s.setAttribute("aria-label","Signal Scan");s.style.removeProperty("display");s.removeAttribute("aria-hidden");s.tabIndex=0;
+  signalButtons.filter(b=>b!==s).forEach(b=>{b.style.setProperty("display","none","important");b.tabIndex=-1;b.setAttribute("aria-hidden","true")});
   const x=find(nav,["Hyperliquid"]);
   [[h,"home",0],[f,"fundamental",1],[s,"signal",2],[c,"crypto",3],[r,"renko",4]].forEach(([b,k,o])=>{
     if(!b)return;b.dataset.ai3NavKey=k;b.style.setProperty("order",String(o),"important");

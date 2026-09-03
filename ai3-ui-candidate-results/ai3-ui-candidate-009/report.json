@@ -1,0 +1,129 @@
+{
+  "id": "ai3-ui-candidate-009",
+  "acceptance": "FAIL",
+  "ok": false,
+  "devices": {
+    "desktop": {
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "steps": [],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "home": {
+        "nav": {
+          "nav": {
+            "x": 832,
+            "y": 41,
+            "w": 456,
+            "h": 66,
+            "center": 1060
+          },
+          "items": [
+            {
+              "name": "Home",
+              "raw": "Home",
+              "x": 832,
+              "y": 41,
+              "w": 88,
+              "h": 66,
+              "icon": {
+                "w": 32,
+                "h": 32
+              },
+              "label": {
+                "fontSize": 13,
+                "fontWeight": "600",
+                "h": 19.5
+              }
+            },
+            {
+              "name": "Fundamental",
+              "raw": "Fundamental",
+              "x": 924,
+              "y": 41,
+              "w": 88,
+              "h": 66,
+              "icon": {
+                "w": 32,
+                "h": 32
+              },
+              "label": {
+                "fontSize": 13,
+                "fontWeight": "600",
+                "h": 19.5
+              }
+            },
+            {
+              "name": "Signal Scan",
+              "raw": "Signal Scan",
+              "x": 1016,
+              "y": 41,
+              "w": 88,
+              "h": 66,
+              "icon": {
+                "w": 32,
+                "h": 32
+              },
+              "label": {
+                "fontSize": 13,
+                "fontWeight": "600",
+                "h": 19.5
+              }
+            },
+            {
+              "name": "Crypto",
+              "raw": "₿ Crypto",
+              "x": 1108,
+              "y": 41,
+              "w": 88,
+              "h": 66,
+              "icon": {
+                "w": 32,
+                "h": 32
+              },
+              "label": {
+                "fontSize": 13,
+                "fontWeight": "600",
+                "h": 19.5
+              }
+            },
+            {
+              "name": "Renko",
+              "raw": "Renko",
+              "x": 1200,
+              "y": 41,
+              "w": 88,
+              "h": 66,
+              "icon": {
+                "w": 32,
+                "h": 32
+              },
+              "label": {
+                "fontSize": 13,
+                "fontWeight": "600",
+                "h": 19.5
+              }
+            }
+          ],
+          "innerWidth": 1600,
+          "scrollWidth": 1600
+        },
+        "filter": {
+          "x": 247,
+          "y": 94,
+          "w": 1170,
+          "h": 64,
+          "text": "Max Loss Any Profit Factor Any Win Rate Any Risk Reward Any Cari",
+          "scrollWidth": 1168,
+          "clientWidth": 1168
+        }
+      }
+    }
+  },
+  "errors": [
+    "desktop Crypto_REACT_ERROR"
+  ],
+  "error": "Error: desktop Crypto_REACT_ERROR\n    at run (file:///home/runner/work/copy/copy/.ai3candidate.mjs:85:98)\n    at async file:///home/runner/work/copy/copy/.ai3candidate.mjs:141:3"
+}

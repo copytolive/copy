@@ -1,0 +1,50 @@
+name: AI5 Self-hosted Mac Bridge Recovery Probe
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai5-selfhosted-mac-probe/**"
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: self-hosted
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Probe local runtime without secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai5-selfhosted-mac-probe/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          mkdir -p ai5-selfhosted-mac-probe-results
+          OS="$(uname -s 2>/dev/null || true)"
+          HOST="$(hostname 2>/dev/null || true)"
+          WHO="$(id -un 2>/dev/null || true)"
+          RUNTIME="/Users/Shared/WorkspaceBersama/rwa.ms/chat-local-online/07_RUNTIME/copytolive-control-bridge"
+          RUNTIME_PRESENT=false
+          [ -d "$RUNTIME" ] && RUNTIME_PRESENT=true
+          SERVICE_PRESENT=false
+          SERVICE_RUNNING=false
+          if [ "$OS" = "Darwin" ]; then
+            if launchctl print "gui/$(id -u)/com.rwacode.copytolive-control" >/tmp/ai5-launchctl.txt 2>&1; then
+              SERVICE_PRESENT=true
+              grep -q 'state = running' /tmp/ai5-launchctl.txt && SERVICE_RUNNING=true || true
+            fi
+          fi
+          python3 - "$ID" "$OS" "$HOST" "$WHO" "$RUNTIME_PRESENT" "$SERVICE_PRESENT" "$SERVICE_RUNNING" <<'PY'
+import json,sys
+id_,os_,host,who,runtime,service,running=sys.argv[1:]
+obj={"id":id_,"ok":True,"os":os_,"hostname":host,"user":who,
+     "runtime_present":runtime=="true","service_present":service=="true","service_running":running=="true"}
+open(f"ai5-selfhosted-mac-probe-results/{id_}.json","w").write(json.dumps(obj,indent=2)+"\n")
+PY
+          git config user.name "ai5-selfhosted-probe"
+          git config user.email "ai5@local.invalid"
+          git add "ai5-selfhosted-mac-probe-results/$ID.json"
+          git commit -m "ai5 selfhosted mac probe: $ID"
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -1,0 +1,56 @@
+name: AI3 Environment Inventory
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai3-env-inventory-requests/**"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai3-env-inventory-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "out=ai3-env-inventory-results/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Read environment names
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          OUT: ${{ steps.req.outputs.out }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUT")"
+          CODE="$(curl -sS -o /tmp/envs.json -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/$REPO/environments?per_page=100")"
+          python3 - "$OUT" "$CODE" /tmp/envs.json <<'PY'
+          import json,sys,pathlib
+          out,code,path=sys.argv[1:]
+          try:d=json.load(open(path))
+          except Exception:d={}
+          names=[e.get("name") for e in d.get("environments",[]) if e.get("name")]
+          pathlib.Path(out).write_text(json.dumps({"ok":code=="200","http":int(code),"environments":names},indent=2)+"\n")
+          PY
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"
+          git config user.name "CopyToLive AI3 Env Inventory"
+          git config user.email "copytolive-ai3-env@local.invalid"
+          git add "$OUT"
+          git commit -m "ai3 env inventory: ${{ steps.req.outputs.id }}"
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -1,0 +1,111 @@
+name: AI2 Renko Filter Acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai2-renko-filter-requests/**"
+
+permissions:
+  contents: write
+
+jobs:
+  accept:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai2-renko-filter-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "response=ai2-renko-filter-responses/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Browser filter acceptance
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          RESP: ${{ steps.req.outputs.response }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ai2-renko-filter-responses
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/ch.out 2>/tmp/ch.err &
+          CPID=$!; trap 'kill $CPID 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:9222/json/list >/tmp/pages.json 2>/dev/null && break
+            sleep .5
+          done
+          cat >/tmp/test.mjs <<'NODE'
+          import fs from 'node:fs';
+          const ID=process.env.ID, OUT=process.env.RESP;
+          const R={id:ID,ok:false,acceptance:'FAIL',checks:{},errors:[],network:[]};
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          let ws,seq=0; const pending=new Map();
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq,t=setTimeout(()=>{pending.delete(id);reject(Error('TIMEOUT '+method))},30000);pending.set(id,{resolve:v=>{clearTimeout(t);resolve(v)},reject});ws.send(JSON.stringify({id,method,params}))});
+          const ev=async expression=>{const x=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(x.exceptionDetails)throw Error(x.exceptionDetails.text||'EVAL');return x.result.value};
+          const wait=async(expr,ms=25000)=>{const end=Date.now()+ms;let v;while(Date.now()<end){try{v=await ev(expr);if(v)return v}catch{}await sleep(250)}return v};
+          const setSelect=async(aria,value)=>ev("(()=>{const e=[...document.querySelectorAll('select')].find(x=>(x.getAttribute('aria-label')||'')==="+JSON.stringify(aria)+");if(!e)return false;e.value="+JSON.stringify(value)+";e.dispatchEvent(new Event('change',{bubbles:true}));return true})()");
+          try{
+            const pages=JSON.parse(fs.readFileSync('/tmp/pages.json','utf8')),page=pages.find(x=>x.type==='page');
+            ws=new WebSocket(page.webSocketDebuggerUrl); await new Promise((a,b)=>{ws.onopen=a;ws.onerror=b});
+            ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);return m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result)}if(m.method==='Runtime.exceptionThrown')R.errors.push(String(m.params?.exceptionDetails?.text||'exception'));if(m.method==='Network.responseReceived'&&Number(m.params?.response?.status)>=400)R.network.push({status:m.params.response.status,url:m.params.response.url})};
+            await send('Runtime.enable'); await send('Network.enable'); await send('Page.enable');
+            await send('Page.navigate',{url:'https://copytolive.com/?view=renko&symbol=SOL&smaPeriod=10&v='+encodeURIComponent(ID)});
+            const ready=await wait("(()=>document.querySelector('[data-testid=\"renko-top-filter\"]')&&document.querySelector('select[aria-label=\"Pair Renko\"]')&&document.querySelector('select[aria-label=\"Pair futures Hyperliquid\"]'))()",60000);
+            if(!ready){R.diag=await ev("(()=>({href:location.href,readyState:document.readyState,hasShell:!!document.querySelector('[data-testid=\\\"renko-top-filter\\\"]'),selects:[...document.querySelectorAll('select')].map(x=>({aria:x.getAttribute('aria-label')||'',value:x.value})),body:String(document.body?.innerText||'').slice(0,5000),scripts:[...document.scripts].map(x=>x.src).filter(Boolean),resources:performance.getEntriesByType('resource').map(x=>x.name).slice(-80)}))()");throw Error('RENKO_FILTER_SHELL_NOT_READY '+JSON.stringify(R.diag));}
+            R.checks.labels=await ev("(()=>[...document.querySelector('[data-testid=\"renko-top-filter\"]')?.querySelectorAll('div')||[]].map(x=>String(x.textContent||'').trim()).filter(x=>['Metode','Pair','Market','OOS WR'].includes(x)))()");
+            if(!['Metode','Pair','Market','OOS WR'].every(x=>R.checks.labels.includes(x))) throw Error('FILTER_LABELS');
+            const u=await ev("(async()=>{const r=await fetch('/api/charting/hyperliquid/renko-universe',{cache:'no-store'});return{status:r.status,data:await r.json()}})()");
+            if(u.status!==200) throw Error('UNIVERSE_HTTP_'+u.status);
+            const pairs=(u.data.pairs||[]).filter(x=>!x.market||x.market==='futures');
+            const top=(market,status)=>pairs.filter(x=>{const c=x.category==='crypto'?'crypto':'noncrypto';if(market!=='all'&&c!==market)return false;const wr=Number(x.backtest?.winRate)||0;return status==='wr55'?wr>=55:status==='wr60'?wr>=60:status==='wr65'?wr>=65:true}).sort((a,b)=>(Number(b.backtest?.winRate)||0)-(Number(a.backtest?.winRate)||0));
+            if(!await setSelect('Market Renko','crypto')) throw Error('MARKET_SELECT_MISSING');
+            const expCrypto=top('crypto','all')[0]?.symbol||'';
+            if(expCrypto&&!await wait("(()=>document.querySelector('select[aria-label=\"Pair Renko\"]')?.value==="+JSON.stringify(expCrypto)+"&&document.querySelector('select[aria-label=\"Pair futures Hyperliquid\"]')?.value==="+JSON.stringify(expCrypto)+")()",30000)) throw Error('AUTO_CRYPTO_SYNC');
+            R.checks.crypto={expected:expCrypto,pair:await ev("document.querySelector('select[aria-label=\"Pair Renko\"]')?.value||''"),terminal:await ev("document.querySelector('select[aria-label=\"Pair futures Hyperliquid\"]')?.value||''")};
+            if(!await setSelect('Filter OOS WR Renko','wr55')) throw Error('OOS_SELECT_MISSING');
+            const exp55=top('crypto','wr55')[0]?.symbol||'';
+            if(exp55&&!await wait("(()=>document.querySelector('select[aria-label=\"Pair Renko\"]')?.value==="+JSON.stringify(exp55)+"&&document.querySelector('select[aria-label=\"Pair futures Hyperliquid\"]')?.value==="+JSON.stringify(exp55)+")()",30000)) throw Error('AUTO_OOS55_SYNC');
+            R.checks.oos55={expected:exp55,pair:await ev("document.querySelector('select[aria-label=\"Pair Renko\"]')?.value||''"),terminal:await ev("document.querySelector('select[aria-label=\"Pair futures Hyperliquid\"]')?.value||''")};
+            const second=await ev("(()=>{const s=document.querySelector('select[aria-label=\"Pair Renko\"]');return s&&s.options.length>1?s.options[1].value:''})()");
+            if(second){await setSelect('Pair Renko',second);if(!await wait("document.querySelector('select[aria-label=\"Pair futures Hyperliquid\"]')?.value==="+JSON.stringify(second),30000)) throw Error('PAIR_MANUAL_SYNC');}
+            R.checks.manualPair={selected:second,terminal:await ev("document.querySelector('select[aria-label=\"Pair futures Hyperliquid\"]')?.value||''")};
+            await setSelect('Filter OOS WR Renko','all'); await sleep(400);
+            await setSelect('Market Renko','noncrypto');
+            const expNon=top('noncrypto','all')[0]?.symbol||'';
+            if(expNon&&!await wait("(()=>document.querySelector('select[aria-label=\"Pair Renko\"]')?.value==="+JSON.stringify(expNon)+"&&document.querySelector('select[aria-label=\"Pair futures Hyperliquid\"]')?.value==="+JSON.stringify(expNon)+")()",30000)) throw Error('AUTO_NONCRYPTO_SYNC');
+            R.checks.noncrypto={expected:expNon,pair:await ev("document.querySelector('select[aria-label=\"Pair Renko\"]')?.value||''"),terminal:await ev("document.querySelector('select[aria-label=\"Pair futures Hyperliquid\"]')?.value||''")};
+            R.checks.nav=await ev("(()=>{const b=[...document.querySelectorAll('button')].find(x=>String(x.textContent||'').trim()==='Renko');return!!b&&getComputedStyle(b).display!=='none})()");
+            if(!R.checks.nav) throw Error('RENKO_NAV_MISSING');
+            const hard=R.network.filter(x=>![429,502,503,504].includes(Number(x.status)));
+            if(R.errors.length||hard.length) throw Error('BROWSER_ERRORS '+JSON.stringify({errors:R.errors,hard}));
+            R.ok=true;R.acceptance='PASS';
+          }catch(e){R.error=String(e?.stack||e)}finally{try{ws?.close()}catch{}fs.writeFileSync(OUT,JSON.stringify(R,null,2)+'\n');console.log(JSON.stringify(R,null,2))}
+          NODE
+          node --check /tmp/test.mjs
+          node /tmp/test.mjs
+      - name: Commit response
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESP="${{ steps.req.outputs.response }}"
+          git config user.name "AI2 Renko Filter"
+          git config user.email "ai2-renko-filter@local.invalid"
+          git add "$RESP"
+          git commit -m "ai2 renko filter: ${{ steps.req.outputs.id }}" || true
+          for n in 1 2 3 4 5 6 7 8 9 10; do
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort || true; sleep "$n"; continue; }
+            git push origin HEAD:main && exit 0
+            sleep "$n"
+          done
+          exit 1
+      - name: Enforce
+        if: always()
+        shell: bash
+        run: python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));raise SystemExit(0 if d.get("ok") and d.get("acceptance")=="PASS" else 1)' "${{ steps.req.outputs.response }}"

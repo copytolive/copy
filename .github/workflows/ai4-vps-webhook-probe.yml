@@ -1,0 +1,57 @@
+name: AI4 VPS Webhook Probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai4-vps-webhook-probe-requests/**"
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai4-vps-webhook-probe-requests/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "out=ai4-vps-webhook-probe-results/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Check production probe file
+        env:
+          ID: ${{ steps.req.outputs.id }}
+          OUT: ${{ steps.req.outputs.out }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUT")"
+          set +e
+          CODE="$(curl -sS -L -o /tmp/body -w '%{http_code}' --max-time 30 "https://copytolive.com/ai4-vps-webhook-probe-20260903.txt?probe=$GITHUB_RUN_ID")"
+          RC=$?
+          set -e
+          BODY="$(head -c 200 /tmp/body 2>/dev/null || true)"
+          python3 - "$OUT" "$ID" "$RC" "$CODE" "$BODY" <<'PY'
+          import json,sys
+          out,id_,rc,code,body=sys.argv[1:]
+          d={"id":id_,"curl_rc":int(rc),"http":int(code or 0),"body":body,"marker_found":"AI4_VPS_WEBHOOK_PROBE_20260903_0958_7D2C" in body}
+          d["ok"]=d["marker_found"] and d["http"]==200
+          open(out,"w").write(json.dumps(d,indent=2)+"\n")
+          PY
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"
+          git config user.name "AI4 VPS Webhook Probe"
+          git config user.email "ai4-vps-probe@local.invalid"
+          git add "$OUT"
+          git commit -m "ai4 VPS webhook probe: ${{ steps.req.outputs.id }}" || true
+          git pull --rebase origin main
+          git push origin HEAD:main

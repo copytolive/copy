@@ -1,0 +1,18 @@
+{
+  "id": "ai3-20260903-live-static-final-004",
+  "ok": true,
+  "files": {
+    "index.html": {
+      "bytes": 17707,
+      "sha256": "3dd6a084dbc0665dd2f21a055918b2ec30f66cde6586ee21ad613e088e853969"
+    },
+    "index-renko-final-06dfdeeb33b1.js": {
+      "bytes": 1683014,
+      "sha256": "89cfd4ae31a71104ddf91462e6649d5657bd26442b47f2dc0169597f89770af2"
+    },
+    "ai3_public_shell_v1.js": {
+      "bytes": 12750,
+      "sha256": "dd2408c3072af3522dce26bf3906fba75e16a05ffab3f9ee6777927735698941"
+    }
+  }
+}

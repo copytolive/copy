@@ -1,0 +1,10 @@
+{
+  "id": "ai3-ui-candidate-003",
+  "acceptance": "FAIL",
+  "ok": false,
+  "devices": {},
+  "errors": [
+    "desktop HOME_LABELS [\"Home\",\"Fundamental\",\"Signal Scan\",\"Crypto\",\"Renko\",\"Signal Scan\"]"
+  ],
+  "error": "Error: desktop HOME_LABELS [\"Home\",\"Fundamental\",\"Signal Scan\",\"Crypto\",\"Renko\",\"Signal Scan\"]\n    at run (file:///home/runner/work/copy/copy/.ai3candidate.mjs:73:84)\n    at async file:///home/runner/work/copy/copy/.ai3candidate.mjs:143:3"
+}

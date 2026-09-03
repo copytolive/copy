@@ -1,0 +1,2196 @@
+{
+  "ok": true,
+  "count": 438,
+  "hits": [
+    {
+      "path": "staff-approval.html",
+      "line": 52,
+      "text": "    <p class=\"sub\">Halaman admin. Aktifkan akses <b>Meteora + Hyperliquid</b> untuk email karyawan yang kamu pilih. Karyawan harus sudah <b>daftar</b> di copytolive.com dulu. Akses ini hanya <b>Premium</b> (bukan admin) &mdash; karyawan tetap tidak bisa withdraw.</p>"
+    },
+    {
+      "path": "staff-approval.html",
+      "line": 56,
+      "text": "      <input id=\"adminEmail\" type=\"email\" placeholder=\"admin@copytolive.com\" autocomplete=\"username\">"
+    },
+    {
+      "path": "staff-approval.html",
+      "line": 68,
+      "text": "      <textarea id=\"emails\" placeholder=\"karyawan1@gmail.com&#10;karyawan2@gmail.com&#10;narzul@copytolive.com\"></textarea>"
+    },
+    {
+      "path": "meteora_live.html",
+      "line": 3772,
+      "text": "    <a class=\"ctl-brand\" href=\"https://copytolive.com/\" style=\"text-decoration:none;\">"
+    },
+    {
+      "path": "meteora_live.html",
+      "line": 3776,
+      "text": "      <a href=\"https://copytolive.com/\" data-ctl-view=\"home\" title=\"Backtest\" style=\"--rail-c:#60a5fa;\">"
+    },
+    {
+      "path": "meteora_live.html",
+      "line": 3781,
+      "text": "      <a class=\"sub\" href=\"https://copytolive.com/\" data-ctl-view=\"live-trading\" title=\"Hyperliquid\" style=\"--rail-c:#34d399;\">"
+    },
+    {
+      "path": "meteora_live.html",
+      "line": 3785,
+      "text": "      <a class=\"sub active\" href=\"https://copytolive.com/\" data-ctl-view=\"meteora-live\" title=\"Meteora\" style=\"--rail-c:#35e7a4;\">"
+    },
+    {
+      "path": "meteora_live.html",
+      "line": 3789,
+      "text": "      <a href=\"https://copytolive.com/\" data-ctl-view=\"compounding-plan\" title=\"Compounding\" style=\"--rail-c:#2dd4bf;\">"
+    },
+    {
+      "path": "meteora_live.html",
+      "line": 3793,
+      "text": "      <a href=\"https://copytolive.com/\" data-ctl-view=\"scanner-signal\" title=\"Signal Scan\" style=\"--rail-c:#a78bfa;\">"
+    },
+    {
+      "path": "meteora_live.html",
+      "line": 3797,
+      "text": "      <a href=\"https://copytolive.com/\" data-ctl-view=\"fundamental-saham\" title=\"Saham\" style=\"--rail-c:#fbbf24;\">"
+    },
+    {
+      "path": "meteora_live.html",
+      "line": 3801,
+      "text": "      <a href=\"https://copytolive.com/\" data-ctl-view=\"account\" title=\"Account\" style=\"--rail-c:#F0B90B;\">"
+    },
+    {
+      "path": "meteora_live.html",
+      "line": 4129,
+      "text": "  <script src=\"/vendor/lightweight-charts.standalone.production.js\"></script>"
+    },
+    {
+      "path": "meteora_live.html",
+      "line": 4534,
+      "text": "              // default navigation to https://copytolive.com/ proceeds"
+    },
+    {
+      "path": "favicon-16x16.png",
+      "line": 69,
+      "text": "  <!-- build: webhook-auto-deploy 2026-05-23 v2 -->"
+    },
+    {
+      "path": "favicon-16x16.png",
+      "line": 86,
+      "text": "    // a local PostCSS migration lands. Hide the CDN production advisory so real"
+    },
+    {
+      "path": "favicon-16x16.png",
+      "line": 92,
+      "text": "        if (msg.includes('cdn.tailwindcss.com should not be used in production')) return;"
+    },
+    {
+      "path": "bot-onboarding.html",
+      "line": 553,
+      "text": "  \u00a9 2026 <a href=\"https://copytolive.com\" style=\"color:#FFD700; text-decoration:none;\">CopyToLive</a> \u00b7 Bot trading non-custodial di Hyperliquid \u00b7 API wallet hanya bisa trade, tidak bisa withdraw."
+    },
+    {
+      "path": "index.html",
+      "line": 69,
+      "text": "  <!-- build: webhook-auto-deploy 2026-05-23 v2 -->"
+    },
+    {
+      "path": "index.html",
+      "line": 86,
+      "text": "    // a local PostCSS migration lands. Hide the CDN production advisory so real"
+    },
+    {
+      "path": "index.html",
+      "line": 92,
+      "text": "        if (msg.includes('cdn.tailwindcss.com should not be used in production')) return;"
+    },
+    {
+      "path": "compounding_plan.html",
+      "line": 12,
+      "text": "                if (msg.includes('cdn.tailwindcss.com should not be used in production')) return;"
+    },
+    {
+      "path": "compounding_plan.html",
+      "line": 151,
+      "text": "        // Dynamic pool cap \u2014 di-fetch dari backtest_farm.json (strategi ready di production_locked)."
+    },
+    {
+      "path": "bot-trading.html",
+      "line": 1285,
+      "text": "        <p>\u00a9 2026 OpenTrue Bot Trading \u2022 Powered by <a href=\"https://hyperliquid.xyz\" target=\"_blank\">Hyperliquid</a> \u2022 Built by <a href=\"https://copytolive.com\">CopyToLive</a></p>"
+    },
+    {
+      "path": "pages_compounding_mirror.js",
+      "line": 305,
+      "text": "        show('Hyperliquid mengembalikan <b>0 balance \u00b7 0 posisi \u00b7 0 fills</b> untuk alamat ini. Masukkan Account Wallet yang sama dengan yang dipakai di copytolive.com.', raw);"
+    },
+    {
+      "path": "pages_compounding_mirror.js",
+      "line": 355,
+      "text": "        show('Alamat <b>' + short(sel.account) + '</b> tervalidasi tetapi Hyperliquid mengembalikan <b>0 balance \u00b7 0 posisi \u00b7 0 fills</b>. Pilih Account Wallet yang sama dengan account copytolive.com.', c.address);"
+    },
+    {
+      "path": "favicon-32x32.png",
+      "line": 69,
+      "text": "  <!-- build: webhook-auto-deploy 2026-05-23 v2 -->"
+    },
+    {
+      "path": "favicon-32x32.png",
+      "line": 86,
+      "text": "    // a local PostCSS migration lands. Hide the CDN production advisory so real"
+    },
+    {
+      "path": "favicon-32x32.png",
+      "line": 92,
+      "text": "        if (msg.includes('cdn.tailwindcss.com should not be used in production')) return;"
+    },
+    {
+      "path": "favicon.ico",
+      "line": 69,
+      "text": "  <!-- build: webhook-auto-deploy 2026-05-23 v2 -->"
+    },
+    {
+      "path": "favicon.ico",
+      "line": 86,
+      "text": "    // a local PostCSS migration lands. Hide the CDN production advisory so real"
+    },
+    {
+      "path": "favicon.ico",
+      "line": 92,
+      "text": "        if (msg.includes('cdn.tailwindcss.com should not be used in production')) return;"
+    },
+    {
+      "path": "apple-touch-icon.png",
+      "line": 69,
+      "text": "  <!-- build: webhook-auto-deploy 2026-05-23 v2 -->"
+    },
+    {
+      "path": "apple-touch-icon.png",
+      "line": 86,
+      "text": "    // a local PostCSS migration lands. Hide the CDN production advisory so real"
+    },
+    {
+      "path": "apple-touch-icon.png",
+      "line": 92,
+      "text": "        if (msg.includes('cdn.tailwindcss.com should not be used in production')) return;"
+    },
+    {
+      "path": "faq.html",
+      "line": 8,
+      "text": "<link rel=\"canonical\" href=\"https://copytolive.com/faq.html\" />"
+    },
+    {
+      "path": "compounding_live.html",
+      "line": 1046,
+      "text": "    <!-- \u2550\u2550\u2550 LOGIN OVERLAY (CopyToLive theme \u2014 dark/gold; wired to copytolive.com auth) \u2550\u2550\u2550 -->"
+    },
+    {
+      "path": "compounding_live.html",
+      "line": 1087,
+      "text": "                    <p style=\"color:#FFD700; font-weight:600; margin:0 0 8px 0; font-size:14px;\">Gunakan akun copytolive.com Anda</p>"
+    },
+    {
+      "path": "compounding_live.html",
+      "line": 1177,
+      "text": "    // \u2500\u2500\u2500 UNIFIED AUTH: Same localStorage keys as copytolive.com \u2500\u2500\u2500"
+    },
+    {
+      "path": "compounding_live.html",
+      "line": 1559,
+      "text": "    // trades cap). Per-stage growth = +50% (target = modal \u00d7 1.5), matching production_locked."
+    },
+    {
+      "path": "compounding_live.html",
+      "line": 2930,
+      "text": "        <!-- Pricing CTA Banner REMOVED \u2014 pricing sudah di halaman depan copytolive.com -->"
+    },
+    {
+      "path": "compounding_live.html",
+      "line": 3017,
+      "text": "    // Auto-detect: relative URL works with both Caddy (production) and Vite proxy (dev)"
+    },
+    {
+      "path": "compounding_live.html",
+      "line": 4677,
+      "text": "    // SINYAL\" per koin dari strategi backtest (production_locked) yang di-love & lolos"
+    },
+    {
+      "path": "compounding_live.html",
+      "line": 6644,
+      "text": "    // Auto-detect: wss for HTTPS (production), ws for HTTP (dev)"
+    },
+    {
+      "path": "renko/index.html",
+      "line": 12,
+      "text": "<script src=\"https://unpkg.com/lightweight-charts@5.1.0/dist/lightweight-charts.standalone.production.js\"></script>"
+    },
+    {
+      "path": "premium/index.html",
+      "line": 28,
+      "text": "    <div class=\"note\">Mode ini adalah entitlement lokal untuk preview GitHub Pages. Backend production, akun billing, dan koneksi trading tetap terpisah dan tidak dipalsukan.</div>"
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 7,
+      "text": "        \"COPYTOLIVE_SSH_HOST\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 8,
+      "text": "        \"COPYTOLIVE_SSH_KEY\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 9,
+      "text": "        \"COPYTOLIVE_SSH_PORT\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 10,
+      "text": "        \"COPYTOLIVE_SSH_USER\""
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 16,
+      "text": "        \"COPYTOLIVE_SSH_HOST\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 17,
+      "text": "        \"COPYTOLIVE_SSH_KEY\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 18,
+      "text": "        \"COPYTOLIVE_SSH_PORT\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 19,
+      "text": "        \"COPYTOLIVE_SSH_USER\""
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 25,
+      "text": "        \"COPYTOLIVE_SSH_HOST\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 26,
+      "text": "        \"COPYTOLIVE_SSH_KEY\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 27,
+      "text": "        \"COPYTOLIVE_SSH_PORT\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 28,
+      "text": "        \"COPYTOLIVE_SSH_USER\""
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 34,
+      "text": "        \"COPYTOLIVE_SSH_HOST\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 35,
+      "text": "        \"COPYTOLIVE_SSH_KEY\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 36,
+      "text": "        \"COPYTOLIVE_SSH_PORT\","
+    },
+    {
+      "path": "ai3-secret-inventory-results/ai3-secret-inventory-001.json",
+      "line": 37,
+      "text": "        \"COPYTOLIVE_SSH_USER\""
+    },
+    {
+      "path": "data/backtest_farm_2.json",
+      "line": 1,
+      "text": "[{\"id\":\"ND_VM_MOMENTUM_XO_f21s55_GOLD_H1_SL0.025_TP2.0\",\"symbol\":\"GOLD\",\"_sym\":\"GOLD\",\"timeframe\":\"H1\",\"signalType\":\"VM_MOMENTUM_XO\",\"title\":\"ND VM MOMENTUM_XO \u2014 GOLD\",\"category\":\"gold\",\"status\":\"production\",\"totalTrades\":326,\"winRate\":47.5,\"profitFactor\":1.65,\"maxDrawdown\":14.5,\"netProfit\":23627.2,\"sqn\":4.37,\"sharpe\":3.84,\"sortino\":99,\"calmar\":16.27,\"recoveryFactor\":16.27,\"grossProfit\":60016,\"grossLoss\":36388.8,\"winningTrades\":155,\"losingTrades\":171,\"avgProfit\":387.2,\"avgLoss\":212.8,\"rr\":1.82,\""
+    },
+    {
+      "path": "data/backtest_farm_1.json",
+      "line": 1,
+      "text": "[{\"id\":\"ND_MTF_LINREG_SLP_f21s55_GOLD_H1_SL0.025_TP2.5\",\"symbol\":\"GOLD\",\"_sym\":\"GOLD\",\"timeframe\":\"H1\",\"signalType\":\"MTF_LINREG_SLP\",\"title\":\"ND MTF LINREG_SLP \u2014 GOLD\",\"category\":\"gold\",\"status\":\"production\",\"totalTrades\":319,\"winRate\":44.5,\"profitFactor\":1.84,\"maxDrawdown\":8.8,\"netProfit\":31516.8,\"sqn\":5.07,\"sharpe\":4.51,\"sortino\":99,\"calmar\":35.76,\"recoveryFactor\":35.76,\"grossProfit\":69182.4,\"grossLoss\":37665.6,\"winningTrades\":142,\"losingTrades\":177,\"avgProfit\":487.2,\"avgLoss\":212.8,\"rr\":2.29,"
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 10,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 365,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 385,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 757,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 777,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 1114,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 1134,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 1485,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 1505,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 1872,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 1892,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 2254,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 2274,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 2641,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 2661,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 3011,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 3031,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 3394,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 3414,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 3774,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 3794,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 4175,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 4195,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 4576,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 4596,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 4957,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 4977,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 5328,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 5348,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 5716,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 5736,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 6111,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 6131,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 6490,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 6510,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 6880,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 6900,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 7263,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 7283,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 7656,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 7676,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 8046,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 8066,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 8419,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 8439,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 8781,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 8801,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 9137,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 9157,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 9523,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 9543,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 9902,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 9922,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 10277,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 10297,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 10636,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 10656,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 11003,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 11023,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 11382,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 11402,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 11751,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 11771,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 12147,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 12167,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 12540,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 12560,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 12933,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 12953,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 13314,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 13334,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 13681,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 13701,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 14055,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 14075,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 14465,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 14485,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 14875,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 14895,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 15241,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 15261,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 15635,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 15655,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 16007,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 16027,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 16384,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 16404,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 16787,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 16807,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 17159,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 17179,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 17561,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 17581,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 17954,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 17974,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 18338,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 18358,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 18734,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 18754,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 19105,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 19125,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 19500,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 19520,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 19875,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 19895,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 20244,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 20264,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 20611,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 20631,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 21005,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 21025,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 21400,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 21420,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 21787,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 21807,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 22149,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 22169,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 22526,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 22546,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 22920,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 22940,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 23316,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 23336,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 23686,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 23706,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 24075,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 24095,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 24436,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 24456,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 24812,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 24832,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 25178,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 25198,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 25555,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 25575,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 25948,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 25968,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 26342,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 26362,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 26733,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 26753,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 27132,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 27152,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 27505,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 27525,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 27901,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 27921,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 28341,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 28361,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 28759,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 28779,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 29175,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 29195,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 29541,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 29561,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 29935,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 29955,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 30336,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 30356,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 30708,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 30728,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 31071,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 31091,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 31451,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 31471,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 31848,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 31868,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 32245,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 32265,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 32623,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 32643,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 33007,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 33027,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 33400,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 33420,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 33785,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 33805,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 34164,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 34184,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 34544,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 34564,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 34936,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 34956,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 35330,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 35350,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 35722,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 35742,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 36090,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 36110,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 36488,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 36508,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 36858,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 36878,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 37223,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 37243,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 37614,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 37634,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 37987,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 38007,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 38359,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 38379,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 38744,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 38764,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 39120,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 39140,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 39499,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 39519,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 39851,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 39871,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 40211,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 40231,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 40597,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 40617,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 40980,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 41000,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 41359,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 41379,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 41756,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 41776,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 42162,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 42182,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 42559,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 42579,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 42948,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 42968,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 43371,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 43391,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 43754,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 43774,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 44161,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 44181,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 44569,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 44589,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 44960,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 44980,
+      "text": "    \"status\": \"production\","
+    },
+    {
+      "path": "data/backtest_farm.json",
+      "line": 45333,
+      "text": "    \"sourceLock\": \"production_locked\","
+    },
+    {
+      "path": "docs/COPYTOLIVE_VPS_DEPLOY.md",
+      "line": 3,
+      "text": "Production deploy is handled by GitHub Actions workflow `Deploy CopyToLive VPS`."
+    },
+    {
+      "path": "docs/COPYTOLIVE_VPS_DEPLOY.md",
+      "line": 7,
+      "text": "- `COPYTOLIVE_SSH_HOST`"
+    },
+    {
+      "path": "docs/COPYTOLIVE_VPS_DEPLOY.md",
+      "line": 8,
+      "text": "- `COPYTOLIVE_SSH_USER`"
+    },
+    {
+      "path": "docs/COPYTOLIVE_VPS_DEPLOY.md",
+      "line": 9,
+      "text": "- `COPYTOLIVE_SSH_PORT`"
+    },
+    {
+      "path": "docs/COPYTOLIVE_VPS_DEPLOY.md",
+      "line": 10,
+      "text": "- `COPYTOLIVE_SSH_KEY`"
+    },
+    {
+      "path": "docs/COPYTOLIVE_VPS_DEPLOY.md",
+      "line": 14,
+      "text": "Never commit the private SSH key to the repository."
+    },
+    {
+      "path": "docs/COPYTOLIVE_VPS_DEPLOY.md",
+      "line": 26,
+      "text": "3. Back up the current production files."
+    },
+    {
+      "path": "docs/COPYTOLIVE_VPS_DEPLOY.md",
+      "line": 29,
+      "text": "6. Verify production checksums and HTTP."
+    },
+    {
+      "path": "docs/COPYTOLIVE_VPS_DEPLOY.md",
+      "line": 33,
+      "text": "After the SSH secrets exist, pushes that change `index.html`, `compounding_live.html`, or `assets/**` on `main` can deploy automatically."
+    },
+    {
+      "path": "docs/COPYTOLIVE_VPS_DEPLOY.md",
+      "line": 37,
+      "text": "`DEPLOY_COPYTOLIVE_PRODUCTION`"
+    },
+    {
+      "path": "docs/P0-P2_PLAN_2026-08-27.md",
+      "line": 29,
+      "text": "- Production loader verification and GitHub Pages browser smoke."
+    },
+    {
+      "path": ".github/workflows/history-v20-browser-acceptance.yml",
+      "line": 65,
+      "text": "      - name: Verify production loader"
+    },
+    {
+      "path": ".github/workflows/history-v20-browser-acceptance.yml",
+      "line": 79,
+      "text": "          echo V20_PRODUCTION_LOADER=PASS"
+    },
+    {
+      "path": ".github/workflows/history-v34-p0-p2-acceptance.yml",
+      "line": 65,
+      "text": "      - name: Production assets after main deploy"
+    },
+    {
+      "path": ".github/workflows/history-v34-p0-p2-acceptance.yml",
+      "line": 80,
+      "text": "          echo V34_PRODUCTION_ASSETS=PASS"
+    },
+    {
+      "path": ".github/workflows/history-v22-ui-arbiter-acceptance.yml",
+      "line": 57,
+      "text": "      - name: Verify production loader"
+    },
+    {
+      "path": ".github/workflows/history-v22-ui-arbiter-acceptance.yml",
+      "line": 70,
+      "text": "          echo V22_PRODUCTION_LOADER=PASS"
+    },
+    {
+      "path": ".github/workflows/ai5-live-v8-probe.yml",
+      "line": 25,
+      "text": "      - name: Probe public production"
+    },
+    {
+      "path": ".github/workflows/ai5-live-v8-probe.yml",
+      "line": 33,
+      "text": "          V8_STATUS=\"$(curl -L -sS -o /tmp/v8.js -w '%{http_code}' --connect-timeout 10 --max-time 30 \"https://copytolive.com/assets/js/MarketScanner-ai5Signal-v8.js?probe=$GITHUB_RUN_ID\")\""
+    },
+    {
+      "path": ".github/workflows/ai5-live-v8-probe.yml",
+      "line": 34,
+      "text": "          V7_STATUS=\"$(curl -L -sS -o /tmp/v7.js -w '%{http_code}' --connect-timeout 10 --max-time 30 \"https://copytolive.com/assets/js/MarketScanner-ai5HLPerf-v7.js?probe=$GITHUB_RUN_ID\")\""
+    },
+    {
+      "path": ".github/workflows/ai5-live-v8-probe.yml",
+      "line": 35,
+      "text": "          ROOT_STATUS=\"$(curl -L -sS -o /tmp/root.html -w '%{http_code}' --connect-timeout 10 --max-time 30 \"https://copytolive.com/?probe=$GITHUB_RUN_ID\")\""
+    },
+    {
+      "path": ".github/workflows/ai5-live-v8-probe.yml",
+      "line": 43,
+      "text": "            MAIN_URL=\"https://copytolive.com/${MAIN#./}\""
+    },
+    {
+      "path": ".github/workflows/ai5-live-v8-probe.yml",
+      "line": 46,
+      "text": "          V8_TYPE=\"$(curl -L -sSI --connect-timeout 10 --max-time 30 \"https://copytolive.com/assets/js/MarketScanner-ai5Signal-v8.js?probe=$GITHUB_RUN_ID\" | tr -d '\\r' | awk 'tolower($1)==\"content-type:\"{print $2}' | tail -n1 || true)\""
+    },
+    {
+      "path": ".github/workflows/ai5-live-v8-probe.yml",
+      "line": 47,
+      "text": "          API_STAGE_STATUS=\"$(curl -L -sS -o /tmp/stage.json -w '%{http_code}' --connect-timeout 10 --max-time 60 -X POST \"https://copytolive.com/trading/signals/unified/scan\" -H 'Content-Type: application/json' --data '{\"pairs\":[\"BTC\"],\"timeframe\":\"1h\",\"account_balance\":10000,\"rr_target\":2,\"sensitivity\":\"strict\",\"stage\":\"prefilter\"}' || true)\""
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-public-final-acceptance.yml",
+      "line": 66,
+      "text": "              const response=await page.goto('https://copytolive.com/?ai4public='+encodeURIComponent(process.env.ID)+'-'+name,{waitUntil:'domcontentloaded',timeout:60000});"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-public-final-acceptance.yml",
+      "line": 76,
+      "text": "              rec.rootUrl=page.url()==='https://copytolive.com/';"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-public-final-acceptance.yml",
+      "line": 139,
+      "text": "                rec.homeOk=!rec.homeState.overlay&&rec.homeState.url==='https://copytolive.com/';"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-public-final-acceptance.yml",
+      "line": 153,
+      "text": "                rec.signalOk=!rec.signalState.overlay&&rec.signalState.mode==='scanner-signal'&&rec.signalState.url==='https://copytolive.com/';"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-public-final-acceptance.yml",
+      "line": 175,
+      "text": "            const checks=await fetch('https://copytolive.com/api/fundamental/health',{headers:{Accept:'application/json'}});"
+    },
+    {
+      "path": ".github/workflows/ai5-direct-sync-probe.yml",
+      "line": 1,
+      "text": "name: AI5 Direct Production Sync Probe"
+    },
+    {
+      "path": ".github/workflows/ai5-direct-sync-probe.yml",
+      "line": 24,
+      "text": "      - name: Check direct production sync"
+    },
+    {
+      "path": ".github/workflows/ai5-direct-sync-probe.yml",
+      "line": 32,
+      "text": "          CODE=\"$(curl -L -sS -o /tmp/probe.txt -w '%{http_code}' --connect-timeout 8 --max-time 20 \"https://copytolive.com/assets/ai5-prod-sync-probe-20260903.txt?x=$GITHUB_RUN_ID\" || true)\""
+    },
+    {
+      "path": ".github/workflows/history-v35-zero-flicker-acceptance.yml",
+      "line": 43,
+      "text": "      - name: Production browser after deploy"
+    },
+    {
+      "path": ".github/workflows/history-v35-zero-flicker-acceptance.yml",
+      "line": 75,
+      "text": "          cat >/tmp/v35-production.mjs <<'NODE'"
+    },
+    {
+      "path": ".github/workflows/history-v35-zero-flicker-acceptance.yml",
+      "line": 93,
+      "text": "          console.log('V35_PRODUCTION_STATE',s);"
+    },
+    {
+      "path": ".github/workflows/history-v35-zero-flicker-acceptance.yml",
+      "line": 101,
+      "text": "          fs.writeFileSync('/tmp/v35-production.png',Buffer.from(shot.data,'base64'));"
+    },
+    {
+      "path": ".github/workflows/history-v35-zero-flicker-acceptance.yml",
+      "line": 102,
+      "text": "          console.log('V35_PRODUCTION_BROWSER=PASS');"
+    },
+    {
+      "path": ".github/workflows/history-v35-zero-flicker-acceptance.yml",
+      "line": 105,
+      "text": "          node /tmp/v35-production.mjs"
+    },
+    {
+      "path": ".github/workflows/history-v35-zero-flicker-acceptance.yml",
+      "line": 112,
+      "text": "            /tmp/v35-production.png"
+    },
+    {
+      "path": ".github/workflows/ai6-crypto-real-pending.yml",
+      "line": 21,
+      "text": "      SSH_HOST: ${{ secrets.COPYTOLIVE_SSH_HOST }}"
+    },
+    {
+      "path": ".github/workflows/ai6-crypto-real-pending.yml",
+      "line": 22,
+      "text": "      SSH_USER: ${{ secrets.COPYTOLIVE_SSH_USER }}"
+    },
+    {
+      "path": ".github/workflows/ai6-crypto-real-pending.yml",
+      "line": 23,
+      "text": "      SSH_KEY: ${{ secrets.COPYTOLIVE_SSH_KEY }}"
+    },
+    {
+      "path": ".github/workflows/ai6-crypto-real-pending.yml",
+      "line": 24,
+      "text": "      SSH_PORT_SECRET: ${{ secrets.COPYTOLIVE_SSH_PORT }}"
+    },
+    {
+      "path": ".github/workflows/ai6-crypto-real-pending.yml",
+      "line": 63,
+      "text": "          WR=/var/www/copytolive"
+    },
+    {
+      "path": ".github/workflows/ai6-crypto-real-pending.yml",
+      "line": 480,
+      "text": "          PH=\"$(curl -sS -o /tmp/ai6-public-health.json -w '%{http_code}' --max-time 15 https://copytolive.com/api/bot-trading/health||true)\""
+    },
+    {
+      "path": ".github/workflows/ai6-crypto-real-pending.yml",
+      "line": 486,
+      "text": "            curl -fsS --max-time 20 \"https://copytolive.com/assets/js/$N?ai6=$ID-$i\" -o /tmp/ai6-public.js \\"
+    },
+    {
+      "path": ".github/workflows/ai6-crypto-real-pending.yml",
+      "line": 504,
+      "text": "          ssh -i ~/.ssh/ai6 -p \"$PORT\" -o BatchMode=yes \"$SSH_USER@$SSH_HOST\" \"bash -s -- '$ID'\" </tmp/ai6-remote.sh >/tmp/ai6-run.log 2>&1"
+    },
+    {
+      "path": ".github/workflows/history-v18-acceptance.yml",
+      "line": 22,
+      "text": "      - name: Verify production serves v19 loader"
+    },
+    {
+      "path": ".github/workflows/history-v18-acceptance.yml",
+      "line": 39,
+      "text": "          echo HISTORY_V19_PRODUCTION_LOADER=PASS"
+    },
+    {
+      "path": ".github/workflows/history-v25-restore-acceptance.yml",
+      "line": 49,
+      "text": "      - name: Verify production V25 loader"
+    },
+    {
+      "path": ".github/workflows/history-v25-restore-acceptance.yml",
+      "line": 62,
+      "text": "          echo V25_PRODUCTION_LOADER=PASS"
+    },
+    {
+      "path": ".github/workflows/history-v23-pending-chart-acceptance.yml",
+      "line": 102,
+      "text": "      - name: Verify production loader"
+    },
+    {
+      "path": ".github/workflows/history-v23-pending-chart-acceptance.yml",
+      "line": 115,
+      "text": "          echo V28_PRODUCTION_LOADER=PASS"
+    },
+    {
+      "path": ".github/workflows/ai3-deploypath-audit.yml",
+      "line": 21,
+      "text": "      - name: Scan tracked repo for production bridge clues"
+    },
+    {
+      "path": ".github/workflows/ai3-deploypath-audit.yml",
+      "line": 29,
+      "text": "            r'webhook',r'auto[-_ ]?deploy',r'109\\.123\\.239\\.76',r'/var/www/copytolive',"
+    },
+    {
+      "path": ".github/workflows/ai3-deploypath-audit.yml",
+      "line": 30,
+      "text": "            r'COPYTOLIVE_SSH',r'rsync',r'scp ',r'ssh ',r'production',r'copytolive\\.com'"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 17,
+      "text": "      SSH_HOST: ${{ secrets.COPYTOLIVE_SSH_HOST }}"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 18,
+      "text": "      SSH_USER: ${{ secrets.COPYTOLIVE_SSH_USER }}"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 19,
+      "text": "      SSH_KEY: ${{ secrets.COPYTOLIVE_SSH_KEY }}"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 20,
+      "text": "      SSH_PORT_SECRET: ${{ secrets.COPYTOLIVE_SSH_PORT }}"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 21,
+      "text": "      WEB_ROOT: /var/www/copytolive"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 38,
+      "text": "      - name: Load SSH key"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 41,
+      "text": "          ssh-private-key: ${{ secrets.COPYTOLIVE_SSH_KEY }}"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 50,
+      "text": "      - name: Guarded production patch - remove double Screener filter"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 58,
+      "text": "          ssh -p \"$PORT\" \"$SSH_USER@$SSH_HOST\" \"EXPECTED='$EXPECTED' ID='$ID' WEB_ROOT='$WEB_ROOT' python3 -\" <<'PY'"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 126,
+      "text": "          const ROOT='https://copytolive.com/';"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 131,
+      "text": "            publicGallery:`https://copytolive.com/assets/qa/fundamental/${id}/index.html`,"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 159,
+      "text": "            report.screenshots.push({device,feature,file,captureDelayMs:0,url:`https://copytolive.com/assets/qa/fundamental/${id}/${file}`});"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 189,
+      "text": "              rec.rootUrl=page.url()==='https://copytolive.com/';"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 309,
+      "text": "          ssh -p \"$PORT\" \"$SSH_USER@$SSH_HOST\" \"mkdir -p '$DEST'\""
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 310,
+      "text": "          scp -q -P \"$PORT\" -r \"publicqa/$ID/.\" \"$SSH_USER@$SSH_HOST:$DEST/\""
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-full-public-qa-v2.yml",
+      "line": 311,
+      "text": "          ssh -p \"$PORT\" \"$SSH_USER@$SSH_HOST\" \"test -s '$DEST/index.html' && test -s '$DEST/report.json' && echo PUBLIC_QA_UPLOAD=PASS\""
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 14,
+      "text": "        description: 'Type DEPLOY_COPYTOLIVE_PRODUCTION'"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 22,
+      "text": "  group: copytolive-vps-production"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 30,
+      "text": "      SSH_HOST: ${{ secrets.COPYTOLIVE_SSH_HOST }}"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 31,
+      "text": "      SSH_USER: ${{ secrets.COPYTOLIVE_SSH_USER }}"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 32,
+      "text": "      SSH_KEY: ${{ secrets.COPYTOLIVE_SSH_KEY }}"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 33,
+      "text": "      SSH_PORT_SECRET: ${{ secrets.COPYTOLIVE_SSH_PORT }}"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 34,
+      "text": "      WEB_ROOT: /var/www/copytolive"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 35,
+      "text": "      BASE_URL: https://copytolive.com"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 46,
+      "text": "          if [ \"$GITHUB_EVENT_NAME\" = \"workflow_dispatch\" ] && [ \"${{ inputs.confirm }}\" != \"DEPLOY_COPYTOLIVE_PRODUCTION\" ]; then"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 71,
+      "text": "      - name: Load SSH key"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 75,
+      "text": "          ssh-private-key: ${{ secrets.COPYTOLIVE_SSH_KEY }}"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 90,
+      "text": "          ssh -p \"${{ steps.gate.outputs.port }}\" -o BatchMode=yes \"$SSH_USER@$SSH_HOST\" \\"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 104,
+      "text": "          ssh -p \"$PORT\" \"$SSH_USER@$SSH_HOST\" \"set -e; mkdir -p '$BACKUP' '$STAGING'; \\"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 119,
+      "text": "          scp -P \"$PORT\" index.html \"$SSH_USER@$SSH_HOST:$STAGING/index.html\""
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 120,
+      "text": "          scp -P \"$PORT\" compounding_live.html \"$SSH_USER@$SSH_HOST:$STAGING/compounding_live.html\""
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 121,
+      "text": "          scp -P \"$PORT\" -r assets \"$SSH_USER@$SSH_HOST:$STAGING/\""
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 132,
+      "text": "          ssh -p \"$PORT\" \"$SSH_USER@$SSH_HOST\" \"set -e; \\"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 145,
+      "text": "      - name: Verify production"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 164,
+      "text": "          echo PRODUCTION_CHECKSUM=PASS"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 165,
+      "text": "          echo PRODUCTION_HTTP=PASS"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 179,
+      "text": "          echo PRODUCTION_BROWSER_SMOKE=PASS"
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 187,
+      "text": "          ssh -p \"$PORT\" \"$SSH_USER@$SSH_HOST\" \"rm -rf '$STAGING' '$WEB_ROOT/assets.previous'\""
+    },
+    {
+      "path": ".github/workflows/deploy-copytolive-vps.yml",
+      "line": 198,
+      "text": "          ssh -p \"$PORT\" \"$SSH_USER@$SSH_HOST\" \"set -e; \\"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-browser-public-gallery.yml",
+      "line": 50,
+      "text": "          const ROOT='https://copytolive.com/';"
+    },
+    {
+      "path": ".github/workflows/ai4-fundamental-browser-public-gallery.yml",
+      "line": 110,
+      "text": "              rec.rootUrl=page.url()==='https://copytolive.com/';"
+    },
+    {
+      "path": ".github/workflows/history-v29-all-summary-acceptance.yml",
+      "line": 48,
+      "text": "      - name: Verify production assets"
+    },
+    {
+      "path": ".github/workflows/history-v29-all-summary-acceptance.yml",
+      "line": 60,
+      "text": "          echo V29_PRODUCTION_ASSETS=PASS"
+    },
+    {
+      "path": ".github/workflows/v45-copytolive-main-domain-acceptance.yml",
+      "line": 12,
+      "text": "  production-v45:"
+    },
+    {
+      "path": ".github/workflows/v45-copytolive-main-domain-acceptance.yml",
+      "line": 16,
+      "text": "      - name: Wait for V45 production asset"
+    },
+    {
+      "path": ".github/workflows/v45-copytolive-main-domain-acceptance.yml",
+      "line": 22,
+      "text": "            if curl -LfsS --connect-timeout 8 --max-time 25 \"https://copytolive.com/compounding_live.html?accept=${GITHUB_SHA}-${i}\" -o /tmp/compounding.html \\"
+    },
+    {
+      "path": ".github/workflows/v45-copytolive-main-domain-acceptance.yml",
+      "line": 25,
+      "text": "              && curl -LfsS --connect-timeout 8 --max-time 25 \"https://copytolive.com/assets/history/history_filter_native_v43.js?v=20260902-v45-main-domain-final&accept=${i}\" -o /tmp/v45.js \\"
+    },
+    {
+      "path": ".github/workflows/v45-copytolive-main-domain-acceptance.yml",
+      "line": 34,
+      "text": "          echo V45_PRODUCTION_ASSET=PASS"
+    },
+    {
+      "path": ".github/workflows/v45-copytolive-main-domain-acceptance.yml",
+      "line": 36,
+      "text": "      - name: Trusted click acceptance on copytolive.com"
+    },
+    {
+      "path": ".github/workflows/v45-copytolive-main-domain-acceptance.yml",
+      "line": 53,
+      "text": "          const URL='https://copytolive.com/compounding_live.html?v=20260902-v45-main-domain-final&allowIframe=1&source=hub';"
+    },
+    {
+      "path": ".github/workflows/v45-copytolive-main-domain-acceptance.yml",
+      "line": 71,
+      "text": "            if(i===89)throw Error('V45 production runtime not ready');"
+    },
+    {
+      "path": ".github/workflows/visual-parity-snapshot.yml",
+      "line": 93,
+      "text": "          if(!s.header || !s.workspace || !s.renkoFrame || s.renkoReady!=='complete') throw new Error('Recovered production dashboard structure missing');"
+    },
+    {
+      "path": ".github/workflows/ai5-copytolive-vps-probe.yml",
+      "line": 14,
+      "text": "      SSH_HOST: ${{ secrets.COPYTOLIVE_SSH_HOST }}"
+    },
+    {
+      "path": ".github/workflows/ai5-copytolive-vps-probe.yml",
+      "line": 15,
+      "text": "      SSH_USER: ${{ secrets.COPYTOLIVE_SSH_USER }}"
+    },
+    {
+      "path": ".github/workflows/ai5-copytolive-vps-probe.yml",
+      "line": 16,
+      "text": "      SSH_KEY: ${{ secrets.COPYTOLIVE_SSH_KEY }}"
+    },
+    {
+      "path": ".github/workflows/ai5-copytolive-vps-probe.yml",
+      "line": 17,
+      "text": "      SSH_PORT_SECRET: ${{ secrets.COPYTOLIVE_SSH_PORT }}"
+    },
+    {
+      "path": ".github/workflows/ai5-copytolive-vps-probe.yml",
+      "line": 50,
+      "text": "          [ \"$SSH_HOST\" = \"109.123.239.76\" ] && HOST_MATCH=true"
+    },
+    {
+      "path": ".github/workflows/ai5-copytolive-vps-probe.yml",
+      "line": 51,
+      "text": "          REMOTE=\"$(ssh -i ~/.ssh/ai5 -p \"$PORT\" -o BatchMode=yes \"$SSH_USER@$SSH_HOST\" 'set -e;"
+    },
+    {
+      "path": ".github/workflows/ai5-copytolive-vps-probe.yml",
+      "line": 52,
+      "text": "            p=/var/www/copytolive/assets/js/MarketScanner-ai5HLPerf-v7.js;"
+    },
+    {
+      "path": ".github/workflows/ai5-copytolive-vps-probe.yml",
+      "line": 53,
+      "text": "            printf \"webroot=%s\\n\" \"$(test -d /var/www/copytolive && echo yes || echo no)\";"
+    },
+    {
+      "path": ".github/workflows/ai5-copytolive-vps-probe.yml",
+      "line": 54,
+      "text": "            printf \"webroot_write=%s\\n\" \"$(test -w /var/www/copytolive && echo yes || echo no)\";"
+    },
+    {
+      "path": ".github/workflows/ai5-copytolive-vps-probe.yml",
+      "line": 58,
+      "text": "            printf \"index_sha=%s\\n\" \"$(sha256sum /var/www/copytolive/index.html|awk \"{print \\\\$1}\")\";"
+    },
+    {
+      "path": ".github/workflows/history-v30-real-metrics-acceptance.yml",
+      "line": 51,
+      "text": "      - name: Verify production assets"
+    },
+    {
+      "path": ".github/workflows/history-v30-real-metrics-acceptance.yml",
+      "line": 63,
+      "text": "          echo V31_PRODUCTION_ASSETS=PASS"
+    },
+    {
+      "path": ".github/workflows/history-v26-pending-history-acceptance.yml",
+      "line": 43,
+      "text": "      - name: Verify production loader"
+    },
+    {
+      "path": ".github/workflows/history-v26-pending-history-acceptance.yml",
+      "line": 56,
+      "text": "          echo V26_PRODUCTION_LOADER=PASS"
+    },
+    {
+      "path": "assets/js/dashboard-CZI4vaVV.js",
+      "line": 26,
+      "text": " */const ya=new class{constructor(e){this.accessToken=null,this.refreshPromise=null,this.baseUrl=e,this.accessToken=localStorage.getItem(\"accessToken\")||localStorage.getItem(\"token\")}setToken(e){this.accessToken=e,e?localStorage.setItem(\"accessToken\",e):localStorage.removeItem(\"accessToken\")}getToken(){return this.accessToken}async refreshToken(){try{const e=await fetch(`${this.baseUrl}/auth/refresh`,{method:\"POST\",credentials:\"include\"});if(!e.ok)return this.setToken(null),null;const t=await e."
+    },
+    {
+      "path": "assets/js/CryptoMultiTFScreener-DCs9AH5D.js",
+      "line": 1,
+      "text": "import{r as e,j as t,f as s}from\"./dashboard-CZI4vaVV.js\";import{q as n,W as l,R as r,h as a}from\"./charting-BrGwxv_j.js\";const i=[\"15m\",\"30m\",\"H1\",\"H4\"],o=\"/data/crypto_screener.json\",c=6e4;function d(e,t=2){return null!=e&&isFinite(e)?Math.abs(e)>=1e12?`$${(e/1e12).toFixed(2)}T`:Math.abs(e)>=1e9?`$${(e/1e9).toFixed(2)}B`:Math.abs(e)>=1e6?`$${(e/1e6).toFixed(2)}M`:Math.abs(e)>=1?`$${e.toLocaleString(void 0,{maximumFractionDigits:t})}`:`$${e.toPrecision(4)}`:\"\u2014\"}function u(e){if(null==e||!isFini"
+    },
+    {
+      "path": "assets/js/index-Co5Gz99f.js",
+      "line": 2,
+      "text": "import{r as e,j as a,R as t,b as s}from\"./vendor-react-CkHKClcf.js\";import{_ as n,B as i}from\"./backtest-ui-B33NdzbG.js\";import{a as r,f as o,r as l,b as d,c,d as u,e as m,O as p,A as x,i as g,g as h,j as b,k as f,M as y,F as k,H as j,n as w,P as v,G as N,I as S,R as P,D as T,W as C,o as A,p as L,q as I,s as _,t as E,l as B,v as z}from\"./property-Dw8AroG_.js\";import{X as D,bA as M,bo as F,an as R,bB as W,aa as O,a4 as H,bh as K,H as U,a3 as q,br as $,d as G,M as J,ao as Y,l as V,b5 as X,av as Q,"
+    },
+    {
+      "path": "assets/js/market-DD_HSfzQ.js",
+      "line": 1,
+      "text": "import{h as e,r as s,j as t,b as a,T as l,c as i,S as n,d as r,P as c,M as d,B as o,I as x,F as m,e as p,X as u,f as h,a as b,L as g,R as j,g as f,i as N,k as v,l as y,m as k,n as z,o as w,p as S,q as C,s as P,G as A,t as E,u as I,D as B,v as D,w as T,x as R,y as M,z as F,E as L,H as O,J as _,K as $,N as G,Z as K,O as U,Q as H,V as W,Y as q,_ as V,$ as J,a0 as Y,a1 as X,a2 as Q,a3 as Z,a4 as ee,a5 as se,a6 as te,a7 as ae,a8 as le,a9 as ie,aa as ne,ab as re,ac as ce,ad as de,W as oe,ae as xe,af a"
+    },
+    {
+      "path": "assets/js/copytrade-AC3KpRzx.js",
+      "line": 1,
+      "text": "import{R as e,j as t,r as a}from\"./vendor-react-CkHKClcf.js\";import{h as s,l as r}from\"./property-Dw8AroG_.js\";import{f as l}from\"./backtest-ui-B33NdzbG.js\";import{U as i}from\"./trading-ui-CiheDru5.js\";import{a5 as o,aZ as n,bg as d,v as c,a9 as x,a8 as m,bj as u,l as g,k as p,aD as b,aA as h,X as y,aO as f,an as v,bk as T,b4 as j,a3 as M,G as k,F as N,aG as w,bl as S,W as C,e as F,U as A,aa as R,ai as D,aF as E,a4 as _,bm as I,be as P,aj as B,L,aq as $,bh as U,p as X}from\"./vendor-icons-BbYMHYt"
+    },
+    {
+      "path": "assets/js/index-DNfwXZJH.js",
+      "line": 5,
+      "text": " * react-dom-client.production.js"
+    },
+    {
+      "path": "assets/js/index-DNfwXZJH.js",
+      "line": 327,
+      "text": " */(0,r))return NaN;return n*(a*db+r*cb)}(r.timezone),isNaN(l)?n():mb(i+o+l,null==t?void 0:t.in)}const bv={dateTimeDelimiter:/[T ]/,timeZoneDelimiter:/[Z ]/i,timezone:/([Z+-].*)$/},yv=/^-?(?:(\\d{3})|(\\d{2})(?:-?(\\d{2}))?|W(\\d{2})(?:-?(\\d{1}))?|)$/,vv=/^(\\d{2}(?:[.,]\\d*)?)(?::?(\\d{2}(?:[.,]\\d*)?))?(?::?(\\d{2}(?:[.,]\\d*)?))?$/,wv=/^([+-])(\\d{2})(?::?(\\d{2}))?$/;function jv(e){return e?parseInt(e):1}function kv(e){return e&&parseFloat(e.replace(\",\",\".\"))||0}const Nv=[31,null,31,30,31,30,31,31,30,31"
+    },
+    {
+      "path": "assets/js/autopilot-BGVZpL4i.js",
+      "line": 1,
+      "text": "import{r as e,j as t,R as n}from\"./vendor-react-CkHKClcf.js\";import{h as i}from\"./property-Dw8AroG_.js\";import{A as a,aZ as s,U as l,l as r,aw as o,n as d,bz as c,bf as p,af as x,ae as g,b5 as u,X as h,b6 as m,aG as f,w as b}from\"./vendor-icons-BbYMHYtX.js\";import{l as y}from\"./vendor-misc-CwT3dK7F.js\";const j={apply:e=>i.post(\"/marketplace/seller/apply\",e),getMyProfile:()=>i.get(\"/marketplace/seller/me\"),updateProfile:e=>i.put(\"/marketplace/seller/me\",e),getStorefront:e=>i.get(`/marketplace/sel"
+    },
+    {
+      "path": "assets/js/dashboard-WZpp2Gui.js",
+      "line": 26,
+      "text": " */const ga=new class{constructor(e){this.accessToken=null,this.refreshPromise=null,this.baseUrl=e,this.accessToken=localStorage.getItem(\"accessToken\")||localStorage.getItem(\"token\")}setToken(e){this.accessToken=e,e?localStorage.setItem(\"accessToken\",e):localStorage.removeItem(\"accessToken\")}getToken(){return this.accessToken}async refreshToken(){try{const e=await fetch(`${this.baseUrl}/auth/refresh`,{method:\"POST\",credentials:\"include\"});if(!e.ok)return this.setToken(null),null;const t=await e."
+    },
+    {
+      "path": "assets/js/trading-ui-CiheDru5.js",
+      "line": 1,
+      "text": "import{r as e,j as t,R as n,a as i}from\"./vendor-react-CkHKClcf.js\";import{S as a,_ as r,I as s}from\"./backtest-ui-B33NdzbG.js\";import{q as l,W as o,R as d,h as c,K as x,n as u,V as p,k as h,S as m,g}from\"./vendor-charts-B8PJQ7tD.js\";import{a as b}from\"./copytrade-AC3KpRzx.js\";import{a as f,b as y,c as j,d as v,e as k,B as w,f as N,g as S,h as z,i as C,j as E,k as _,l as F}from\"./autopilot-BGVZpL4i.js\";import{m as A}from\"./property-Dw8AroG_.js\";import{A as D,a8 as T,a9 as B,aa as R,_ as P,ab as "
+    },
+    {
+      "path": "assets/js/market-DoqinKXu.js",
+      "line": 1,
+      "text": "import{h as e,r as s,j as t,b as a,T as l,c as i,S as n,d as r,P as c,M as d,B as o,I as x,F as m,R as p,X as u,e as h,a as b,L as g,f as j,g as f,i as N,k as v,l as y,m as k,n as z,o as w,p as S,q as C,s as P,G as A,t as E,u as I,D as B,v as D,w as T,x as R,y as M,z as F,E as L,H as O,J as _,K as $,N as G,Z as K,O as U,Q as H,V as W,Y as q,_ as V,$ as J,a0 as Y,a1 as X,a2 as Q,a3 as Z,a4 as ee,a5 as se,a6 as te,a7 as ae,a8 as le,a9 as ie,aa as ne,ab as re,ac as ce,ad as de,W as oe,ae as xe,af a"
+    },
+    {
+      "path": "assets/js/index-DkOBfQdj.js",
+      "line": 5,
+      "text": " * react-dom-client.production.js"
+    },
+    {
+      "path": "assets/js/vendor-react-CkHKClcf.js",
+      "line": 4,
+      "text": " * react-dom-client.production.js"
+    },
+    {
+      "path": "docs/trading/devlog/(Penting) 2026-08-27_HYPERLIQUID_UI_SINGLE_WRITER_POSTMORTEM.md",
+      "line": 7,
+      "text": "Gejala yang terlihat di production:"
+    },
+    {
+      "path": "docs/trading/devlog/(Penting) 2026-08-27_HYPERLIQUID_UI_SINGLE_WRITER_POSTMORTEM.md",
+      "line": 59,
+      "text": "6. Mengklaim production fixed sebelum temporal browser test dan production loader PASS."
+    },
+    {
+      "path": "docs/trading/devlog/(Penting) 2026-08-27_HYPERLIQUID_UI_SINGLE_WRITER_POSTMORTEM.md",
+      "line": 69,
+      "text": "- Production loader harus memuat capability marker terbaru."
+    },
+    {
+      "path": "docs/trading/devlog/(Penting) 2026-08-27_HYPERLIQUID_UI_SINGLE_WRITER_POSTMORTEM.md",
+      "line": 77,
+      "text": "Production loader: `PASS`."
+    }
+  ]
+}

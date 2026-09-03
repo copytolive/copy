@@ -1,0 +1,90 @@
+name: AI5 CopyToLive VPS Probe
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai5-vps-probe/**"
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SSH_HOST: ${{ secrets.COPYTOLIVE_SSH_HOST }}
+      SSH_USER: ${{ secrets.COPYTOLIVE_SSH_USER }}
+      SSH_KEY: ${{ secrets.COPYTOLIVE_SSH_KEY }}
+      SSH_PORT_SECRET: ${{ secrets.COPYTOLIVE_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: req
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai5-vps-probe/.*\.json$' | tail -n1)"
+          ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "out=ai5-vps-probe-results/$ID.json" >> "$GITHUB_OUTPUT"
+          echo "port=${SSH_PORT_SECRET:-22}" >> "$GITHUB_OUTPUT"
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${SSH_HOST:-}" && test -n "${SSH_USER:-}" && test -n "${SSH_KEY:-}"
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/ai5
+          chmod 600 ~/.ssh/ai5
+          ssh-keyscan -p "${SSH_PORT_SECRET:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Read-only capability probe
+        env:
+          OUT: ${{ steps.req.outputs.out }}
+          ID: ${{ steps.req.outputs.id }}
+          PORT: ${{ steps.req.outputs.port }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$OUT")"
+          HOST_MATCH=false
+          [ "$SSH_HOST" = "109.123.239.76" ] && HOST_MATCH=true
+          REMOTE="$(ssh -i ~/.ssh/ai5 -p "$PORT" -o BatchMode=yes "$SSH_USER@$SSH_HOST" 'set -e;
+            p=/var/www/copytolive/assets/js/MarketScanner-ai5HLPerf-v7.js;
+            printf "webroot=%s\n" "$(test -d /var/www/copytolive && echo yes || echo no)";
+            printf "webroot_write=%s\n" "$(test -w /var/www/copytolive && echo yes || echo no)";
+            printf "scanner=%s\n" "$(test -f "$p" && echo yes || echo no)";
+            printf "scanner_write=%s\n" "$(test -w "$p" && echo yes || echo no)";
+            printf "scanner_sha=%s\n" "$(test -f "$p" && sha256sum "$p"|awk "{print \\$1}" || echo none)";
+            printf "index_sha=%s\n" "$(sha256sum /var/www/copytolive/index.html|awk "{print \\$1}")";
+            printf "source_root=%s\n" "$(test -d /opt/copytolive-source && echo yes || echo no)";
+            printf "backend_unified=%s\n" "$(test -f /opt/copytolive-source/trading-service/app/api/routes/unified_signals.py && echo yes || echo no)";
+            printf "backend_unified_write=%s\n" "$(test -w /opt/copytolive-source/trading-service/app/api/routes/unified_signals.py && echo yes || echo no)";
+          ')"
+          python3 - "$OUT" "$ID" "$HOST_MATCH" "$REMOTE" <<'PY'
+          import json,sys
+          out,id_,hm,remote=sys.argv[1:5]
+          d={"id":id_,"host_matches_known_copytolive":hm=="true"}
+          for ln in remote.splitlines():
+              if "=" in ln:
+                  k,v=ln.split("=",1); d[k]=v
+          d["ok"]=d.get("webroot")=="yes" and d.get("scanner")=="yes"
+          open(out,"w").write(json.dumps(d,indent=2)+"\n")
+          PY
+      - name: Commit result
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"
+          test -s "$OUT"
+          git config user.name "CopyToLive AI5 VPS Probe"
+          git config user.email "copytolive-ai5-vps@local.invalid"
+          git add "$OUT"
+          git commit -m "ai5 vps probe: ${{ steps.req.outputs.id }}" || true
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Enforce
+        if: always()
+        shell: bash
+        run: |
+          python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); raise SystemExit(0 if d.get("ok") else 1)' "${{ steps.req.outputs.out }}"

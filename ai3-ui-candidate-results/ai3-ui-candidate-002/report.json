@@ -1,0 +1,10 @@
+{
+  "id": "ai3-ui-candidate-002",
+  "acceptance": "FAIL",
+  "ok": false,
+  "devices": {},
+  "errors": [
+    "desktop WIDTH_DRIFT 52,96,85,58,53"
+  ],
+  "error": "Error: desktop WIDTH_DRIFT 52,96,85,58,53\n    at run (file:///home/runner/work/copy/copy/.ai3candidate.mjs:76:56)\n    at async file:///home/runner/work/copy/copy/.ai3candidate.mjs:143:3"
+}

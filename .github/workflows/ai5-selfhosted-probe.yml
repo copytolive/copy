@@ -1,0 +1,16 @@
+name: AI5 Copy Self Hosted Probe
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai5-selfhosted-probe/**"
+jobs:
+  probe:
+    runs-on: self-hosted
+    timeout-minutes: 3
+    steps:
+      - shell: bash
+        run: |
+          echo AI5_COPY_SELF_HOSTED_PASS
+          uname -a
+          pwd

@@ -30,6 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           SRC=ai5-staging/MarketScanner-ai5Signal-v8.js
+          mkdir -p "$(dirname "$OUT")"
           test -s "$SRC"
           node --check "$SRC"
           python3 - "$SRC" "$OUT" "$ID" <<'PY'

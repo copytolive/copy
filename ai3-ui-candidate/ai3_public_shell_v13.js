@@ -1,4 +1,4 @@
-(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.6";
+(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.7";
 const K="ot_backtest_view_mode",H=["lucide-coins","lucide-orbit","lucide-circle-dollar-sign","lucide-trending-up"];
 const norm=s=>String(s||"").replace(/\s+/g," ").trim();
 const side=c=>Array.from(document.querySelectorAll("#desktop-sidebar nav button")).find(b=>b.querySelector("svg."+c))||null;
@@ -88,10 +88,12 @@ function normalizeTopNav(){
        moves the five-button group by ~32px. Persisting the Home center removes that jump. */
     css(nav,"transform","none");
     const nr=nav.getBoundingClientRect(),center=nr.left+nr.width/2;
-    const bucket=Math.round(window.innerWidth/20)*20,anchorKey="ot_nav_anchor_v136_"+(mobile?"m_":"d_")+bucket;
+    const bucket=Math.round(window.innerWidth/20)*20,anchorKey="ot_nav_anchor_v137_"+(mobile?"m_":"d_")+bucket;
     let mode="";try{mode=localStorage.getItem(K)||""}catch(_){}
     let anchor=NaN;try{anchor=Number(localStorage.getItem(anchorKey))}catch(_){}
-    if(!Number.isFinite(anchor)||mode==="home"||mode==="backtest"||mode===""){
+    const bodyText=norm(document.body&&document.body.innerText);
+    const stableHome=(mode==="home"||mode==="backtest"||mode==="")&&bodyText.includes("Max Loss")&&bodyText.includes("Profit Factor")&&bodyText.includes("Risk Reward");
+    if(!Number.isFinite(anchor)||stableHome){
       anchor=center;try{localStorage.setItem(anchorKey,String(anchor))}catch(_){}
     }
     const dx=anchor-center;if(Math.abs(dx)>.25)css(nav,"transform","translateX("+dx+"px)");

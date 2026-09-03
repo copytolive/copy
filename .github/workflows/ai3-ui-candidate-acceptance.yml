@@ -42,7 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$OUT"
-          cat > /tmp/ai3candidate.mjs <<'JS'
+          cat > .ai3candidate.mjs <<'JS'
           import fs from 'fs';
           import {chromium} from 'playwright';
           const ID=process.env.ID,OUT=process.env.OUT,ROOT='https://copytolive.com/';
@@ -194,7 +194,7 @@ jobs:
           fs.writeFileSync(`${OUT}/report.json`,JSON.stringify(report,null,2));
           if(!report.ok)process.exit(3);
           JS
-          node /tmp/ai3candidate.mjs
+          node .ai3candidate.mjs
       - name: Commit evidence
         if: always()
         shell: bash

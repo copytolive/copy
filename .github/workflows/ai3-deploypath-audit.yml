@@ -1,0 +1,53 @@
+name: AI3 Repo Deploy Path Audit
+on:
+  push:
+    branches: [main]
+    paths: ["ai3-deploypath-requests/**"]
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai3-deploypath-requests/.*\.json$' | tail -1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"; echo "out=ai3-deploypath-results/$ID.json" >> "$GITHUB_OUTPUT"
+      - name: Scan tracked repo for production bridge clues
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"; mkdir -p "$(dirname "$OUT")"
+          python3 - "$OUT" <<'PY'
+          import pathlib,re,json,sys
+          terms=[
+            r'webhook',r'auto[-_ ]?deploy',r'109\.123\.239\.76',r'/var/www/copytolive',
+            r'COPYTOLIVE_SSH',r'rsync',r'scp ',r'ssh ',r'production',r'copytolive\.com'
+          ]
+          hits=[]
+          skip={'.git','node_modules'}
+          for p in pathlib.Path('.').rglob('*'):
+            if not p.is_file() or any(x in skip for x in p.parts): continue
+            try:
+              if p.stat().st_size>2_000_000:continue
+              s=p.read_text('utf-8',errors='ignore')
+            except:continue
+            for i,line in enumerate(s.splitlines(),1):
+              if any(re.search(t,line,re.I) for t in terms):
+                hits.append({"path":str(p),"line":i,"text":line[:500]})
+                if len(hits)>=1200:break
+            if len(hits)>=1200:break
+          pathlib.Path(sys.argv[1]).write_text(json.dumps({"ok":True,"count":len(hits),"hits":hits},indent=2)+"\n")
+          PY
+      - name: Commit
+        shell: bash
+        run: |
+          OUT="${{ steps.req.outputs.out }}"
+          git config user.name "CopyToLive AI3 Deploy Audit"; git config user.email "ai3-deploy-audit@local.invalid"
+          git add "$OUT"; git commit -m "ai3 deploy path audit: ${{ steps.req.outputs.id }}"
+          git pull --rebase origin main; git push origin HEAD:main

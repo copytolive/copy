@@ -1,0 +1,50 @@
+name: AI3 Production Asset Snapshot
+on:
+  push:
+    branches: [main]
+    paths: ["ai3-prod-assets-requests/**"]
+permissions:
+  contents: write
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: req
+        shell: bash
+        run: |
+          FILE="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ai3-prod-assets-requests/.*\.json$' | tail -1)"
+          ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["id"])' "$FILE")"
+          echo "id=$ID" >> "$GITHUB_OUTPUT"; echo "out=ai3-prod-assets-results/$ID" >> "$GITHUB_OUTPUT"
+      - name: Fetch production text assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"; mkdir -p "$OUT"
+          base="https://copytolive.com"
+          curl -fsSL -H 'Cache-Control: no-cache' "$base/index.html?audit=$GITHUB_RUN_ID" -o "$OUT/index.html"
+          curl -fsSL -H 'Cache-Control: no-cache' "$base/assets/js/ai3_public_shell_v1.js?audit=$GITHUB_RUN_ID" -o "$OUT/ai3_public_shell_v1.js"
+          curl -fsSL -H 'Cache-Control: no-cache' "$base/assets/js/ai4_fundamental_router_v1.js?audit=$GITHUB_RUN_ID" -o "$OUT/ai4_fundamental_router_v1.js"
+          curl -fsSL -H 'Cache-Control: no-cache' "$base/assets/js/ai5_signal_scan_runtime_v1.js?audit=$GITHUB_RUN_ID" -o "$OUT/ai5_signal_scan_runtime_v1.js"
+          curl -fsSL -H 'Cache-Control: no-cache' "$base/fundamental.html?audit=$GITHUB_RUN_ID" -o "$OUT/fundamental.html"
+          python3 - "$OUT" <<'PY'
+          import pathlib,hashlib,json,sys
+          out=pathlib.Path(sys.argv[1]); d={}
+          for p in out.iterdir():
+              if p.is_file():
+                  b=p.read_bytes(); d[p.name]={"bytes":len(b),"sha256":hashlib.sha256(b).hexdigest()}
+          (out/"manifest.json").write_text(json.dumps(d,indent=2)+"\n")
+          PY
+      - name: Commit snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="${{ steps.req.outputs.out }}"
+          git config user.name "CopyToLive AI3 Prod Snapshot"
+          git config user.email "ai3-prod-snapshot@local.invalid"
+          git add "$OUT"
+          git commit -m "ai3 production assets: ${{ steps.req.outputs.id }}"
+          git pull --rebase origin main
+          git push origin HEAD:main

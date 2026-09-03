@@ -1,4 +1,4 @@
-(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.5";
+(()=>{"use strict";window.__CTL_AI3_SHELL_CANDIDATE__="v13.6";
 const K="ot_backtest_view_mode",H=["lucide-coins","lucide-orbit","lucide-circle-dollar-sign","lucide-trending-up"];
 const norm=s=>String(s||"").replace(/\s+/g," ").trim();
 const side=c=>Array.from(document.querySelectorAll("#desktop-sidebar nav button")).find(b=>b.querySelector("svg."+c))||null;
@@ -83,9 +83,18 @@ function normalizeTopNav(){
       const svg=b.querySelector("svg");if(svg){css(svg,"width",icon+"px");css(svg,"height",icon+"px")}
       const l=label(b);if(l){css(l,"display","block");css(l,"visibility","visible");css(l,"opacity","1");css(l,"font-size",font+"px");css(l,"font-weight","600");css(l,"line-height",mobile?"16.5px":"19.5px");css(l,"height","auto")}
     });
-    /* Preserve the host shell's horizontal anchor. Equal slot geometry is locked here;
-       cross-route drift is validated against Home instead of forcing viewport centering. */
+    /* Lock every SPA route to the first Home anchor for this viewport.
+       Renko hides/reflows surrounding chrome, so relying on parent centering alone
+       moves the five-button group by ~32px. Persisting the Home center removes that jump. */
     css(nav,"transform","none");
+    const nr=nav.getBoundingClientRect(),center=nr.left+nr.width/2;
+    const bucket=Math.round(window.innerWidth/20)*20,anchorKey="ot_nav_anchor_v136_"+(mobile?"m_":"d_")+bucket;
+    let mode="";try{mode=localStorage.getItem(K)||""}catch(_){}
+    let anchor=NaN;try{anchor=Number(localStorage.getItem(anchorKey))}catch(_){}
+    if(!Number.isFinite(anchor)||mode==="home"||mode==="backtest"||mode===""){
+      anchor=center;try{localStorage.setItem(anchorKey,String(anchor))}catch(_){}
+    }
+    const dx=anchor-center;if(Math.abs(dx)>.25)css(nav,"transform","translateX("+dx+"px)");
   });
 }
 function fitFilterBars(){

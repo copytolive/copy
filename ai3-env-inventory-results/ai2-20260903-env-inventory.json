@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "http": 200,
+  "environments": [
+    "github-pages"
+  ]
+}

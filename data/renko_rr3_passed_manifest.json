@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-08-10T03:23:30.368166Z",
+  "mode": "tick_only",
+  "source_report": "backend/data/renko_variant_sweeps/tick_validated/rr3_tick_validation_report.json",
+  "input_h1_screening_count": 250,
+  "tick_validated_count": 0,
+  "blocked_count": 250,
+  "policy": "Home and auto-entry expose only tickValidation.eligible=true. H1/OHLC Renko candidates are archived as screening data and hidden from Home."
+}
